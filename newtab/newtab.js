@@ -176,10 +176,12 @@ $('groups-grid').addEventListener('click', async e => {
 let dragSrcId = null;
 let dragSrcEl = null;
 let isDragging = false;
+let pendingRender = false;
 
 $('groups-grid').addEventListener('dragstart', e => {
   const card = e.target.closest('.group-card');
   if (!card) return;
+  pendingRender = false;
   isDragging = true;
   dragSrcEl = card;
   dragSrcId = card.dataset.id;
@@ -232,6 +234,10 @@ $('groups-grid').addEventListener('dragend', async e => {
     const cards = [...$('groups-grid').querySelectorAll('.group-card')];
     const ids = cards.map(c => c.dataset.id);
     await chrome.runtime.sendMessage({ action: 'updateGroupPositions', orderedIds: ids });
+  }
+  if (pendingRender) {
+    pendingRender = false;
+    render();
   }
 });
 
@@ -526,11 +532,9 @@ $('import-input').addEventListener('change', async e => {
 render();
 
 const STORAGE_KEY = 'tabCollector';
-let renderTimer = null;
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area === 'local' && changes[STORAGE_KEY]) {
-    if (isDragging) return;
-    clearTimeout(renderTimer);
-    renderTimer = setTimeout(() => { if (!isDragging) render(); }, 300);
+    if (isDragging) { pendingRender = true; return; }
+    render();
   }
 });
