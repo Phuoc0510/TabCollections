@@ -83,7 +83,7 @@ async function render() {
       ? `<div class="group-tabs">${g.tabs.map(renderTabEntry).join('')}</div>`
       : `<div class="group-tabs group-tabs-empty">No tabs yet. Use the extension popup to add tabs.</div>`;
 
-    return `<article class="group-card${isExpanded ? ' is-expanded' : ''}" data-id="${g.id}">
+    return `<article class="group-card${isExpanded ? ' is-expanded' : ''}" draggable="true" data-id="${g.id}">
       <div class="group-color-bar" style="background:${g.color || '#4285f4'}"></div>
       <div class="group-card-inner">
         <button class="group-header group-toggle" data-id="${g.id}" aria-expanded="${isExpanded}" aria-controls="group-content-${g.id}">
@@ -169,6 +169,53 @@ $('groups-grid').addEventListener('click', async e => {
     }
     return;
   }
+});
+
+// ── Drag and drop reorder ──
+
+let dragSrcId = null;
+
+$('groups-grid').addEventListener('dragstart', e => {
+  const card = e.target.closest('.group-card');
+  if (!card) return;
+  dragSrcId = card.dataset.id;
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', dragSrcId);
+  card.classList.add('dragging');
+});
+
+$('groups-grid').addEventListener('dragend', e => {
+  const card = e.target.closest('.group-card');
+  if (card) card.classList.remove('dragging');
+  document.querySelectorAll('.group-card').forEach(el => el.classList.remove('drag-over'));
+  dragSrcId = null;
+});
+
+$('groups-grid').addEventListener('dragover', e => {
+  e.preventDefault();
+  const target = e.target.closest('.group-card');
+  if (!target || target.dataset.id === dragSrcId) return;
+  e.dataTransfer.dropEffect = 'move';
+  target.classList.add('drag-over');
+});
+
+$('groups-grid').addEventListener('dragleave', e => {
+  const target = e.target.closest('.group-card');
+  if (target) target.classList.remove('drag-over');
+});
+
+$('groups-grid').addEventListener('drop', async e => {
+  e.preventDefault();
+  const target = e.target.closest('.group-card');
+  if (!target || !dragSrcId || dragSrcId === target.dataset.id) return;
+  const cards = [...$('groups-grid').querySelectorAll('.group-card')];
+  const ids = cards.map(c => c.dataset.id);
+  const fromIdx = ids.indexOf(dragSrcId);
+  const toIdx = ids.indexOf(target.dataset.id);
+  ids.splice(fromIdx, 1);
+  ids.splice(toIdx, 0, dragSrcId);
+  await chrome.runtime.sendMessage({ action: 'updateGroupPositions', orderedIds: ids });
+  await render();
 });
 
 function showConfirm(message) {
@@ -341,7 +388,56 @@ function showBgModal() {
         presetsEl.querySelectorAll('.bg-preset').forEach(x => x.classList.remove('selected'));
         el.classList.add('selected');
         inputEl.value = el.dataset.value;
-      });
+});
+
+// ── Drag and drop reorder ──
+
+let dragSrcId = null;
+
+$('groups-grid').addEventListener('dragstart', e => {
+  const card = e.target.closest('.group-card');
+  if (!card) return;
+  dragSrcId = card.dataset.id;
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', dragSrcId);
+  card.classList.add('dragging');
+});
+
+$('groups-grid').addEventListener('dragend', e => {
+  const card = e.target.closest('.group-card');
+  if (card) card.classList.remove('dragging');
+  document.querySelectorAll('.group-card').forEach(el => el.classList.remove('drag-over'));
+  dragSrcId = null;
+});
+
+$('groups-grid').addEventListener('dragover', e => {
+  e.preventDefault();
+  const target = e.target.closest('.group-card');
+  if (!target || target.dataset.id === dragSrcId) return;
+  e.dataTransfer.dropEffect = 'move';
+  target.classList.add('drag-over');
+});
+
+$('groups-grid').addEventListener('dragleave', e => {
+  const target = e.target.closest('.group-card');
+  if (target) target.classList.remove('drag-over');
+});
+
+$('groups-grid').addEventListener('drop', async e => {
+  e.preventDefault();
+  const target = e.target.closest('.group-card');
+  if (!target || !dragSrcId || dragSrcId === target.dataset.id) return;
+
+  const cards = [...$('groups-grid').querySelectorAll('.group-card')];
+  const ids = cards.map(c => c.dataset.id);
+  const fromIdx = ids.indexOf(dragSrcId);
+  const toIdx = ids.indexOf(target.dataset.id);
+  ids.splice(fromIdx, 1);
+  ids.splice(toIdx, 0, dragSrcId);
+
+  await chrome.runtime.sendMessage({ action: 'updateGroupPositions', orderedIds: ids });
+  await render();
+});
     });
   });
 

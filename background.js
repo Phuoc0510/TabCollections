@@ -92,6 +92,10 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
           await importData(msg.json);
           sendResponse({ ok: true });
           break;
+        case 'updateGroupPositions':
+          await updateGroupPositions(msg.orderedIds);
+          sendResponse({ ok: true });
+          break;
         default:
           sendResponse({ error: 'Unknown action' });
       }
