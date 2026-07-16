@@ -9,7 +9,8 @@ A Chrome/Brave extension that helps you collect tabs into organized groups and m
 - **Inline view** — saved tabs are displayed directly on your new tab page, no extra clicks needed
 - **Compact cards** — groups are shown as compact expandable cards
 - **Context menu** — right-click any tab → "Add to Tab Collection" for quick saving
-- **Customizable** — choose from dev-themed emoji icons and accent colors for each collection
+- **Customizable** — 350+ emoji icons across 11 categories (Dev, Smileys, Pets, Food, Sports, Travel, etc.) with search, plus accent colors
+- **Drag & drop reorder** — drag any collection card to reorder; positions persist
 - **Background image** — set a custom background image on the new tab page
 - **Export / Import** — backup your collections as JSON files
 - **Dark mode** — follows your system's color scheme automatically
@@ -46,6 +47,7 @@ A Chrome/Brave extension that helps you collect tabs into organized groups and m
 ├── background.js          # Service worker
 ├── storage.js             # Storage layer
 ├── storage.test.js        # Storage tests
+├── constants.js           # Shared constants (ICON_CATEGORIES, COLORS)
 ├── popup/                 # Popup UI
 │   ├── popup.html
 │   ├── popup.css
