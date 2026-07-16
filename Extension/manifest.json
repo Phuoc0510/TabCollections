@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "Tab Collection",
+  "version": "1.0.0",
+  "description": "Collect tabs into groups and manage them from your new tab page",
+  "permissions": ["storage", "contextMenus", "tabs"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_title": "Tab Collection"
+  },
+  "chrome_url_overrides": {
+    "newtab": "newtab/newtab.html"
+  },
+  "icons": {
+    "128": "icons/icon128.png"
+  }
+}
