@@ -186,6 +186,7 @@ $('groups-grid').addEventListener('dragstart', e => {
   e.dataTransfer.effectAllowed = 'move';
   e.dataTransfer.setData('text/plain', dragSrcId);
   card.style.opacity = '0.35';
+  card.style.pointerEvents = 'none';
 });
 
 $('groups-grid').addEventListener('dragover', e => {
@@ -207,7 +208,10 @@ $('groups-grid').addEventListener('drop', e => {
 });
 
 $('groups-grid').addEventListener('dragend', async e => {
-  if (dragSrcEl) dragSrcEl.style.opacity = '';
+  if (dragSrcEl) {
+    dragSrcEl.style.opacity = '';
+    dragSrcEl.style.pointerEvents = '';
+  }
   isDragging = false;
   const srcId = dragSrcId;
   dragSrcEl = null;
@@ -515,6 +519,6 @@ chrome.storage.onChanged.addListener((changes, area) => {
   if (area === 'local' && changes[STORAGE_KEY]) {
     if (isDragging) return;
     clearTimeout(renderTimer);
-    renderTimer = setTimeout(() => render(), 300);
+    renderTimer = setTimeout(() => { if (!isDragging) render(); }, 300);
   }
 });
