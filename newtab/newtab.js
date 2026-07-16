@@ -420,12 +420,19 @@ function showBgModal() {
     }
     const reader = new FileReader();
     reader.onload = async () => {
-      const dataUrl = reader.result;
-      await saveBg(dataUrl);
-      await applyBg(dataUrl);
-      inputEl.value = '📎 ' + file.name;
-      presetsEl.querySelectorAll('.bg-preset').forEach(el => el.classList.remove('selected'));
-      showStatus('Background applied', 'success');
+      try {
+        const dataUrl = reader.result;
+        await saveBg(dataUrl);
+        await applyBg(dataUrl);
+        inputEl.value = '📎 ' + file.name;
+        presetsEl.querySelectorAll('.bg-preset').forEach(el => el.classList.remove('selected'));
+        showStatus('Background applied', 'success');
+      } catch (err) {
+        showStatus('Failed to save background: ' + err.message, 'error');
+      }
+    };
+    reader.onerror = () => {
+      showStatus('Failed to read image file', 'error');
     };
     reader.readAsDataURL(file);
   });
