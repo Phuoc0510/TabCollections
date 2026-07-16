@@ -40,6 +40,10 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-
     background: rgba(138,180,248,.12);
     color: #8ab4f8;
   }
+  #bg-modal { background: #2d2d44 !important; }
+  #bg-url-input { background: #1a1a2e; border-color: #3c3c5e; color: #e8eaed; }
+  #bg-modal label { color: #9aa0a6 !important; }
+  #bg-confirm-btn { background: #8ab4f8 !important; color: #1a1a2e !important; border-color: #8ab4f8 !important; }
   #export-btn, #import-btn { background: #3c3c5e !important; color: #e8eaed !important; }
   .group-chevron { color: #9aa0a6; }
   .group-tabs-empty { color: #9aa0a6; }
@@ -49,7 +53,7 @@ header { display: flex; justify-content: space-between; align-items: center; mar
 #bg-drop-zone {
   border: 2px dashed #ccc;
   border-radius: 8px;
-  padding: 16px;
+  padding: 24px;
   text-align: center;
   cursor: pointer;
   transition: background .15s, border-color .15s;
@@ -161,13 +165,13 @@ button:hover { background: #f0f4ff; border-color: #4285f4; }
 #modal-confirm-btn:hover { background: #3b78e7; }
 
 #bg-modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-#bg-modal { background: #fff; border-radius: 16px; padding: 24px; width: 420px; box-shadow: 0 16px 48px rgba(0,0,0,0.2); }
-#bg-modal h2 { font-size: 20px; font-weight: 700; margin-bottom: 16px; }
-#bg-modal label { font-size: 12px; font-weight: 600; color: #666; text-transform: uppercase; letter-spacing: .5px; display: block; margin-bottom: 6px; margin-top: 12px; }
-#bg-url-input { width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; margin-bottom: 8px; }
+#bg-modal { background: #fff; border-radius: 16px; padding: 32px; width: 500px; box-shadow: 0 16px 48px rgba(0,0,0,0.2); }
+#bg-modal h2 { font-size: 20px; font-weight: 700; margin-bottom: 20px; }
+#bg-modal label { font-size: 12px; font-weight: 600; color: #666; text-transform: uppercase; letter-spacing: .5px; display: block; margin-bottom: 6px; margin-top: 14px; }
+#bg-url-input { width: 100%; padding: 10px 14px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; margin-bottom: 10px; }
 #bg-url-input:focus { border-color: #4285f4; }
-#bg-presets { display: flex; gap: 8px; flex-wrap: wrap; }
-.bg-preset { width: 60px; height: 40px; border-radius: 8px; border: 2px solid transparent; cursor: pointer; background-size: cover; background-position: center; transition: border-color .15s; }
+#bg-presets { display: flex; gap: 10px; flex-wrap: wrap; }
+.bg-preset { width: 72px; height: 48px; border-radius: 8px; border: 2px solid transparent; cursor: pointer; background-size: cover; background-position: center; transition: border-color .15s; }
 .bg-preset:hover { border-color: #4285f4; }
 .bg-preset.selected { border-color: #4285f4; }
 #bg-remove-btn { color: #c5221f; border-color: #c5221f; }
