@@ -144,6 +144,8 @@ button:hover { background: #f0f4ff; border-color: #4285f4; }
 #modal label:first-of-type { margin-top: 0; }
 #group-name-input { width: 100%; padding: 8px 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; }
 #group-name-input:focus { border-color: #4285f4; }
+#group-name-input.error { border-color: #c5221f; }
+#name-error { display: none; color: #c5221f; font-size: 12px; margin-top: 4px; }
 
 #color-picker { display: flex; gap: 8px; flex-wrap: wrap; }
 .pick-color { border-radius: 50%; width: 32px; height: 32px; }

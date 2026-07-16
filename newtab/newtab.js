@@ -300,6 +300,8 @@ function showModal(title, name, icon, color, onConfirm) {
 
 function hideModal() {
   $('modal-overlay').style.display = 'none';
+  $('group-name-input').classList.remove('error');
+  $('name-error').style.display = 'none';
   modalCallback = null;
 }
 
@@ -313,7 +315,14 @@ $('new-group-btn').addEventListener('click', () => {
 
 $('modal-confirm-btn').addEventListener('click', () => {
   const name = $('group-name-input').value.trim();
-  if (!name) { showStatus('Name is required', 'error'); return; }
+  const nameErr = $('name-error');
+  if (!name) {
+    $('group-name-input').classList.add('error');
+    nameErr.style.display = 'block';
+    return;
+  }
+  nameErr.style.display = 'none';
+  $('group-name-input').classList.remove('error');
   const iconEl = $('icon-picker').querySelector('.selected');
   const icon = iconEl ? iconEl.dataset.value : '📁';
   const colorEl = $('color-picker').querySelector('.selected');
@@ -325,6 +334,10 @@ $('modal-confirm-btn').addEventListener('click', () => {
 $('modal-cancel-btn').addEventListener('click', hideModal);
 $('modal-overlay').addEventListener('click', e => {
   if (e.target === $('modal-overlay')) hideModal();
+});
+$('group-name-input').addEventListener('input', () => {
+  $('group-name-input').classList.remove('error');
+  $('name-error').style.display = 'none';
 });
 $('group-name-input').addEventListener('keydown', e => {
   if (e.key === 'Enter') $('modal-confirm-btn').click();
