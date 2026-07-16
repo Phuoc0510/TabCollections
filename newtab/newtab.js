@@ -313,7 +313,7 @@ $('new-group-btn').addEventListener('click', () => {
 
 $('modal-confirm-btn').addEventListener('click', () => {
   const name = $('group-name-input').value.trim();
-  if (!name) return;
+  if (!name) { showStatus('Name is required', 'error'); return; }
   const iconEl = $('icon-picker').querySelector('.selected');
   const icon = iconEl ? iconEl.dataset.value : '📁';
   const colorEl = $('color-picker').querySelector('.selected');
