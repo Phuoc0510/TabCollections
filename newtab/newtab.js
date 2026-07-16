@@ -107,7 +107,6 @@ async function render() {
 }
 
 $('groups-grid').addEventListener('click', async e => {
-  if (pendingDrop) return;
   const groupCard = e.target.closest('.group-card');
   if (!groupCard) return;
 
@@ -175,7 +174,6 @@ $('groups-grid').addEventListener('click', async e => {
 // ── Drag and drop reorder ──
 
 let dragSrcId = null;
-let pendingDrop = false;
 
 $('groups-grid').addEventListener('dragstart', e => {
   const card = e.target.closest('.group-card');
@@ -206,23 +204,23 @@ $('groups-grid').addEventListener('dragleave', e => {
   if (target) target.classList.remove('drag-over');
 });
 
-$('groups-grid').addEventListener('drop', async e => {
+$('groups-grid').addEventListener('drop', e => {
   e.preventDefault();
   const target = e.target.closest('.group-card');
   if (!target || !dragSrcId || dragSrcId === target.dataset.id) return;
-  pendingDrop = true;
-  try {
-    const cards = [...$('groups-grid').querySelectorAll('.group-card')];
-    const ids = cards.map(c => c.dataset.id);
-    const fromIdx = ids.indexOf(dragSrcId);
-    const toIdx = ids.indexOf(target.dataset.id);
-    ids.splice(fromIdx, 1);
-    ids.splice(toIdx, 0, dragSrcId);
-    await chrome.runtime.sendMessage({ action: 'updateGroupPositions', orderedIds: ids });
-    await render();
-  } finally {
-    pendingDrop = false;
+  const cards = [...$('groups-grid').querySelectorAll('.group-card')];
+  const ids = cards.map(c => c.dataset.id);
+  const fromIdx = ids.indexOf(dragSrcId);
+  const toIdx = ids.indexOf(target.dataset.id);
+  const sourceCard = cards[fromIdx];
+  if (fromIdx < toIdx) {
+    target.insertAdjacentElement('afterend', sourceCard);
+  } else {
+    target.insertAdjacentElement('beforebegin', sourceCard);
   }
+  ids.splice(fromIdx, 1);
+  ids.splice(toIdx, 0, dragSrcId);
+  chrome.runtime.sendMessage({ action: 'updateGroupPositions', orderedIds: ids });
 });
 
 function showConfirm(message) {
