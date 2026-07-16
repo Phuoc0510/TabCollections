@@ -166,11 +166,11 @@ button:hover { background: #f0f4ff; border-color: #4285f4; }
 
 #bg-modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 1000; }
 #bg-modal { background: #fff; border-radius: 16px; padding: 32px; width: 500px; box-shadow: 0 16px 48px rgba(0,0,0,0.2); }
-#bg-modal h2 { font-size: 20px; font-weight: 700; margin-bottom: 20px; }
-#bg-modal label { font-size: 12px; font-weight: 600; color: #666; text-transform: uppercase; letter-spacing: .5px; display: block; margin-bottom: 6px; margin-top: 14px; }
-#bg-url-input { width: 100%; padding: 10px 14px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; margin-bottom: 10px; }
+#bg-modal h2 { font-size: 20px; font-weight: 700; margin-bottom: 24px; }
+#bg-modal label { font-size: 12px; font-weight: 600; color: #666; text-transform: uppercase; letter-spacing: .5px; display: block; margin-bottom: 8px; margin-top: 16px; }
+#bg-url-input { width: 100%; padding: 10px 14px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; outline: none; margin-bottom: 12px; }
 #bg-url-input:focus { border-color: #4285f4; }
-#bg-presets { display: flex; gap: 10px; flex-wrap: wrap; }
+#bg-presets { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
 .bg-preset { width: 72px; height: 48px; border-radius: 8px; border: 2px solid transparent; cursor: pointer; background-size: cover; background-position: center; transition: border-color .15s; }
 .bg-preset:hover { border-color: #4285f4; }
 .bg-preset.selected { border-color: #4285f4; }
