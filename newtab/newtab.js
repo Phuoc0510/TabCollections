@@ -175,10 +175,12 @@ $('groups-grid').addEventListener('click', async e => {
 
 let dragSrcId = null;
 let dragSrcEl = null;
+let isDragging = false;
 
 $('groups-grid').addEventListener('dragstart', e => {
   const card = e.target.closest('.group-card');
   if (!card) return;
+  isDragging = true;
   dragSrcEl = card;
   dragSrcId = card.dataset.id;
   e.dataTransfer.effectAllowed = 'move';
@@ -190,6 +192,7 @@ $('groups-grid').addEventListener('dragover', e => {
   e.preventDefault();
   const target = e.target.closest('.group-card');
   if (!target || !dragSrcEl || target === dragSrcEl) return;
+  if (!dragSrcEl.isConnected) { dragSrcEl = null; return; }
   e.dataTransfer.dropEffect = 'move';
   const rect = target.getBoundingClientRect();
   if (e.clientY < rect.top + rect.height / 2) {
@@ -205,6 +208,7 @@ $('groups-grid').addEventListener('drop', e => {
 
 $('groups-grid').addEventListener('dragend', async e => {
   if (dragSrcEl) dragSrcEl.style.opacity = '';
+  isDragging = false;
   const srcId = dragSrcId;
   dragSrcEl = null;
   dragSrcId = null;
@@ -506,8 +510,11 @@ $('import-input').addEventListener('change', async e => {
 render();
 
 const STORAGE_KEY = 'tabCollector';
+let renderTimer = null;
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area === 'local' && changes[STORAGE_KEY]) {
-    render();
+    if (isDragging) return;
+    clearTimeout(renderTimer);
+    renderTimer = setTimeout(() => render(), 300);
   }
 });
