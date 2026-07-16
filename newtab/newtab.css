@@ -146,6 +146,7 @@ button:hover { background: #f0f4ff; border-color: #4285f4; }
 #group-name-input:focus { border-color: #4285f4; }
 #group-name-input.error { border-color: #c5221f; }
 #name-error { display: none; color: #c5221f; font-size: 12px; margin-top: 4px; }
+.required { color: #c5221f; }
 
 #color-picker { display: flex; gap: 8px; flex-wrap: wrap; }
 .pick-color { border-radius: 50%; width: 32px; height: 32px; }
