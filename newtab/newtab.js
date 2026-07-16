@@ -177,6 +177,7 @@ let dragSrcId = null;
 let dragSrcEl = null;
 let isDragging = false;
 let pendingRender = false;
+let skipSelfNext = false;
 
 $('groups-grid').addEventListener('dragstart', e => {
   const card = e.target.closest('.group-card');
@@ -202,6 +203,7 @@ $('groups-grid').addEventListener('dragover', e => {
   const before = e.clientY < rect.top + rect.height / 2;
 
   if (target === dragSrcEl) {
+    if (skipSelfNext) { skipSelfNext = false; return; }
     const cards = [...grid.querySelectorAll('.group-card')];
     const idx = cards.indexOf(target);
     const edge = 20;
@@ -218,6 +220,7 @@ $('groups-grid').addEventListener('dragover', e => {
   } else {
     grid.insertBefore(dragSrcEl, target.nextSibling);
   }
+  skipSelfNext = true;
 });
 
 $('groups-grid').addEventListener('drop', e => {
