@@ -397,48 +397,48 @@ function showBgModal() {
     });
   });
 
-  const dropZone = $('bg-drop-zone');
-  dropZone.addEventListener('dragover', e => {
-    e.preventDefault();
-    dropZone.classList.add('drag-over');
-  });
-  dropZone.addEventListener('dragleave', () => {
-    dropZone.classList.remove('drag-over');
-  });
-  dropZone.addEventListener('drop', e => {
-    e.preventDefault();
-    dropZone.classList.remove('drag-over');
-    const file = e.dataTransfer.files[0];
-    if (!file) return;
-    if (!file.type.startsWith('image/')) {
-      showStatus('Unsupported file type. Use .jpg, .png, .gif, or .webp', 'error');
-      return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-      showStatus('File too large (max 5MB)', 'error');
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = async () => {
-      try {
-        const dataUrl = reader.result;
-        await saveBg(dataUrl);
-        await applyBg(dataUrl);
-        inputEl.value = '📎 ' + file.name;
-        presetsEl.querySelectorAll('.bg-preset').forEach(el => el.classList.remove('selected'));
-        showStatus('Background applied', 'success');
-      } catch (err) {
-        showStatus('Failed to save background: ' + err.message, 'error');
-      }
-    };
-    reader.onerror = () => {
-      showStatus('Failed to read image file', 'error');
-    };
-    reader.readAsDataURL(file);
-  });
-
   overlay.style.display = 'flex';
 }
+
+const dropZone = $('bg-drop-zone');
+dropZone.addEventListener('dragover', e => {
+  e.preventDefault();
+  dropZone.classList.add('drag-over');
+});
+dropZone.addEventListener('dragleave', () => {
+  dropZone.classList.remove('drag-over');
+});
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('drag-over');
+  const file = e.dataTransfer.files[0];
+  if (!file) return;
+  if (!file.type.startsWith('image/')) {
+    showStatus('Unsupported file type. Use .jpg, .png, .gif, or .webp', 'error');
+    return;
+  }
+  if (file.size > 5 * 1024 * 1024) {
+    showStatus('File too large (max 5MB)', 'error');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = async () => {
+    try {
+      const dataUrl = reader.result;
+      await saveBg(dataUrl);
+      await applyBg(dataUrl);
+      $('bg-url-input').value = '📎 ' + file.name;
+      $('bg-presets').querySelectorAll('.bg-preset').forEach(el => el.classList.remove('selected'));
+      showStatus('Background applied', 'success');
+    } catch (err) {
+      showStatus('Failed to save background: ' + err.message, 'error');
+    }
+  };
+  reader.onerror = () => {
+    showStatus('Failed to read image file', 'error');
+  };
+  reader.readAsDataURL(file);
+});
 
 $('customize-btn').addEventListener('click', showBgModal);
 
@@ -449,6 +449,10 @@ $('bg-modal-overlay').addEventListener('click', e => {
 
 $('bg-confirm-btn').addEventListener('click', async () => {
   const url = $('bg-url-input').value.trim();
+  if (url.startsWith('📎 ')) {
+    $('bg-modal-overlay').style.display = 'none';
+    return;
+  }
   await saveBg(url);
   await applyBg(url);
   $('bg-modal-overlay').style.display = 'none';
