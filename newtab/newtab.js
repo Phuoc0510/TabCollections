@@ -205,13 +205,14 @@ $('groups-grid').addEventListener('drop', e => {
 
 $('groups-grid').addEventListener('dragend', async e => {
   if (dragSrcEl) dragSrcEl.style.opacity = '';
+  const srcId = dragSrcId;
   dragSrcEl = null;
-  if (dragSrcId) {
+  dragSrcId = null;
+  if (srcId) {
     const cards = [...$('groups-grid').querySelectorAll('.group-card')];
     const ids = cards.map(c => c.dataset.id);
     await chrome.runtime.sendMessage({ action: 'updateGroupPositions', orderedIds: ids });
   }
-  dragSrcId = null;
 });
 
 function showConfirm(message) {
