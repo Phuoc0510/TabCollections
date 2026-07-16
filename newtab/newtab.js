@@ -177,7 +177,7 @@ let dragSrcId = null;
 let dragSrcEl = null;
 let isDragging = false;
 let pendingRender = false;
-let skipSelfNext = false;
+let lastRefNode = undefined;
 
 $('groups-grid').addEventListener('dragstart', e => {
   const card = e.target.closest('.group-card');
@@ -186,6 +186,7 @@ $('groups-grid').addEventListener('dragstart', e => {
   isDragging = true;
   dragSrcEl = card;
   dragSrcId = card.dataset.id;
+  lastRefNode = undefined;
   e.dataTransfer.effectAllowed = 'move';
   e.dataTransfer.setData('text/plain', dragSrcId);
   card.style.opacity = '0.35';
@@ -195,32 +196,23 @@ $('groups-grid').addEventListener('dragover', e => {
   e.preventDefault();
   if (!dragSrcEl || !dragSrcEl.isConnected) { dragSrcEl = null; return; }
   const target = e.target.closest('.group-card');
-  if (!target) return;
+  if (!target || target === dragSrcEl) return;
   e.dataTransfer.dropEffect = 'move';
 
   const grid = target.parentNode;
-  const rect = target.getBoundingClientRect();
-  const before = e.clientY < rect.top + rect.height / 2;
+  const cards = [...grid.querySelectorAll('.group-card')];
+  const srcIdx = cards.indexOf(dragSrcEl);
+  const tgtIdx = cards.indexOf(target);
 
-  if (target === dragSrcEl) {
-    if (skipSelfNext) { skipSelfNext = false; return; }
-    const cards = [...grid.querySelectorAll('.group-card')];
-    const idx = cards.indexOf(target);
-    const edge = 20;
-    if (before && idx > 0 && e.clientY < rect.top + edge) {
-      grid.insertBefore(dragSrcEl, cards[idx - 1]);
-    } else if (!before && idx < cards.length - 1 && e.clientY > rect.bottom - edge) {
-      grid.insertBefore(dragSrcEl, cards[idx + 1].nextSibling);
-    }
-    return;
-  }
+  // Insert AFTER target when dragging downward, BEFORE when dragging upward
+  const refNode = srcIdx < tgtIdx ? target.nextSibling : target;
+  // Skip if insertion point hasn't changed or would be a no-op
+  if (refNode === lastRefNode) return;
+  if (refNode === dragSrcEl) return;
+  if (refNode && dragSrcEl.nextSibling === refNode) return;
 
-  if (before) {
-    grid.insertBefore(dragSrcEl, target);
-  } else {
-    grid.insertBefore(dragSrcEl, target.nextSibling);
-  }
-  skipSelfNext = true;
+  lastRefNode = refNode;
+  grid.insertBefore(dragSrcEl, refNode);
 });
 
 $('groups-grid').addEventListener('drop', e => {
