@@ -64,12 +64,39 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function renderIconPicker() {
     const container = document.getElementById('new-group-icons');
-    container.innerHTML = ICONS.map(i =>
-      `<div class="pop-pick${i === pendingNewIcon ? ' selected' : ''}" data-value="${i}">${i}</div>`
+    const term = (document.getElementById('icon-search')?.value || '').toLowerCase().trim();
+
+    container.innerHTML =
+      '<input type="text" class="icon-search" id="icon-search" placeholder="🔍 Search icons...">' +
+      '<div class="icon-grid-scroll"></div>';
+
+    const scroll = container.querySelector('.icon-grid-scroll');
+    renderIconGrid(scroll, term);
+    document.getElementById('icon-search').addEventListener('input', () => {
+      const t = document.getElementById('icon-search').value.toLowerCase().trim();
+      renderIconGrid(scroll, t);
+    });
+  }
+
+  function renderIconGrid(scroll, term) {
+    const cats = term
+      ? ICON_CATEGORIES.filter(c => c.name.toLowerCase().includes(term))
+      : ICON_CATEGORIES;
+
+    scroll.innerHTML = cats.map(cat =>
+      `<div class="icon-cat">
+        <div class="icon-cat-name">${cat.name}</div>
+        <div class="icon-grid">
+          ${cat.icons.map(i =>
+            `<div class="icon-item${i === pendingNewIcon ? ' selected' : ''}" data-value="${i}">${i}</div>`
+          ).join('')}
+        </div>
+      </div>`
     ).join('');
-    container.querySelectorAll('.pop-pick').forEach(el => {
+
+    scroll.querySelectorAll('.icon-item').forEach(el => {
       el.addEventListener('click', () => {
-        container.querySelectorAll('.pop-pick').forEach(x => x.classList.remove('selected'));
+        scroll.querySelectorAll('.icon-item').forEach(x => x.classList.remove('selected'));
         el.classList.add('selected');
         pendingNewIcon = el.dataset.value;
       });

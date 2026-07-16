@@ -190,6 +190,30 @@ function hideConfirm() {
   $('confirm-overlay').onclick = null;
 }
 
+function renderIconGrid(scroll, term, selectedIcon) {
+  const cats = term
+    ? ICON_CATEGORIES.filter(c => c.name.toLowerCase().includes(term))
+    : ICON_CATEGORIES;
+
+  scroll.innerHTML = cats.map(cat =>
+    `<div class="icon-cat">
+      <div class="icon-cat-name">${cat.name}</div>
+      <div class="icon-grid">
+        ${cat.icons.map(i =>
+          `<div class="icon-item${i === selectedIcon ? ' selected' : ''}" data-value="${i}">${i}</div>`
+        ).join('')}
+      </div>
+    </div>`
+  ).join('');
+
+  scroll.querySelectorAll('.icon-item').forEach(el => {
+    el.addEventListener('click', () => {
+      scroll.querySelectorAll('.icon-item').forEach(x => x.classList.remove('selected'));
+      el.classList.add('selected');
+    });
+  });
+}
+
 function showModal(title, name, icon, color, onConfirm) {
   $('modal-title').textContent = title;
   $('group-name-input').value = name;
@@ -197,14 +221,14 @@ function showModal(title, name, icon, color, onConfirm) {
   modalCallback = onConfirm;
 
   const iconPicker = $('icon-picker');
-  iconPicker.innerHTML = ICONS.map(i =>
-    `<div class="pick-option${i === icon ? ' selected' : ''}" data-value="${i}">${i}</div>`
-  ).join('');
-  iconPicker.querySelectorAll('.pick-option').forEach(el => {
-    el.addEventListener('click', () => {
-      iconPicker.querySelectorAll('.pick-option').forEach(x => x.classList.remove('selected'));
-      el.classList.add('selected');
-    });
+  iconPicker.innerHTML =
+    '<input type="text" class="icon-search" id="icon-search" placeholder="🔍 Search icons...">' +
+    '<div class="icon-grid-scroll"></div>';
+
+  renderIconGrid($('icon-picker').querySelector('.icon-grid-scroll'), '', icon);
+  document.getElementById('icon-search').addEventListener('input', () => {
+    const t = document.getElementById('icon-search').value.toLowerCase().trim();
+    renderIconGrid($('icon-picker').querySelector('.icon-grid-scroll'), t, icon);
   });
 
   const colorPicker = $('color-picker');
