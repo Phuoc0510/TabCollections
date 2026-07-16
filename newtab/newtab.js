@@ -512,3 +512,10 @@ $('import-input').addEventListener('change', async e => {
 });
 
 render();
+
+const STORAGE_KEY = 'tabCollector';
+chrome.storage.onChanged.addListener((changes, area) => {
+  if (area === 'local' && changes[STORAGE_KEY]) {
+    render();
+  }
+});
