@@ -1,0 +1,15 @@
+{
+  "name": "tab-collection",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A Chrome/Brave extension for collecting tabs into organized groups",
+  "scripts": {
+    "test": "node storage.test.js",
+    "lint": "eslint .",
+    "format": "prettier --write ."
+  },
+  "devDependencies": {
+    "eslint": "^9.0.0",
+    "prettier": "^3.0.0"
+  }
+}

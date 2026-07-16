@@ -147,6 +147,19 @@ body.has-bg #app { max-width: 1000px; }
   }
 }
 
+#confirm-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 1001; }
+#confirm-modal { background: #fff; border-radius: 16px; padding: 24px; width: 360px; box-shadow: 0 16px 48px rgba(0,0,0,0.2); }
+#confirm-message { font-size: 15px; margin-bottom: 20px; line-height: 1.4; }
+#confirm-ok-btn { background: #c5221f; color: #fff; border-color: #c5221f; }
+#confirm-ok-btn:hover { background: #a50e0e; }
+@media (prefers-color-scheme: dark) {
+  #confirm-modal { background: #2d2d44 !important; }
+  #confirm-message { color: #e8eaed; }
+  #confirm-cancel-btn { background: #3c3c5e !important; color: #e8eaed !important; }
+  #confirm-ok-btn { background: #c5221f !important; color: #fff !important; border-color: #c5221f !important; }
+  #confirm-ok-btn:hover { background: #a50e0e !important; }
+}
+
 @media (max-width: 600px) {
   #app { padding: 20px 14px; }
   #groups-grid { grid-template-columns: 1fr; }

@@ -1,6 +1,3 @@
-const ICONS = ['💻', '📁', '🗂️', '📄', '🔧', '⚙️', '🌐', '🔗', '🧩', '📊', '🚀', '🔥', '💡', '📦', '🐛', '🧪', '⚡', '🗄️'];
-const COLORS = ['#4285f4', '#ea4335', '#fbbc04', '#34a853', '#ff6d01', '#46bdc6', '#7b1fa2', '#e91e63'];
-
 let pendingNewIcon = '📁';
 let pendingNewColor = '#4285f4';
 

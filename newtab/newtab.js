@@ -1,6 +1,3 @@
-const ICONS = ['💻', '📁', '🗂️', '📄', '🔧', '⚙️', '🌐', '🔗', '🧩', '📊', '🚀', '🔥', '💡', '📦', '🐛', '🧪', '⚡', '🗄️'];
-const COLORS = ['#4285f4', '#ea4335', '#fbbc04', '#34a853', '#ff6d01', '#46bdc6', '#7b1fa2', '#e91e63', '#795548', '#607d8b'];
-
 let groups = [];
 let modalCallback = null;
 const expandedGroupIds = new Set();
@@ -107,72 +104,90 @@ async function render() {
     </article>`;
   }).join('');
 
-  document.querySelectorAll('.group-toggle').forEach(toggle => {
-    toggle.addEventListener('click', () => {
-      const { id } = toggle.dataset;
-      if (expandedGroupIds.has(id)) {
-        expandedGroupIds.delete(id);
-      } else {
-        expandedGroupIds.add(id);
-      }
-      render();
-    });
-  });
+}
 
-  document.querySelectorAll('.tab-delete').forEach(btn => {
-    btn.addEventListener('click', async e => {
-      e.stopPropagation();
-      await chrome.runtime.sendMessage({ action: 'removeTab', tabId: btn.dataset.id });
+$('groups-grid').addEventListener('click', async e => {
+  const groupCard = e.target.closest('.group-card');
+  if (!groupCard) return;
+
+  const groupId = groupCard.dataset.id;
+
+  const toggle = e.target.closest('.group-toggle');
+  if (toggle) {
+    if (expandedGroupIds.has(groupId)) expandedGroupIds.delete(groupId);
+    else expandedGroupIds.add(groupId);
+    await render();
+    return;
+  }
+
+  const tabDelete = e.target.closest('.tab-delete');
+  if (tabDelete) {
+    e.stopPropagation();
+    await chrome.runtime.sendMessage({ action: 'removeTab', tabId: tabDelete.dataset.id });
+    await render();
+    return;
+  }
+
+  const tabOpen = e.target.closest('.tab-open');
+  if (tabOpen) {
+    e.preventDefault();
+    e.stopPropagation();
+    await chrome.tabs.create({ url: tabOpen.href });
+    return;
+  }
+
+  const tabEntry = e.target.closest('.tab-entry');
+  if (tabEntry) {
+    await chrome.tabs.create({ url: tabEntry.querySelector('.tab-open').href });
+    return;
+  }
+
+  const openAllBtn = e.target.closest('.group-open-all-btn');
+  if (openAllBtn) {
+    const g = groups.find(x => x.id === openAllBtn.dataset.id);
+    if (!g || !g.tabs) return;
+    for (const t of g.tabs) await chrome.tabs.create({ url: t.url });
+    showStatus(`Opened ${g.tabs.length} tab${g.tabs.length !== 1 ? 's' : ''}`, 'success');
+    return;
+  }
+
+  const editBtn = e.target.closest('.group-edit-btn');
+  if (editBtn) {
+    const g = groups.find(x => x.id === editBtn.dataset.id);
+    if (g) showEditModal(g);
+    return;
+  }
+
+  const deleteBtn = e.target.closest('.group-delete-btn');
+  if (deleteBtn) {
+    const g = groups.find(x => x.id === deleteBtn.dataset.id);
+    if (!g) return;
+    if (await showConfirm(`Delete "${g.name}" and all its tabs?`)) {
+      await chrome.runtime.sendMessage({ action: 'deleteGroup', id: g.id });
       await render();
-    });
-  });
+      showStatus(`Deleted "${g.name}"`, 'success');
+    }
+    return;
+  }
+});
 
-  document.querySelectorAll('.tab-entry').forEach(el => {
-    el.addEventListener('click', async e => {
-      if (e.target.closest('.tab-delete') || e.target.closest('.tab-open')) return;
-      const url = el.querySelector('.tab-open').href;
-      await chrome.tabs.create({ url });
-    });
+function showConfirm(message) {
+  return new Promise(resolve => {
+    $('confirm-message').textContent = message;
+    $('confirm-overlay').style.display = 'flex';
+    $('confirm-ok-btn').onclick = () => { hideConfirm(); resolve(true); };
+    $('confirm-cancel-btn').onclick = () => { hideConfirm(); resolve(false); };
+    $('confirm-overlay').onclick = e => {
+      if (e.target === $('confirm-overlay')) { hideConfirm(); resolve(false); }
+    };
   });
+}
 
-  document.querySelectorAll('.tab-open').forEach(a => {
-    a.addEventListener('click', async e => {
-      e.preventDefault();
-      e.stopPropagation();
-      await chrome.tabs.create({ url: a.href });
-    });
-  });
-
-  document.querySelectorAll('.group-open-all-btn').forEach(btn => {
-    btn.addEventListener('click', async e => {
-      e.stopPropagation();
-      const g = groups.find(x => x.id === btn.dataset.id);
-      if (!g || !g.tabs) return;
-      for (const t of g.tabs) await chrome.tabs.create({ url: t.url });
-      showStatus(`Opened ${g.tabs.length} tab${g.tabs.length !== 1 ? 's' : ''}`, 'success');
-    });
-  });
-
-  document.querySelectorAll('.group-edit-btn').forEach(btn => {
-    btn.addEventListener('click', e => {
-      e.stopPropagation();
-      const g = groups.find(x => x.id === btn.dataset.id);
-      if (g) showEditModal(g);
-    });
-  });
-
-  document.querySelectorAll('.group-delete-btn').forEach(btn => {
-    btn.addEventListener('click', async e => {
-      e.stopPropagation();
-      const g = groups.find(x => x.id === btn.dataset.id);
-      if (!g) return;
-      if (confirm(`Delete "${g.name}" and all its tabs?`)) {
-        await chrome.runtime.sendMessage({ action: 'deleteGroup', id: g.id });
-        await render();
-        showStatus(`Deleted "${g.name}"`, 'success');
-      }
-    });
-  });
+function hideConfirm() {
+  $('confirm-overlay').style.display = 'none';
+  $('confirm-ok-btn').onclick = null;
+  $('confirm-cancel-btn').onclick = null;
+  $('confirm-overlay').onclick = null;
 }
 
 function showModal(title, name, icon, color, onConfirm) {
