@@ -186,20 +186,35 @@ $('groups-grid').addEventListener('dragstart', e => {
   e.dataTransfer.effectAllowed = 'move';
   e.dataTransfer.setData('text/plain', dragSrcId);
   card.style.opacity = '0.35';
-  card.style.pointerEvents = 'none';
 });
 
 $('groups-grid').addEventListener('dragover', e => {
   e.preventDefault();
+  if (!dragSrcEl || !dragSrcEl.isConnected) { dragSrcEl = null; return; }
   const target = e.target.closest('.group-card');
-  if (!target || !dragSrcEl || target === dragSrcEl) return;
-  if (!dragSrcEl.isConnected) { dragSrcEl = null; return; }
+  if (!target) return;
   e.dataTransfer.dropEffect = 'move';
+
+  const grid = target.parentNode;
   const rect = target.getBoundingClientRect();
-  if (e.clientY < rect.top + rect.height / 2) {
-    target.parentNode.insertBefore(dragSrcEl, target);
+  const before = e.clientY < rect.top + rect.height / 2;
+
+  if (target === dragSrcEl) {
+    const cards = [...grid.querySelectorAll('.group-card')];
+    const idx = cards.indexOf(target);
+    const edge = 20;
+    if (before && idx > 0 && e.clientY < rect.top + edge) {
+      grid.insertBefore(dragSrcEl, cards[idx - 1]);
+    } else if (!before && idx < cards.length - 1 && e.clientY > rect.bottom - edge) {
+      grid.insertBefore(dragSrcEl, cards[idx + 1].nextSibling);
+    }
+    return;
+  }
+
+  if (before) {
+    grid.insertBefore(dragSrcEl, target);
   } else {
-    target.parentNode.insertBefore(dragSrcEl, target.nextSibling);
+    grid.insertBefore(dragSrcEl, target.nextSibling);
   }
 });
 
@@ -208,10 +223,7 @@ $('groups-grid').addEventListener('drop', e => {
 });
 
 $('groups-grid').addEventListener('dragend', async e => {
-  if (dragSrcEl) {
-    dragSrcEl.style.opacity = '';
-    dragSrcEl.style.pointerEvents = '';
-  }
+  if (dragSrcEl) dragSrcEl.style.opacity = '';
   isDragging = false;
   const srcId = dragSrcId;
   dragSrcEl = null;
