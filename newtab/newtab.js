@@ -174,53 +174,44 @@ $('groups-grid').addEventListener('click', async e => {
 // ── Drag and drop reorder ──
 
 let dragSrcId = null;
+let dragSrcEl = null;
 
 $('groups-grid').addEventListener('dragstart', e => {
   const card = e.target.closest('.group-card');
   if (!card) return;
+  dragSrcEl = card;
   dragSrcId = card.dataset.id;
   e.dataTransfer.effectAllowed = 'move';
   e.dataTransfer.setData('text/plain', dragSrcId);
-  card.classList.add('dragging');
-});
-
-$('groups-grid').addEventListener('dragend', e => {
-  const card = e.target.closest('.group-card');
-  if (card) card.classList.remove('dragging');
-  document.querySelectorAll('.group-card').forEach(el => el.classList.remove('drag-over'));
-  dragSrcId = null;
+  card.style.opacity = '0.35';
 });
 
 $('groups-grid').addEventListener('dragover', e => {
   e.preventDefault();
   const target = e.target.closest('.group-card');
-  if (!target || target.dataset.id === dragSrcId) return;
+  if (!target || !dragSrcEl || target === dragSrcEl) return;
   e.dataTransfer.dropEffect = 'move';
-  target.classList.add('drag-over');
-});
-
-$('groups-grid').addEventListener('dragleave', e => {
-  const target = e.target.closest('.group-card');
-  if (target) target.classList.remove('drag-over');
-});
-
-$('groups-grid').addEventListener('drop', async e => {
-  e.preventDefault();
-  const target = e.target.closest('.group-card');
-  if (!target || !dragSrcId || dragSrcId === target.dataset.id) return;
-  const cards = [...$('groups-grid').querySelectorAll('.group-card')];
-  const ids = cards.map(c => c.dataset.id);
-  const fromIdx = ids.indexOf(dragSrcId);
-  const toIdx = ids.indexOf(target.dataset.id);
-  const sourceCard = cards[fromIdx];
-  if (fromIdx < toIdx) {
-    target.insertAdjacentElement('afterend', sourceCard);
+  const rect = target.getBoundingClientRect();
+  if (e.clientY < rect.top + rect.height / 2) {
+    target.parentNode.insertBefore(dragSrcEl, target);
   } else {
-    target.insertAdjacentElement('beforebegin', sourceCard);
+    target.parentNode.insertBefore(dragSrcEl, target.nextSibling);
   }
-  ids.splice(fromIdx, 1);
-  ids.splice(toIdx, 0, dragSrcId);
-  await chrome.runtime.sendMessage({ action: 'updateGroupPositions', orderedIds: ids });
+});
+
+$('groups-grid').addEventListener('drop', e => {
+  e.preventDefault();
+});
+
+$('groups-grid').addEventListener('dragend', async e => {
+  if (dragSrcEl) dragSrcEl.style.opacity = '';
+  dragSrcEl = null;
+  if (dragSrcId) {
+    const cards = [...$('groups-grid').querySelectorAll('.group-card')];
+    const ids = cards.map(c => c.dataset.id);
+    await chrome.runtime.sendMessage({ action: 'updateGroupPositions', orderedIds: ids });
+  }
+  dragSrcId = null;
 });
 
 function showConfirm(message) {
