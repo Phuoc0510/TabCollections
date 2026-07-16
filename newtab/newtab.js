@@ -204,7 +204,7 @@ $('groups-grid').addEventListener('dragleave', e => {
   if (target) target.classList.remove('drag-over');
 });
 
-$('groups-grid').addEventListener('drop', e => {
+$('groups-grid').addEventListener('drop', async e => {
   e.preventDefault();
   const target = e.target.closest('.group-card');
   if (!target || !dragSrcId || dragSrcId === target.dataset.id) return;
@@ -220,7 +220,7 @@ $('groups-grid').addEventListener('drop', e => {
   }
   ids.splice(fromIdx, 1);
   ids.splice(toIdx, 0, dragSrcId);
-  chrome.runtime.sendMessage({ action: 'updateGroupPositions', orderedIds: ids });
+  await chrome.runtime.sendMessage({ action: 'updateGroupPositions', orderedIds: ids });
 });
 
 function showConfirm(message) {
