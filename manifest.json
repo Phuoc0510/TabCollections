@@ -1,9 +1,13 @@
 {
   "manifest_version": 3,
   "name": "Tab Collection",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Collect tabs into groups and manage them from your new tab page",
-  "permissions": ["storage", "contextMenus", "tabs"],
+  "permissions": [
+    "storage",
+    "contextMenus",
+    "tabs"
+  ],
   "background": {
     "service_worker": "background.js"
   },
