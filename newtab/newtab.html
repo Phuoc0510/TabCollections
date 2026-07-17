@@ -2,78 +2,84 @@
 <html>
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="../styles/reset.css">
+  <link rel="stylesheet" href="../styles/glass.css">
+  <link rel="stylesheet" href="../styles/components.css">
+  <link rel="stylesheet" href="../styles/animations.css">
+  <link rel="stylesheet" href="../styles/responsive.css">
   <link rel="stylesheet" href="newtab.css">
 </head>
 <body>
-  <div id="app">
-    <header>
-      <h1>Tab Collections</h1>
+  <div id="app" class="app">
+    <header class="app-header glass glass-strong">
+      <h1 class="app-title">Tab Collections</h1>
       <div class="header-actions">
-        <button id="new-group-btn">+ New Collection</button>
-        <button id="export-btn">Export</button>
-        <button id="import-btn">Import</button>
-        <button id="customize-btn">🎨</button>
+        <button id="new-group-btn" class="btn-primary">+ New Collection</button>
+        <button id="export-btn" class="btn-ghost">Export</button>
+        <button id="import-btn" class="btn-ghost">Import</button>
+        <button id="customize-btn" class="btn-ghost">🎨</button>
         <input type="file" id="import-input" accept=".json" style="display:none">
       </div>
     </header>
 
-    <div id="status-bar"></div>
+    <div id="status-bar" class="status-bar"></div>
 
     <div id="groups-view">
-      <div id="groups-grid"></div>
-      <div id="empty-state" style="display:none">
+      <div id="groups-grid" class="groups-grid animate-stagger"></div>
+      <div id="empty-state" class="empty-state" style="display:none">
         <p>No collections yet. Use the extension popup to add tabs, or click "+ New Collection" to start.</p>
       </div>
     </div>
   </div>
 
-  <div id="modal-overlay" style="display:none">
-    <div id="modal">
+  <div id="modal-overlay" class="modal-overlay" style="display:none">
+    <div id="modal" class="modal">
       <h2 id="modal-title">New Collection</h2>
       <label for="group-name-input">Name <span class="required">*</span></label>
-      <input type="text" id="group-name-input" placeholder="Collection name">
-      <span id="name-error">Name is required</span>
+      <input type="text" id="group-name-input" class="modal-input" placeholder="Collection name">
+      <span id="name-error" class="name-error">Name is required</span>
       <label>Icon</label>
-      <div id="icon-picker"></div>
+      <div id="icon-picker" class="icon-picker"></div>
       <label>Color</label>
-      <div id="color-picker"></div>
+      <div id="color-picker" class="color-picker"></div>
       <div class="modal-actions">
-        <button id="modal-cancel-btn">Cancel</button>
-        <button id="modal-confirm-btn">Create</button>
+        <button id="modal-cancel-btn" class="btn-ghost">Cancel</button>
+        <button id="modal-confirm-btn" class="btn-primary">Create</button>
       </div>
     </div>
   </div>
 
-  <div id="bg-modal-overlay" style="display:none">
-    <div id="bg-modal">
+  <div id="bg-modal-overlay" class="modal-overlay" style="display:none">
+    <div id="bg-modal" class="modal" style="width:500px">
       <h2>Customize Background</h2>
       <label>Presets</label>
-      <div id="bg-presets"></div>
-      <div id="bg-drop-zone">
+      <div id="bg-presets" class="bg-presets"></div>
+      <div id="bg-drop-zone" class="bg-drop-zone">
         <span>Drop image here</span>
       </div>
       <label>Or paste image URL</label>
-      <input type="text" id="bg-url-input" placeholder="https://...">
+      <input type="text" id="bg-url-input" class="modal-input" placeholder="https://...">
       <div class="modal-actions">
-        <button id="bg-cancel-btn">Cancel</button>
-        <button id="bg-remove-btn">Remove Background</button>
-        <button id="bg-confirm-btn">Apply</button>
+        <button id="bg-cancel-btn" class="btn-ghost">Cancel</button>
+        <button id="bg-remove-btn" class="btn-danger">Remove Background</button>
+        <button id="bg-confirm-btn" class="btn-primary">Apply</button>
       </div>
     </div>
   </div>
 
-  <div id="confirm-overlay" style="display:none">
-    <div id="confirm-modal">
-      <p id="confirm-message"></p>
+  <div id="confirm-overlay" class="modal-overlay" style="display:none">
+    <div id="confirm-modal" class="modal">
+      <p id="confirm-message" class="confirm-message"></p>
       <div class="modal-actions">
-        <button id="confirm-cancel-btn">Cancel</button>
-        <button id="confirm-ok-btn">Delete</button>
+        <button id="confirm-cancel-btn" class="btn-ghost">Cancel</button>
+        <button id="confirm-ok-btn" class="btn-danger">Delete</button>
       </div>
     </div>
   </div>
 
-  <div id="icon-popover" style="display:none">
-    <input type="text" class="icon-search" id="popover-icon-search" placeholder="🔍 Search icons...">
+  <div id="icon-popover" class="icon-popover" style="display:none">
+    <input type="text" class="icon-search" id="popover-icon-search" placeholder="Search icons...">
     <div class="icon-grid-scroll"></div>
   </div>
 
