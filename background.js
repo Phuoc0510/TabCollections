@@ -30,7 +30,11 @@ async function rebuildContextMenu() {
   });
 }
 
-chrome.runtime.onInstalled.addListener(() => {
+chrome.runtime.onInstalled.addListener(async () => {
+  const groups = await getGroups();
+  if (groups.length === 0) {
+    await createGroup('General', '📁', '#4285f4');
+  }
   rebuildContextMenu();
 });
 

@@ -37,9 +37,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   function renderGroups() {
-    groupSelect.innerHTML = '<option value="">Select group...</option>' +
-      groups.map(g => `<option value="${g.id}">${g.icon} ${g.name}</option>`).join('') +
+    groupSelect.innerHTML = groups.map(g => `<option value="${g.id}">${g.icon} ${g.name}</option>`).join('') +
       '<option value="__new__">➕ New Group...</option>';
+    if (!groupSelect.value && groups.length > 0) {
+      groupSelect.value = groups[0].id;
+    }
+    updateButtonState();
   }
 
   function showNewGroupForm() {
