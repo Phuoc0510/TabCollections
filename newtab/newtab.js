@@ -263,7 +263,18 @@ $('groups-grid').addEventListener('dragover', e => {
   const entry = e.target.closest('.tab-entry');
   const targetCard = e.target.closest('.group-card');
 
-  if (!tabDragSrcEl || !tabDragSrcEl.isConnected) return;
+  if (!tabDragSrcEl || !tabDragSrcEl.isConnected) {
+    if (!targetCard) return;
+    // External drag — allow copy onto card (validated at drop)
+    if (!dragSrcEl) {
+      dragTargetGroupId = targetCard.dataset.id;
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'copy';
+      document.querySelectorAll('.group-card.drag-target').forEach(el => el.classList.remove('drag-target'));
+      targetCard.classList.add('drag-target');
+    }
+    return;
+  }
   if (!targetCard) return;
 
   if (targetCard.dataset.id !== dragSrcGroupId) {
@@ -292,8 +303,37 @@ $('groups-grid').addEventListener('dragover', e => {
   }
 });
 
-$('groups-grid').addEventListener('drop', e => {
+$('groups-grid').addEventListener('drop', async e => {
   e.preventDefault();
+  const targetCard = e.target.closest('.group-card');
+  if (!targetCard) return;
+
+  if (!tabDragSrcEl && !dragSrcEl) {
+    document.querySelectorAll('.group-card.drag-target').forEach(el => el.classList.remove('drag-target'));
+    dragTargetGroupId = null;
+    try {
+      let url = e.dataTransfer.getData('text/uri-list') || e.dataTransfer.getData('text/plain');
+      if (!url && e.dataTransfer.items) {
+        for (const item of e.dataTransfer.items) {
+          if (item.kind === 'string') {
+            url = await new Promise(r => item.getAsString(r));
+            if (url) break;
+          }
+        }
+      }
+      if (!url) return;
+      url = url.trim();
+      let title = url;
+      try { title = new URL(url).hostname; } catch {}
+      await chrome.runtime.sendMessage({
+        action: 'addTabToGroup',
+        tab: { title, url, favicon: '' },
+        groupId: targetCard.dataset.id
+      });
+    } catch (err) {
+      console.warn('External drop failed:', err);
+    }
+  }
 });
 
 $('groups-grid').addEventListener('dragend', async e => {
