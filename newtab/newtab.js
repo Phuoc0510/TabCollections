@@ -40,7 +40,7 @@ async function loadAll() {
   groups = await chrome.runtime.sendMessage({ action: 'getGroups' });
   const data = await chrome.runtime.sendMessage({ action: 'getAllData' });
   for (const g of groups) {
-    g.tabs = Object.values(data.tabs).filter(t => t.groupId === g.id).sort((a, b) => b.addedAt - a.addedAt);
+    g.tabs = Object.values(data.tabs).filter(t => t.groupId === g.id).sort((a, b) => (b.position ?? b.addedAt) - (a.position ?? a.addedAt));
   }
 }
 
@@ -48,7 +48,8 @@ function renderTabEntry(t) {
   const title = t.title || (() => { try { return new URL(t.url).hostname; } catch { return 'Untitled'; } })();
   const displayUrl = t.url.length > 60 ? t.url.slice(0, 57) + '...' : t.url;
   const imgSrc = faviconUrl(t);
-  return `<div class="tab-entry" data-id="${t.id}">
+  return `<div class="tab-entry" data-id="${t.id}" draggable="true">
+    <span class="tab-drag-handle" draggable="true">⠿</span>
     ${imgSrc ? `<img src="${imgSrc}" alt="" onerror="this.style.display='none'">` : ''}
     <div class="tab-info">
       <div class="tab-title">${esc(title)}</div>
@@ -178,10 +179,13 @@ let dragSrcEl = null;
 let isDragging = false;
 let pendingRender = false;
 let lastRefNode = undefined;
+let tabDragSrcEl = null;
 
 $('groups-grid').addEventListener('dragstart', e => {
   const card = e.target.closest('.group-card');
   if (!card) return;
+  // Don't start card drag if dragging a tab entry
+  if (e.target.closest('.tab-entry')) return;
   pendingRender = false;
   isDragging = true;
   dragSrcEl = card;
@@ -234,6 +238,62 @@ $('groups-grid').addEventListener('dragend', async e => {
     pendingRender = false;
     render();
   }
+});
+
+// ── Tab drag-and-drop reorder ──
+
+$('groups-grid').addEventListener('dragstart', e => {
+  const entry = e.target.closest('.tab-entry');
+  if (!entry) return;
+  const handle = e.target.closest('.tab-drag-handle');
+  if (!handle) { e.preventDefault(); return; }
+
+  tabDragSrcEl = entry;
+  entry.classList.add('dragging');
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', entry.dataset.id);
+});
+
+$('groups-grid').addEventListener('dragover', e => {
+  const entry = e.target.closest('.tab-entry');
+  if (!entry || !tabDragSrcEl || !tabDragSrcEl.isConnected) return;
+  if (entry === tabDragSrcEl) return;
+  e.preventDefault();
+  e.dataTransfer.dropEffect = 'move';
+
+  const container = entry.parentNode;
+  const rect = entry.getBoundingClientRect();
+  const midY = rect.top + rect.height / 2;
+
+  if (e.clientY < midY) {
+    container.insertBefore(tabDragSrcEl, entry);
+  } else {
+    container.insertBefore(tabDragSrcEl, entry.nextSibling);
+  }
+});
+
+$('groups-grid').addEventListener('drop', e => {
+  e.preventDefault();
+});
+
+$('groups-grid').addEventListener('dragend', async e => {
+  const src = tabDragSrcEl;
+  tabDragSrcEl = null;
+  if (!src) return;
+  src.classList.remove('dragging');
+
+  const container = src.parentNode;
+  if (!container) return;
+  const groupCard = container.closest('.group-card');
+  if (!groupCard) return;
+
+  const entries = [...container.querySelectorAll('.tab-entry')];
+  const orderedIds = entries.map(el => el.dataset.id);
+  await chrome.runtime.sendMessage({
+    action: 'updateTabPositions',
+    groupId: groupCard.dataset.id,
+    orderedIds
+  });
 });
 
 function showConfirm(message) {

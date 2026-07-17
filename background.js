@@ -96,6 +96,10 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
           await updateGroupPositions(msg.orderedIds);
           sendResponse({ ok: true });
           break;
+        case 'updateTabPositions':
+          await updateTabPositions(msg.groupId, msg.orderedIds);
+          sendResponse({ ok: true });
+          break;
         default:
           sendResponse({ error: 'Unknown action' });
       }

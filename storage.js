@@ -25,7 +25,7 @@ async function getTabsByGroup(groupId) {
   const data = await getAllData();
   return Object.values(data.tabs)
     .filter(t => t.groupId === groupId)
-    .sort((a, b) => b.addedAt - a.addedAt);
+    .sort((a, b) => (b.position ?? b.addedAt) - (a.position ?? a.addedAt));
 }
 
 async function createGroup(name, icon = '💻', color = '#4285f4') {
@@ -64,7 +64,8 @@ async function addTabToGroup(tabInfo, groupId) {
     url: tabInfo.url,
     favicon: tabInfo.favicon || '',
     groupId,
-    addedAt: Date.now()
+    addedAt: Date.now(),
+    position: Date.now()
   };
   data.tabs[entry.id] = entry;
   data.groups[groupId].updatedAt = Date.now();
@@ -83,6 +84,16 @@ async function updateGroupPositions(orderedIds) {
   orderedIds.forEach((id, idx) => {
     if (data.groups[id]) {
       data.groups[id].position = orderedIds.length - idx;
+    }
+  });
+  await saveAllData(data);
+}
+
+async function updateTabPositions(groupId, orderedIds) {
+  const data = await getAllData();
+  orderedIds.forEach((id, idx) => {
+    if (data.tabs[id] && data.tabs[id].groupId === groupId) {
+      data.tabs[id].position = orderedIds.length - idx;
     }
   });
   await saveAllData(data);
@@ -114,5 +125,5 @@ async function importData(jsonStr) {
 }
 
 if (typeof module !== 'undefined') {
-  module.exports = { getAllData, getGroups, getTabsByGroup, createGroup, updateGroup, deleteGroup, addTabToGroup, removeTab, updateGroupPositions, exportData, importData };
+  module.exports = { getAllData, getGroups, getTabsByGroup, createGroup, updateGroup, deleteGroup, addTabToGroup, removeTab, updateGroupPositions, updateTabPositions, exportData, importData };
 }
