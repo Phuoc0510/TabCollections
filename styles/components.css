@@ -1,0 +1,219 @@
+@import 'variables.css';
+
+/* Buttons */
+.btn-primary {
+  background: #4285f4;
+  color: #fff;
+  border-color: #4285f4;
+}
+.btn-primary:hover { background: #3b78e7; }
+.btn-primary:disabled {
+  background: #ccc;
+  border-color: #ccc;
+  color: #fff;
+  cursor: not-allowed;
+}
+
+.btn-danger {
+  color: var(--danger);
+  border-color: var(--danger);
+}
+.btn-danger:hover {
+  background: var(--danger-hover-bg);
+}
+
+.btn-ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--text-secondary);
+}
+.btn-ghost:hover {
+  background: var(--hover-bg);
+  color: var(--text-primary);
+}
+
+/* Modals */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: var(--overlay-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 200ms ease;
+}
+
+.modal {
+  background: var(--bg-primary);
+  border-radius: var(--radius-xl);
+  padding: 24px;
+  width: 360px;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
+  animation: modalIn 250ms ease;
+}
+
+.modal h2 {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.modal label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: block;
+  margin-bottom: 6px;
+  margin-top: 12px;
+}
+
+.modal label:first-of-type {
+  margin-top: 0;
+}
+
+.modal-input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.modal-input:focus {
+  border-color: #4285f4;
+}
+
+.modal-input.error {
+  border-color: var(--danger);
+}
+
+.modal-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+/* Status bar */
+.status-bar {
+  padding: 10px 16px;
+  border-radius: var(--radius-md);
+  margin-bottom: 16px;
+  display: none;
+  font-size: 14px;
+  animation: slideDown 300ms ease;
+}
+
+.status-bar.success {
+  display: block;
+  background: var(--success-bg);
+  color: var(--success-text);
+}
+
+.status-bar.error {
+  display: block;
+  background: var(--error-bg);
+  color: var(--error-text);
+}
+
+/* Icon picker shared */
+.icon-search {
+  width: 100%;
+  padding: 6px 8px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.icon-search:focus {
+  border-color: #4285f4;
+}
+
+.icon-grid-scroll {
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.icon-grid-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+.icon-grid-scroll::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 2px;
+}
+
+.icon-cat-name {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 6px 0 4px;
+  position: sticky;
+  top: 0;
+  background: var(--bg-primary);
+  z-index: 1;
+}
+
+.icon-grid {
+  display: flex;
+  gap: 3px;
+  flex-wrap: wrap;
+}
+
+.icon-item {
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  border: 2px solid transparent;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.icon-item:hover {
+  border-color: #ccc;
+  background: var(--hover-bg);
+}
+
+.icon-item.selected {
+  border-color: #4285f4;
+  background: #e8f0fe;
+}
+
+/* Color picker shared */
+.color-picker {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pick-color {
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: border-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.pick-color:hover {
+  border-color: #4285f4;
+  transform: scale(1.1);
+}
+
+.pick-color.selected {
+  border-color: #4285f4;
+  box-shadow: 0 0 0 2px #fff, 0 0 0 4px #4285f4;
+}

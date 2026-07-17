@@ -1,0 +1,49 @@
+@media (max-width: 1024px) {
+  .groups-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .groups-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .app-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .header-actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .header-actions button {
+    flex: 1;
+    min-width: 0;
+    text-align: center;
+  }
+
+  .group-header {
+    flex-wrap: wrap;
+  }
+
+  .group-meta {
+    margin-left: 0;
+  }
+
+  .group-actions {
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .tab-entry {
+    padding: 8px 12px;
+  }
+
+  .tab-open {
+    display: none;
+  }
+}

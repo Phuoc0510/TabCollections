@@ -1,0 +1,41 @@
+@import 'variables.css';
+
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-family);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  transition: background var(--transition-slow), color var(--transition-slow);
+}
+
+button {
+  padding: 8px 16px;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border: 1px solid var(--border-color);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background var(--transition-fast), border-color var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+button:hover {
+  background: var(--hover-bg);
+  border-color: #4285f4;
+}
+
+input, select {
+  font-family: var(--font-family);
+  outline: none;
+}
+
+input:focus, select:focus {
+  border-color: #4285f4;
+}
