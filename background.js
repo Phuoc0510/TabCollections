@@ -104,6 +104,11 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
           await updateTabPositions(msg.groupId, msg.orderedIds);
           sendResponse({ ok: true });
           break;
+        case 'moveTabToGroup':
+          await moveTabToGroup(msg.tabId, msg.targetGroupId);
+          await rebuildContextMenu();
+          sendResponse({ ok: true });
+          break;
         default:
           sendResponse({ error: 'Unknown action' });
       }
