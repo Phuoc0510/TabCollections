@@ -109,11 +109,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   function renderColorPicker() {
     const container = document.getElementById('new-group-colors');
     container.innerHTML = COLORS.map(c =>
-      `<div class="pop-pick pop-pick-color${c === pendingNewColor ? ' selected' : ''}" data-value="${c}" style="background:${c}"></div>`
+      `<div class="pick-color${c === pendingNewColor ? ' selected' : ''}" data-value="${c}" style="background:${c}"></div>`
     ).join('');
-    container.querySelectorAll('.pop-pick').forEach(el => {
+    container.querySelectorAll('.pick-color').forEach(el => {
       el.addEventListener('click', () => {
-        container.querySelectorAll('.pop-pick').forEach(x => x.classList.remove('selected'));
+        container.querySelectorAll('.pick-color').forEach(x => x.classList.remove('selected'));
         el.classList.add('selected');
         pendingNewColor = el.dataset.value;
       });

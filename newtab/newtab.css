@@ -168,6 +168,14 @@
   background: #e8f0fe;
 }
 
+.group-edit-btn {
+  color: var(--text-secondary);
+}
+
+.group-edit-btn:hover {
+  background: var(--hover-bg);
+}
+
 .group-delete-btn {
   color: var(--danger);
   border-color: transparent;
