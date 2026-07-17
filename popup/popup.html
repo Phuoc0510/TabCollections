@@ -2,32 +2,44 @@
 <html>
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="../styles/reset.css">
+  <link rel="stylesheet" href="../styles/glass.css">
+  <link rel="stylesheet" href="../styles/components.css">
+  <link rel="stylesheet" href="../styles/animations.css">
   <link rel="stylesheet" href="popup.css">
 </head>
 <body>
-  <div id="app">
-    <h1>Tab Collection</h1>
-    <div id="tabs-section">
-      <h2>Current Tabs</h2>
-      <div id="tab-list"></div>
+  <div id="app" class="popup-app">
+    <header class="popup-header glass">
+      <span class="popup-icon">📁</span>
+      <h1 class="popup-title">Tab Collection</h1>
+    </header>
+
+    <div id="tabs-section" class="popup-section">
+      <h2 class="popup-section-title">Current Tabs</h2>
+      <div id="tab-list" class="tab-list"></div>
     </div>
-    <div id="actions">
-      <button id="add-to-group-btn" disabled>Add to Group</button>
-      <select id="group-select">
+
+    <div id="actions" class="popup-actions">
+      <select id="group-select" class="popup-select glass">
         <option value="">Select group...</option>
       </select>
+      <button id="add-to-group-btn" class="btn-primary" disabled>Add to Group</button>
     </div>
-    <div id="new-group-form" style="display:none">
-      <input type="text" id="new-group-name" placeholder="Group name">
-      <div id="new-group-icons"></div>
-      <div id="new-group-colors"></div>
+
+    <div id="new-group-form" class="popup-new-group glass" style="display:none">
+      <input type="text" id="new-group-name" class="modal-input" placeholder="Group name">
+      <div id="new-group-icons" class="popup-icons"></div>
+      <div id="new-group-colors" class="color-picker"></div>
       <div class="form-actions">
-        <button id="create-group-cancel">Cancel</button>
-        <button id="create-group-confirm">Create</button>
+        <button id="create-group-cancel" class="btn-ghost">Cancel</button>
+        <button id="create-group-confirm" class="btn-primary">Create</button>
       </div>
     </div>
-    <div id="bottom-actions">
-      <button id="manage-groups-btn">Manage Groups</button>
+
+    <div id="bottom-actions" class="popup-bottom">
+      <button id="manage-groups-btn" class="btn-ghost" style="width:100%">Manage Groups</button>
     </div>
   </div>
   <script src="../constants.js"></script>
