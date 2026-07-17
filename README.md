@@ -19,7 +19,6 @@
 ### Drag & Drop
 - **Reorder groups** — drag cards to rearrange, positions persist automatically
 - **Reorder tabs** — rearrange tabs within a group using drag handles
-- **Move tabs between groups** — cross-group tab drag-and-drop
 - **Drop URLs from browser** — drag any URL from the address bar onto a group card to save it
 
 ### Customization
@@ -72,7 +71,7 @@ git clone https://github.com/Phuoc0510/TabCollections.git
 | Delete collection | Expand card → **Delete** |
 | Reorder cards | Drag card by its header |
 | Reorder tabs | Drag `⠿` handle on any tab entry |
-| Move tab between groups | Drag tab `⠿` handle onto another card |
+
 
 ---
 
@@ -151,7 +150,6 @@ Data flows through `chrome.storage.local`. The background service worker acts as
 
 ### v2.0.0
 - Drag URL from browser address bar onto group cards
-- Drag-and-drop tabs between groups
 - Enhanced drag-target visual feedback
 - Improved ESLint configuration
 
