@@ -181,6 +181,7 @@ let pendingRender = false;
 let lastRefNode = undefined;
 let tabDragSrcEl = null;
 let dragSrcGroupId = null;
+let dragTargetGroupId = null;
 
 $('groups-grid').addEventListener('dragstart', e => {
   const card = e.target.closest('.group-card');
@@ -265,8 +266,8 @@ $('groups-grid').addEventListener('dragover', e => {
   if (!tabDragSrcEl || !tabDragSrcEl.isConnected) return;
   if (!targetCard) return;
 
-  // Cross-group: highlight target card
   if (targetCard.dataset.id !== dragSrcGroupId) {
+    dragTargetGroupId = targetCard.dataset.id;
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
     document.querySelectorAll('.group-card.drag-target').forEach(el => el.classList.remove('drag-target'));
@@ -274,6 +275,7 @@ $('groups-grid').addEventListener('dragover', e => {
     return;
   }
 
+  dragTargetGroupId = null;
   // Same group: existing tab reorder
   if (!entry || entry === tabDragSrcEl) return;
   e.preventDefault();
@@ -302,16 +304,16 @@ $('groups-grid').addEventListener('dragend', async e => {
   if (!src) { isDragging = false; dragSrcGroupId = null; return; }
   src.classList.remove('dragging');
 
-  const targetCard = e.target.closest('.group-card');
   const srcGroupId = dragSrcGroupId;
+  const targetId = dragTargetGroupId;
   dragSrcGroupId = null;
+  dragTargetGroupId = null;
 
-  // Cross-group move
-  if (targetCard && srcGroupId && targetCard.dataset.id !== srcGroupId) {
+  if (targetId && srcGroupId && targetId !== srcGroupId) {
     await chrome.runtime.sendMessage({
       action: 'moveTabToGroup',
       tabId: src.dataset.id,
-      targetGroupId: targetCard.dataset.id
+      targetGroupId: targetId
     });
     isDragging = false;
     return;
