@@ -225,7 +225,6 @@ $('groups-grid').addEventListener('drop', e => {
 
 $('groups-grid').addEventListener('dragend', async e => {
   if (dragSrcEl) dragSrcEl.style.opacity = '';
-  isDragging = false;
   const srcId = dragSrcId;
   dragSrcEl = null;
   dragSrcId = null;
@@ -234,6 +233,7 @@ $('groups-grid').addEventListener('dragend', async e => {
     const ids = cards.map(c => c.dataset.id);
     await chrome.runtime.sendMessage({ action: 'updateGroupPositions', orderedIds: ids });
   }
+  isDragging = false;
   if (pendingRender) {
     pendingRender = false;
     render();
@@ -249,6 +249,7 @@ $('groups-grid').addEventListener('dragstart', e => {
   if (!handle) { e.preventDefault(); return; }
 
   tabDragSrcEl = entry;
+  isDragging = true;
   entry.classList.add('dragging');
   e.dataTransfer.effectAllowed = 'move';
   e.dataTransfer.setData('text/plain', entry.dataset.id);
@@ -294,6 +295,7 @@ $('groups-grid').addEventListener('dragend', async e => {
     groupId: groupCard.dataset.id,
     orderedIds
   });
+  isDragging = false;
 });
 
 function showConfirm(message) {
