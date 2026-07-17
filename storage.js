@@ -124,6 +124,16 @@ async function importData(jsonStr) {
   await saveAllData(data);
 }
 
+async function moveTabToGroup(tabId, targetGroupId) {
+  const data = await getAllData();
+  if (!data.groups[targetGroupId]) throw new Error('Target group not found');
+  if (!data.tabs[tabId]) throw new Error('Tab not found');
+  data.tabs[tabId].groupId = targetGroupId;
+  data.tabs[tabId].position = Date.now();
+  data.groups[targetGroupId].updatedAt = Date.now();
+  await saveAllData(data);
+}
+
 if (typeof module !== 'undefined') {
-  module.exports = { getAllData, getGroups, getTabsByGroup, createGroup, updateGroup, deleteGroup, addTabToGroup, removeTab, updateGroupPositions, updateTabPositions, exportData, importData };
+  module.exports = { getAllData, saveAllData, getGroups, getTabsByGroup, createGroup, updateGroup, deleteGroup, addTabToGroup, removeTab, updateGroupPositions, updateTabPositions, exportData, importData, moveTabToGroup };
 }

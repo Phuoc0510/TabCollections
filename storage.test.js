@@ -17,7 +17,7 @@ function assert(condition, message) {
 }
 
 async function main() {
-  const { getAllData, getGroups, createGroup, updateGroup, deleteGroup, addTabToGroup, getTabsByGroup, removeTab, exportData, importData } = await import('./storage.js');
+  const { getAllData, saveAllData, getGroups, createGroup, updateGroup, deleteGroup, addTabToGroup, getTabsByGroup, removeTab, exportData, importData, moveTabToGroup } = await import('./storage.js');
 
   let stored = {};
   chrome.storage.local.get = async () => stored;
@@ -111,6 +111,19 @@ async function main() {
     assert(false, 'addTabToGroup should have thrown');
   } catch (e) {
     assert(e.message === 'Group not found', 'addTabToGroup throws for invalid groupId');
+  }
+
+  // Test 14: moveTabToGroup changes groupId
+  {
+    const name = 'moveTabToGroup changes groupId';
+    const data = { groups: { g1: { id: 'g1', name: 'A', updatedAt: 1000 }, g2: { id: 'g2', name: 'B', updatedAt: 2000 } }, tabs: { t1: { id: 't1', url: 'https://x.com', groupId: 'g1', addedAt: 500, position: 500 } } };
+    await saveAllData(data);
+    await moveTabToGroup('t1', 'g2');
+    const result = await getTabsByGroup('g2');
+    assert(result.length === 1, 'tab should be in g2');
+    assert(result[0].groupId === 'g2', 'groupId should be g2');
+    assert(result[0].id === 't1', 'tab id should stay t1');
+    console.log(`PASS: ${name}`);
   }
 
   console.log('\nAll tests passed.');
