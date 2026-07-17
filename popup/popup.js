@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   function renderTabs() {
     tabList.innerHTML = tabs.map(t => `
       <label class="tab-item">
-        <input type="checkbox" value="${t.id}">
+        <input type="checkbox" value="${t.id}"${t.active ? ' checked' : ''}>
         <img src="${faviconUrl(t)}" alt="" onerror="this.style.display='none'">
         <span class="tab-title">${t.title || t.url}</span>
       </label>
