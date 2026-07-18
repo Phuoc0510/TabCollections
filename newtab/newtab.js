@@ -2,11 +2,6 @@ let groups = [];
 let modalCallback = null;
 const expandedGroupIds = new Set();
 let expandedInitialized = false;
-let pages = [];
-let activePageId = null;
-let searchTerm = '';
-let searchScope = 'current-page';
-let searchExact = false;
 let privacyMode = false;
 
 const $ = id => document.getElementById(id);
@@ -42,48 +37,25 @@ function faviconUrl(t) {
   catch { return ''; }
 }
 
-function highlightText(text, term) {
-  if (!term) return esc(text);
-  const lower = text.toLowerCase();
-  const tLower = term.toLowerCase();
-  const idx = lower.indexOf(tLower);
-  if (idx === -1) return esc(text);
-  return esc(text.slice(0, idx)) + '<mark>' + esc(text.slice(idx, idx + term.length)) + '</mark>' + esc(text.slice(idx + term.length));
-}
-
 async function loadAll() {
   groups = await chrome.runtime.sendMessage({ action: 'getGroups' });
   const data = await chrome.runtime.sendMessage({ action: 'getAllData' });
   for (const g of groups) {
-    g.tabs = Object.values(data.tabs).filter(t => t.groupId === g.id).sort((a, b) => (b.position ?? b.addedAt) - (a.position ?? a.addedAt));
+    g.tabs = Object.values(data.tabs).filter(t => t.groupId === g.id).sort((a, b) => (b.position ?? b.addedAt) - (a.position ?? b.addedAt));
   }
-  pages = await chrome.runtime.sendMessage({ action: 'getPages' });
-  if (pages.length === 0) {
-    const defaultPage = await chrome.runtime.sendMessage({
-      action: 'createPage',
-      name: 'General',
-      icon: '📁',
-      groupIds: groups.map(g => g.id)
-    });
-    pages = [defaultPage];
-  }
-  activePageId = activePageId || pages[0]?.id || null;
 }
 
-function renderTabEntry(t, term) {
+function renderTabEntry(t) {
   const title = t.title || (() => { try { return new URL(t.url).hostname; } catch { return 'Untitled'; } })();
   const displayUrl = t.url.length > 60 ? t.url.slice(0, 57) + '...' : t.url;
   const imgSrc = faviconUrl(t);
-
-  const hlTitle = term ? highlightText(title, term) : esc(title);
-  const hlUrl = term ? highlightText(displayUrl, term) : esc(displayUrl);
 
   return `<div class="tab-entry" data-id="${t.id}" draggable="true">
     <span class="tab-drag-handle" draggable="true">⠿</span>
     ${imgSrc ? `<img src="${imgSrc}" alt="" onerror="this.style.display='none'">` : ''}
     <div class="tab-info">
-      <div class="tab-title">${hlTitle}</div>
-      <div class="tab-url">${hlUrl}</div>
+      <div class="tab-title">${esc(title)}</div>
+      <div class="tab-url">${esc(displayUrl)}</div>
     </div>
     <a class="tab-open" href="${esc(t.url)}" target="_blank">Open</a>
     <button class="tab-delete" data-id="${t.id}">✕</button>
@@ -91,7 +63,13 @@ function renderTabEntry(t, term) {
 }
 
 async function render() {
-  await loadAll();
+  try {
+    await loadAll();
+  } catch (err) {
+    console.error('Failed to load data:', err);
+    showStatus('Failed to load data: ' + err.message, 'error');
+    return;
+  }
   if (!expandedInitialized) {
     groups.forEach(g => expandedGroupIds.add(g.id));
     expandedInitialized = true;
@@ -103,46 +81,15 @@ async function render() {
   if (groups.length === 0) {
     grid.innerHTML = '';
     empty.style.display = 'block';
-    renderPagesBar();
-    renderSearch();
     return;
   }
   empty.style.display = 'none';
 
-  const filteredGroups = activePageId
-    ? groups.filter(g => {
-        const page = pages.find(p => p.id === activePageId);
-        return page ? page.groupIds.includes(g.id) : true;
-      })
-    : groups;
-
-  const searchActive = searchTerm.length > 0;
-  const displayGroups = searchActive
-    ? filteredGroups.map(g => ({
-        ...g,
-        tabs: (g.tabs || []).filter(t => {
-          const title = (t.title || '').toLowerCase();
-          const url = (t.url || '').toLowerCase();
-          const term = searchTerm.toLowerCase();
-          if (searchExact) return title === term || url === term;
-          return title.includes(term) || url.includes(term);
-        })
-      })).filter(g => g.tabs.length > 0)
-    : filteredGroups;
-
-  if (displayGroups.length === 0) {
-    grid.innerHTML = `<div class="empty-state" style="display:block"><p>${searchActive ? 'No matching bookmarks found.' : (groups.length === 0 ? 'No collections yet. Use the extension popup to add tabs, or click "+ New Collection" to start.' : 'No collections in this page.')}</p></div>`;
-    empty.style.display = 'none';
-    renderPagesBar();
-    renderSearch();
-    return;
-  }
-
-  grid.innerHTML = displayGroups.map(g => {
+  grid.innerHTML = groups.map(g => {
     const isExpanded = expandedGroupIds.has(g.id);
     const timeAgo = g.updatedAt ? timeAgoStr(g.updatedAt) : '';
     const tabsHtml = g.tabs && g.tabs.length
-      ? `<div class="group-tabs">${g.tabs.map(t => renderTabEntry(t, searchTerm)).join('')}</div>`
+      ? `<div class="group-tabs">${g.tabs.map(renderTabEntry).join('')}</div>`
       : `<div class="group-tabs group-tabs-empty">No tabs yet. Use the extension popup to add tabs.</div>`;
 
     return `<article class="group-card glass${isExpanded ? ' is-expanded' : ''}" draggable="true" data-id="${g.id}">
@@ -165,58 +112,6 @@ async function render() {
       </div>
     </article>`;
   }).join('');
-
-  renderPagesBar();
-  renderSearch();
-}
-
-function renderPagesBar() {
-  const container = $('pages-tabs');
-  if (!container) return;
-  container.innerHTML = pages.map(p => `
-    <div class="page-tab${p.id === activePageId ? ' active' : ''}" data-id="${p.id}">
-      <span class="page-tab-icon">${p.icon}</span>
-      <span class="page-tab-name">${esc(p.name)}</span>
-      ${pages.length > 1 ? `<span class="page-tab-remove" data-id="${p.id}">✕</span>` : ''}
-    </div>
-  `).join('');
-}
-
-function renderSearch() {
-  const input = $('search-input');
-  const scope = $('search-scope');
-  const exact = $('search-exact-toggle');
-  const count = $('search-count');
-
-  if (!input) return;
-
-  input.value = searchTerm;
-  if (scope) scope.value = searchScope;
-  if (exact) exact.checked = searchExact;
-
-  if (searchTerm) {
-    const allGroups = searchScope === 'all' ? groups : (activePageId
-      ? groups.filter(g => {
-          const page = pages.find(p => p.id === activePageId);
-          return page ? page.groupIds.includes(g.id) : true;
-        })
-      : groups);
-    const allTabs = allGroups.flatMap(g => g.tabs || []);
-    const matched = allTabs.filter(t => {
-      const title = (t.title || '').toLowerCase();
-      const url = (t.url || '').toLowerCase();
-      const term = searchTerm.toLowerCase();
-      if (searchExact) return title === term || url === term;
-      return title.includes(term) || url.includes(term);
-    });
-    const matchedGroupIds = new Set(matched.map(t => t.groupId));
-    if (count) {
-      count.textContent = `${matched.length} match${matched.length !== 1 ? 'es' : ''} in ${matchedGroupIds.size} group${matchedGroupIds.size !== 1 ? 's' : ''}`;
-      count.style.display = 'inline';
-    }
-  } else {
-    if (count) count.style.display = 'none';
-  }
 }
 
 $('groups-grid').addEventListener('click', async e => {
@@ -284,67 +179,6 @@ $('groups-grid').addEventListener('click', async e => {
   }
 });
 
-// Pages tabs click handler
-$('pages-tabs').addEventListener('click', async e => {
-  const tab = e.target.closest('.page-tab');
-  if (!tab) return;
-
-  const removeBtn = e.target.closest('.page-tab-remove');
-  if (removeBtn) {
-    e.stopPropagation();
-    const pageId = removeBtn.dataset.id;
-    if (await showConfirm(`Delete page "${pages.find(p => p.id === pageId)?.name}"? Groups inside won't be deleted.`)) {
-      await chrome.runtime.sendMessage({ action: 'deletePage', id: pageId });
-      pages = await chrome.runtime.sendMessage({ action: 'getPages' });
-      if (activePageId === pageId) activePageId = pages[0]?.id || null;
-      await render();
-    }
-    return;
-  }
-
-  const pageId = tab.dataset.id;
-  if (pageId === activePageId) return;
-  activePageId = pageId;
-  await render();
-});
-
-// Add page handler
-$('add-page-btn').addEventListener('click', async () => {
-  const name = prompt('Page name:');
-  if (!name || !name.trim()) return;
-  await chrome.runtime.sendMessage({ action: 'createPage', name: name.trim(), icon: '📄' });
-  pages = await chrome.runtime.sendMessage({ action: 'getPages' });
-  activePageId = pages[pages.length - 1].id;
-  await render();
-  showStatus(`Created page "${name.trim()}"`, 'success');
-});
-
-// Search event listeners
-$('search-input').addEventListener('input', e => {
-  searchTerm = e.target.value;
-  render();
-});
-
-$('search-scope').addEventListener('change', e => {
-  searchScope = e.target.value;
-  render();
-});
-
-$('search-exact-toggle').addEventListener('change', e => {
-  searchExact = e.target.checked;
-  render();
-});
-
-// Privacy toggle
-function togglePrivacy() {
-  privacyMode = !privacyMode;
-  document.body.classList.toggle('privacy-mode', privacyMode);
-  chrome.storage.local.set({ privacyMode });
-  document.querySelectorAll('#privacy-toggle, #header-privacy-toggle').forEach(btn => {
-    btn.classList.toggle('active', privacyMode);
-  });
-}
-
 // ── Drag and drop reorder ──
 
 let dragSrcId = null;
@@ -411,7 +245,7 @@ $('groups-grid').addEventListener('dragend', async e => {
   isDragging = false;
   if (pendingRender) {
     pendingRender = false;
-    render();
+    render().catch(err => console.error('Delayed render after drag failed:', err));
   }
 });
 
@@ -602,10 +436,20 @@ function showModal(title, name, icon, color, onConfirm) {
     '<input type="text" class="icon-search" id="icon-search" placeholder="🔍 Search icons...">' +
     '<div class="icon-grid-scroll"></div>';
 
-  renderIconGrid($('icon-picker').querySelector('.icon-grid-scroll'), '', icon);
+  let selectedIcon = icon;
+  renderIconGrid($('icon-picker').querySelector('.icon-grid-scroll'), '', selectedIcon);
+
+  // Track actual selection in the icon grid
+  const scrollEl = $('icon-picker').querySelector('.icon-grid-scroll');
+  scrollEl.addEventListener('click', e => {
+    const item = e.target.closest('.icon-item');
+    if (!item) return;
+    selectedIcon = item.dataset.value;
+  });
+
   document.getElementById('icon-search').addEventListener('input', () => {
     const t = document.getElementById('icon-search').value.toLowerCase().trim();
-    renderIconGrid($('icon-picker').querySelector('.icon-grid-scroll'), t, icon);
+    renderIconGrid($('icon-picker').querySelector('.icon-grid-scroll'), t, selectedIcon);
   });
 
   const colorPicker = $('color-picker');
@@ -632,7 +476,8 @@ function hideModal() {
 
 $('new-group-btn').addEventListener('click', () => {
   showModal('New Collection', '', '📁', '#4285f4', async (name, icon, color) => {
-    await chrome.runtime.sendMessage({ action: 'createGroup', name, icon, color });
+    const response = await chrome.runtime.sendMessage({ action: 'createGroup', name, icon, color });
+    if (response && response.error) { showStatus('Create failed: ' + response.error, 'error'); return; }
     await render();
     showStatus(`Created "${name}"`, 'success');
   });
@@ -648,7 +493,7 @@ $('modal-confirm-btn').addEventListener('click', () => {
   }
   nameErr.style.display = 'none';
   $('group-name-input').classList.remove('error');
-  const iconEl = $('icon-picker').querySelector('.selected');
+  const iconEl = $('icon-picker').querySelector('.icon-item.selected');
   const icon = iconEl ? iconEl.dataset.value : '📁';
   const colorEl = $('color-picker').querySelector('.selected');
   const color = colorEl ? colorEl.dataset.value : '#4285f4';
@@ -671,7 +516,8 @@ $('group-name-input').addEventListener('keydown', e => {
 
 function showEditModal(g) {
   showModal('Edit Collection', g.name, g.icon || '📁', g.color || '#4285f4', async (name, icon, color) => {
-    await chrome.runtime.sendMessage({ action: 'updateGroup', id: g.id, data: { name, icon, color } });
+    const response = await chrome.runtime.sendMessage({ action: 'updateGroup', id: g.id, data: { name, icon, color } });
+    if (response && response.error) { showStatus('Update failed: ' + response.error, 'error'); return; }
     await render();
     showStatus('Updated', 'success');
   });
@@ -823,7 +669,9 @@ $('privacy-toggle').addEventListener('click', togglePrivacy);
 $('header-privacy-toggle').addEventListener('click', togglePrivacy);
 
 $('export-btn').addEventListener('click', async () => {
-  const json = await chrome.runtime.sendMessage({ action: 'exportData' });
+  const response = await chrome.runtime.sendMessage({ action: 'exportData' });
+  if (response && response.error) { showStatus('Export failed: ' + response.error, 'error'); return; }
+  const json = response;
   const blob = new Blob([json], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -841,7 +689,8 @@ $('import-input').addEventListener('change', async e => {
   if (!file) return;
   try {
     const text = await file.text();
-    await chrome.runtime.sendMessage({ action: 'importData', json: text });
+    const response = await chrome.runtime.sendMessage({ action: 'importData', json: text });
+    if (response && response.error) throw new Error(response.error);
     await render();
     showStatus('Imported successfully', 'success');
   } catch (err) {
@@ -852,10 +701,29 @@ $('import-input').addEventListener('change', async e => {
 
 render();
 
+// Privacy toggle
+function togglePrivacy() {
+  privacyMode = !privacyMode;
+  document.body.classList.toggle('privacy-mode', privacyMode);
+  chrome.storage.local.set({ privacyMode });
+  document.getElementById('header-privacy-toggle')?.classList.toggle('active', privacyMode);
+}
+
+document.getElementById('header-privacy-toggle')?.addEventListener('click', togglePrivacy);
+
+// Init privacy mode
+chrome.storage.local.get('privacyMode').then(result => {
+  privacyMode = !!result.privacyMode;
+  if (privacyMode) {
+    document.body.classList.add('privacy-mode');
+    document.getElementById('header-privacy-toggle')?.classList.add('active');
+  }
+});
+
 const STORAGE_KEY = 'tabCollector';
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area === 'local' && changes[STORAGE_KEY]) {
     if (isDragging) { pendingRender = true; return; }
-    render();
+    render().catch(err => console.error('Storage change render failed:', err));
   }
 });
