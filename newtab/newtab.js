@@ -41,7 +41,7 @@ async function loadAll() {
   groups = await chrome.runtime.sendMessage({ action: 'getGroups' });
   const data = await chrome.runtime.sendMessage({ action: 'getAllData' });
   for (const g of groups) {
-    g.tabs = Object.values(data.tabs).filter(t => t.groupId === g.id).sort((a, b) => (b.position ?? b.addedAt) - (a.position ?? b.addedAt));
+    g.tabs = Object.values(data.tabs).filter(t => t.groupId === g.id).sort((a, b) => (b.position ?? b.addedAt) - (a.position ?? a.addedAt));
   }
 }
 
@@ -49,7 +49,6 @@ function renderTabEntry(t) {
   const title = t.title || (() => { try { return new URL(t.url).hostname; } catch { return 'Untitled'; } })();
   const displayUrl = t.url.length > 60 ? t.url.slice(0, 57) + '...' : t.url;
   const imgSrc = faviconUrl(t);
-
   return `<div class="tab-entry" data-id="${t.id}" draggable="true">
     <span class="tab-drag-handle" draggable="true">⠿</span>
     ${imgSrc ? `<img src="${imgSrc}" alt="" onerror="this.style.display='none'">` : ''}
@@ -178,6 +177,15 @@ $('groups-grid').addEventListener('click', async e => {
     return;
   }
 });
+
+// Privacy toggle
+function togglePrivacy() {
+  privacyMode = !privacyMode;
+  document.body.classList.toggle('privacy-mode', privacyMode);
+  chrome.storage.local.set({ privacyMode });
+  const hpBtn = document.getElementById('header-privacy-toggle');
+  if (hpBtn) hpBtn.classList.toggle('active', privacyMode);
+}
 
 // ── Drag and drop reorder ──
 
@@ -659,13 +667,11 @@ chrome.storage.local.get('privacyMode').then(result => {
   privacyMode = !!result.privacyMode;
   if (privacyMode) {
     document.body.classList.add('privacy-mode');
-    document.querySelectorAll('#privacy-toggle, #header-privacy-toggle').forEach(btn => {
-      if (btn) btn.classList.add('active');
-    });
+    const hpBtn = document.getElementById('header-privacy-toggle');
+    if (hpBtn) hpBtn.classList.add('active');
   }
 });
 
-$('privacy-toggle').addEventListener('click', togglePrivacy);
 $('header-privacy-toggle').addEventListener('click', togglePrivacy);
 
 $('export-btn').addEventListener('click', async () => {
@@ -700,25 +706,6 @@ $('import-input').addEventListener('change', async e => {
 });
 
 render();
-
-// Privacy toggle
-function togglePrivacy() {
-  privacyMode = !privacyMode;
-  document.body.classList.toggle('privacy-mode', privacyMode);
-  chrome.storage.local.set({ privacyMode });
-  document.getElementById('header-privacy-toggle')?.classList.toggle('active', privacyMode);
-}
-
-document.getElementById('header-privacy-toggle')?.addEventListener('click', togglePrivacy);
-
-// Init privacy mode
-chrome.storage.local.get('privacyMode').then(result => {
-  privacyMode = !!result.privacyMode;
-  if (privacyMode) {
-    document.body.classList.add('privacy-mode');
-    document.getElementById('header-privacy-toggle')?.classList.add('active');
-  }
-});
 
 const STORAGE_KEY = 'tabCollector';
 chrome.storage.onChanged.addListener((changes, area) => {
