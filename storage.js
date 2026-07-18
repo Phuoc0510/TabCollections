@@ -134,6 +134,52 @@ async function moveTabToGroup(tabId, targetGroupId) {
   await saveAllData(data);
 }
 
+async function getPages() {
+  const data = await getAllData();
+  if (!data.pages) return [];
+  return Object.values(data.pages).sort((a, b) => a.position - b.position);
+}
+
+async function createPage(name, icon = '📄', groupIds = []) {
+  const data = await getAllData();
+  if (!data.pages) data.pages = {};
+  const now = Date.now();
+  const page = { id: uuid(), name, icon, position: now, groupIds };
+  data.pages[page.id] = page;
+  await saveAllData(data);
+  return page;
+}
+
+async function updatePage(id, updates) {
+  const data = await getAllData();
+  if (!data.pages[id]) throw new Error('Page not found');
+  data.pages[id] = { ...data.pages[id], ...updates };
+  await saveAllData(data);
+}
+
+async function deletePage(id) {
+  const data = await getAllData();
+  delete data.pages[id];
+  await saveAllData(data);
+}
+
+async function addGroupToPage(pageId, groupId) {
+  const data = await getAllData();
+  if (!data.pages[pageId]) throw new Error('Page not found');
+  if (!data.groups[groupId]) throw new Error('Group not found');
+  if (!data.pages[pageId].groupIds.includes(groupId)) {
+    data.pages[pageId].groupIds.push(groupId);
+  }
+  await saveAllData(data);
+}
+
+async function removeGroupFromPage(pageId, groupId) {
+  const data = await getAllData();
+  if (!data.pages[pageId]) throw new Error('Page not found');
+  data.pages[pageId].groupIds = data.pages[pageId].groupIds.filter(g => g !== groupId);
+  await saveAllData(data);
+}
+
 if (typeof module !== 'undefined') {
-  module.exports = { getAllData, saveAllData, getGroups, getTabsByGroup, createGroup, updateGroup, deleteGroup, addTabToGroup, removeTab, updateGroupPositions, updateTabPositions, exportData, importData, moveTabToGroup };
+  module.exports = { getAllData, saveAllData, getGroups, getTabsByGroup, createGroup, updateGroup, deleteGroup, addTabToGroup, removeTab, updateGroupPositions, updateTabPositions, exportData, importData, moveTabToGroup, getPages, createPage, updatePage, deletePage, addGroupToPage, removeGroupFromPage };
 }

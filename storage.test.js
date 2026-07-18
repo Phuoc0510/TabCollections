@@ -17,7 +17,7 @@ function assert(condition, message) {
 }
 
 async function main() {
-  const { getAllData, saveAllData, getGroups, createGroup, updateGroup, deleteGroup, addTabToGroup, getTabsByGroup, removeTab, exportData, importData, moveTabToGroup } = await import('./storage.js');
+  const { getAllData, saveAllData, getGroups, createGroup, updateGroup, deleteGroup, addTabToGroup, getTabsByGroup, removeTab, exportData, importData, moveTabToGroup, getPages, createPage, updatePage, deletePage, addGroupToPage, removeGroupFromPage } = await import('./storage.js');
 
   let stored = {};
   chrome.storage.local.get = async () => stored;
@@ -125,6 +125,34 @@ async function main() {
     assert(result[0].id === 't1', 'tab id should stay t1');
     console.log(`PASS: ${name}`);
   }
+
+  // Test 15: createPage & getPages
+  let p1 = await createPage('Work', '💼', ['group-id-1']);
+  assert(p1.id && p1.name === 'Work' && p1.icon === '💼' && Array.isArray(p1.groupIds), 'createPage basic');
+
+  // Test 16: getPages returns pages sorted by position
+  let p2 = await createPage('Personal', '👤', []);
+  let pages = await getPages();
+  assert(pages.length === 2 && pages[0].name === 'Work', 'getPages sorted by position');
+
+  // Test 17: updatePage renames page
+  await updatePage(p1.id, { name: 'Office' });
+  pages = await getPages();
+  assert(pages.find(p => p.id === p1.id).name === 'Office', 'updatePage name');
+
+  // Test 18: deletePage removes page (groups inside are NOT deleted)
+  await deletePage(p2.id);
+  pages = await getPages();
+  assert(pages.length === 1 && pages[0].id === p1.id, 'deletePage');
+
+  // Test 19: addGroupToPage / removeGroupFromPage
+  let g_temp = await createGroup('Temp', '📁');
+  await addGroupToPage(p1.id, g_temp.id);
+  let pagesData = await getAllData();
+  assert(pagesData.pages[p1.id].groupIds.includes(g_temp.id), 'addGroupToPage');
+  await removeGroupFromPage(p1.id, g_temp.id);
+  pagesData = await getAllData();
+  assert(!pagesData.pages[p1.id].groupIds.includes(g_temp.id), 'removeGroupFromPage');
 
   console.log('\nAll tests passed.');
 }
