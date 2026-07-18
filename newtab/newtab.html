@@ -20,8 +20,27 @@
         <button id="import-btn" class="btn-ghost">Import</button>
         <button id="customize-btn" class="btn-ghost">🎨</button>
         <input type="file" id="import-input" accept=".json" style="display:none">
+        <button id="header-privacy-toggle" class="btn-ghost" title="Privacy Mode">👁</button>
       </div>
     </header>
+
+    <div id="pages-bar" class="pages-bar glass">
+      <div id="pages-tabs" class="pages-tabs"></div>
+      <button id="add-page-btn" class="btn-ghost pages-add-btn" title="Add Page">+</button>
+    </div>
+
+    <div id="search-bar" class="search-bar glass">
+      <input type="text" id="search-input" class="search-input" placeholder="🔍  Search bookmarks...">
+      <select id="search-scope" class="search-scope">
+        <option value="current-page">Current Page</option>
+        <option value="all">All Groups</option>
+      </select>
+      <label class="search-exact">
+        <input type="checkbox" id="search-exact-toggle"> Exact
+      </label>
+      <span id="search-count" class="search-count" style="display:none"></span>
+      <button id="privacy-toggle" class="btn-ghost" title="Privacy Mode">👁</button>
+    </div>
 
     <div id="status-bar" class="status-bar"></div>
 
