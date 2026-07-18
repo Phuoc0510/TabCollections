@@ -109,6 +109,18 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
           await rebuildContextMenu();
           sendResponse({ ok: true });
           break;
+        case 'getPages':
+          sendResponse(await getPages());
+          break;
+        case 'createPage': {
+          const newPage = await createPage(msg.name, msg.icon, msg.groupIds);
+          sendResponse(newPage);
+          break;
+        }
+        case 'deletePage':
+          await deletePage(msg.id);
+          sendResponse({ ok: true });
+          break;
         default:
           sendResponse({ error: 'Unknown action' });
       }
