@@ -1,12 +1,71 @@
 let pendingNewIcon = '📁';
 let pendingNewColor = '#4285f4';
 
+async function handleQuickSave() {
+  const sessionData = await chrome.storage.session.get('pendingQuickSave');
+  const pending = sessionData.pendingQuickSave;
+  if (!pending) {
+    document.body.innerHTML = '<div class="popup-app" style="padding:20px;text-align:center"><p>No tab to save.</p></div>';
+    return;
+  }
+
+  document.getElementById('tabs-section').style.display = 'none';
+  document.getElementById('actions').style.display = 'none';
+  document.getElementById('bottom-actions').style.display = 'none';
+  document.getElementById('new-group-form').style.display = 'none';
+  const qsSection = document.getElementById('quick-save-section');
+  qsSection.style.display = 'block';
+
+  const groups = await chrome.runtime.sendMessage({ action: 'getGroups' });
+
+  const qsFavicon = document.getElementById('qs-favicon');
+  const qsTitle = document.getElementById('qs-title');
+  const qsUrl = document.getElementById('qs-url');
+  const qsGroupSelect = document.getElementById('qs-group-select');
+  const qsSaveBtn = document.getElementById('qs-save-btn');
+  const qsDone = document.getElementById('qs-done');
+
+  qsFavicon.src = pending.favicon || `https://www.google.com/s2/favicons?domain=${encodeURIComponent(new URL(pending.url).hostname)}&sz=16`;
+  qsFavicon.onerror = () => { qsFavicon.style.display = 'none'; };
+  qsTitle.textContent = pending.title || pending.url;
+  qsUrl.textContent = pending.url;
+
+  qsGroupSelect.innerHTML = groups.map(g =>
+    `<option value="${g.id}">${g.icon} ${g.name}</option>`
+  ).join('');
+  qsGroupSelect.value = groups.length > 0 ? groups[0].id : '';
+  qsSaveBtn.disabled = !qsGroupSelect.value;
+
+  qsGroupSelect.addEventListener('change', () => {
+    qsSaveBtn.disabled = !qsGroupSelect.value;
+  });
+
+  qsSaveBtn.addEventListener('click', async () => {
+    const groupId = qsGroupSelect.value;
+    if (!groupId) return;
+    await chrome.runtime.sendMessage({
+      action: 'addTabToGroup',
+      tab: pending,
+      groupId
+    });
+    qsSection.querySelector('.popup-actions').style.display = 'none';
+    qsDone.style.display = 'block';
+    await chrome.storage.session.remove('pendingQuickSave');
+    setTimeout(() => window.close(), 1200);
+  });
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
   const tabList = document.getElementById('tab-list');
   const groupSelect = document.getElementById('group-select');
   const addBtn = document.getElementById('add-to-group-btn');
   const manageBtn = document.getElementById('manage-groups-btn');
   const newGroupForm = document.getElementById('new-group-form');
+
+  if (window.location.search.includes('quick=1')) {
+    await handleQuickSave();
+    return;
+  }
 
   const [tabs, initialGroups] = await Promise.all([
     chrome.tabs.query({ currentWindow: true }),

@@ -28,6 +28,26 @@
       <button id="add-to-group-btn" class="btn-primary" disabled>Add to Group</button>
     </div>
 
+    <div id="quick-save-section" class="popup-section" style="display:none">
+      <h2 class="popup-section-title">Quick Save</h2>
+      <div class="qs-preview glass">
+        <img id="qs-favicon" src="" alt="" width="16" height="16">
+        <div class="qs-info">
+          <div id="qs-title" class="qs-title"></div>
+          <div id="qs-url" class="qs-url"></div>
+        </div>
+      </div>
+      <div class="popup-actions" style="margin-top:10px">
+        <select id="qs-group-select" class="popup-select glass">
+          <option value="">Select group...</option>
+        </select>
+        <button id="qs-save-btn" class="btn-primary" disabled>Save</button>
+      </div>
+      <div id="qs-done" class="qs-done" style="display:none">
+        <span>✓ Saved!</span>
+      </div>
+    </div>
+
     <div id="new-group-form" class="popup-new-group glass" style="display:none">
       <input type="text" id="new-group-name" class="modal-input" placeholder="Group name">
       <div id="new-group-icons" class="popup-icons"></div>
