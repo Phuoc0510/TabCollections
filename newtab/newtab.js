@@ -91,7 +91,7 @@ async function render() {
       ? `<div class="group-tabs">${g.tabs.map(renderTabEntry).join('')}</div>`
       : `<div class="group-tabs group-tabs-empty">No tabs yet. Use the extension popup to add tabs.</div>`;
 
-    return `<article class="group-card glass${isExpanded ? ' is-expanded' : ''}" draggable="true" data-id="${g.id}">
+    return `<article class="group-card glass-card${isExpanded ? ' is-expanded' : ''}" draggable="true" data-id="${g.id}">
       <div class="group-color-bar" style="--bar-color:${g.color || '#4285f4'}"></div>
       <div class="group-card-inner">
         <button class="group-header group-toggle" data-id="${g.id}" aria-expanded="${isExpanded}" aria-controls="group-content-${g.id}">

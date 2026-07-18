@@ -3,6 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../styles/reset.css">
   <link rel="stylesheet" href="../styles/glass.css">
   <link rel="stylesheet" href="../styles/components.css">
@@ -12,7 +15,7 @@
 </head>
 <body>
   <div id="app" class="app">
-    <header class="app-header glass glass-strong">
+    <header class="app-header glass-strong">
       <h1 class="app-title">Tab Collections</h1>
       <div class="header-actions">
         <button id="new-group-btn" class="btn-primary">+ New Collection</button>
@@ -24,7 +27,7 @@
       </div>
     </header>
 
-    <div id="status-bar" class="status-bar"></div>
+    <div id="status-bar" class="status-bar glass-card"></div>
 
     <div id="groups-view">
       <div id="groups-grid" class="groups-grid animate-stagger"></div>

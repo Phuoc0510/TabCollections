@@ -5,11 +5,13 @@
   background: #4285f4;
   color: #fff;
   border-color: #4285f4;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 .btn-primary:hover { background: #3b78e7; }
 .btn-primary:disabled {
-  background: #ccc;
-  border-color: #ccc;
+  background: rgba(204, 204, 204, 0.6);
+  border-color: transparent;
   color: #fff;
   cursor: not-allowed;
 }
@@ -17,6 +19,8 @@
 .btn-danger {
   color: var(--danger);
   border-color: var(--danger);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 .btn-danger:hover {
   background: var(--danger-hover-bg);
@@ -26,6 +30,8 @@
   background: transparent;
   border-color: transparent;
   color: var(--text-secondary);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 .btn-ghost:hover {
   background: var(--hover-bg);
@@ -45,11 +51,14 @@
 }
 
 .modal {
-  background: var(--bg-primary);
+  background: var(--glass-card-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--glass-card-border);
   border-radius: var(--radius-xl);
   padding: 24px;
   width: 360px;
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.15);
   animation: modalIn 250ms ease;
 }
 

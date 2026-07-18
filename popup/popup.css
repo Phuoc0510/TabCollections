@@ -13,21 +13,24 @@
 .popup-header {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 14px;
-  border-radius: var(--radius-md);
-  margin-bottom: 12px;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: var(--radius-lg);
+  margin-bottom: 14px;
 }
 
 .popup-icon {
-  font-size: 20px;
+  font-size: 22px;
   line-height: 1;
 }
 
 .popup-title {
   font-size: 18px;
   font-weight: 700;
-  color: var(--text-primary);
+  background: linear-gradient(135deg, var(--text-primary), var(--text-secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .popup-section-title {
@@ -88,8 +91,8 @@
 
 .popup-select {
   flex: 1;
-  padding: 6px 8px;
-  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  border-radius: var(--radius-md);
   font-size: 13px;
   color: var(--text-primary);
 }
@@ -101,9 +104,9 @@
 
 /* ── New Group Form ── */
 .popup-new-group {
-  border-radius: var(--radius-md);
-  padding: 12px;
-  margin-bottom: 12px;
+  border-radius: var(--radius-lg);
+  padding: 14px;
+  margin-bottom: 14px;
 }
 
 .popup-new-group .modal-input {

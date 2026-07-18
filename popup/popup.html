@@ -3,6 +3,9 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../styles/reset.css">
   <link rel="stylesheet" href="../styles/glass.css">
   <link rel="stylesheet" href="../styles/components.css">
@@ -11,7 +14,7 @@
 </head>
 <body>
   <div id="app" class="popup-app">
-    <header class="popup-header glass">
+    <header class="popup-header glass-card">
       <span class="popup-icon">📁</span>
       <h1 class="popup-title">Tab Collection</h1>
     </header>
@@ -22,7 +25,7 @@
     </div>
 
     <div id="actions" class="popup-actions">
-      <select id="group-select" class="popup-select glass">
+      <select id="group-select" class="popup-select glass-card">
         <option value="">Select group...</option>
       </select>
       <button id="add-to-group-btn" class="btn-primary" disabled>Add to Group</button>
@@ -30,7 +33,7 @@
 
     <div id="quick-save-section" class="popup-section" style="display:none">
       <h2 class="popup-section-title">Quick Save</h2>
-      <div class="qs-preview glass">
+      <div class="qs-preview glass-card">
         <img id="qs-favicon" src="" alt="" width="16" height="16">
         <div class="qs-info">
           <div id="qs-title" class="qs-title"></div>
@@ -38,7 +41,7 @@
         </div>
       </div>
       <div class="popup-actions" style="margin-top:10px">
-        <select id="qs-group-select" class="popup-select glass">
+        <select id="qs-group-select" class="popup-select glass-card">
           <option value="">Select group...</option>
         </select>
         <button id="qs-save-btn" class="btn-primary" disabled>Save</button>
@@ -48,7 +51,7 @@
       </div>
     </div>
 
-    <div id="new-group-form" class="popup-new-group glass" style="display:none">
+    <div id="new-group-form" class="popup-new-group glass-card" style="display:none">
       <input type="text" id="new-group-name" class="modal-input" placeholder="Group name">
       <div id="new-group-icons" class="popup-icons"></div>
       <div id="new-group-colors" class="color-picker"></div>

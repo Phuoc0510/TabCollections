@@ -18,17 +18,21 @@
   margin-bottom: 32px;
   flex-wrap: wrap;
   gap: 12px;
-  border-radius: var(--radius-lg);
-  padding: 12px 16px;
+  border-radius: var(--radius-xl);
+  padding: 16px 20px;
 }
 
 .app-title {
-  font-size: 28px;
+  font-size: 26px;
   font-weight: 700;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   min-width: 0;
+  background: linear-gradient(135deg, var(--text-primary), var(--text-secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .header-actions {
@@ -58,17 +62,6 @@
 
 .group-card[draggable="true"]:active {
   cursor: grabbing;
-}
-
-.group-card:hover {
-  transform: scale(1.02);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
-}
-
-@media (prefers-color-scheme: dark) {
-  .group-card:hover {
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-  }
 }
 
 .group-color-bar {
@@ -235,6 +228,11 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  display: none;
+}
+
+.tab-entry:hover .tab-url {
+  display: block;
 }
 
 .tab-open {
@@ -448,25 +446,34 @@
 body.has-bg .app-header,
 body.has-bg .group-card,
 body.has-bg .status-bar {
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  background: rgba(255, 255, 255, 0.88) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
 }
 
 body.has-bg .app-header {
-  border-radius: var(--radius-lg);
-  padding: 12px 16px;
+  border-radius: var(--radius-xl);
+  padding: 16px 20px;
 }
 
 body.has-bg .app {
   max-width: 1440px;
 }
 
+body.has-bg .group-card {
+  background: var(--glass-card-bg) !important;
+}
+
+body.has-bg .app-header {
+  background: var(--glass-bg) !important;
+}
+
 @media (prefers-color-scheme: dark) {
-  body.has-bg .app-header,
-  body.has-bg .group-card,
-  body.has-bg .status-bar {
-    background: rgba(26, 26, 46, 0.85) !important;
+  body.has-bg .group-card {
+    background: var(--glass-card-bg) !important;
+  }
+
+  body.has-bg .app-header {
+    background: var(--glass-bg) !important;
   }
 }
 
