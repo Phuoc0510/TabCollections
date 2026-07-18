@@ -53,7 +53,7 @@ async function main() {
   // Test 7: exportData returns valid JSON string
   let jsonStr = await exportData();
   let parsed = JSON.parse(jsonStr);
-  assert(parsed.version === 1 && Array.isArray(parsed.groups) && Array.isArray(parsed.tabs), 'exportData format');
+  assert(parsed.version === 2 && Array.isArray(parsed.groups) && Array.isArray(parsed.tabs) && Array.isArray(parsed.pages), 'exportData format');
 
   // Test 8: importData merges data
   let importJson = JSON.stringify({
@@ -153,6 +153,49 @@ async function main() {
   await removeGroupFromPage(p1.id, g_temp.id);
   pagesData = await getAllData();
   assert(!pagesData.pages[p1.id].groupIds.includes(g_temp.id), 'removeGroupFromPage');
+
+  // Test 20: exportData version updated and includes pages
+  let p_exp = await createPage('ExpPage', '📄', []);
+  let jsonStr2 = await exportData();
+  let parsed2 = JSON.parse(jsonStr2);
+  assert(parsed2.version === 2 && Array.isArray(parsed2.pages), 'exportData version 2 includes pages');
+
+  // Test 21: importData v2 includes pages
+  await saveAllData({ groups: {}, tabs: {} });
+  let newImport = JSON.stringify({
+    version: 2,
+    exportedAt: '2026-01-01',
+    groups: [],
+    tabs: [],
+    pages: [{ id: 'p-import', name: 'Imported Page', icon: '📄', position: 0, groupIds: [] }]
+  });
+  await importData(newImport);
+  let afterV2 = await getAllData();
+  assert(afterV2.pages && afterV2.pages['p-import'], 'importData v2 includes pages');
+
+  // Test 22: updatePage with non-existent ID throws
+  try {
+    await updatePage('nonexistent', { name: 'Fail' });
+    assert(false, 'updatePage should have thrown');
+  } catch (e) {
+    assert(e.message === 'Page not found', 'updatePage throws for invalid pageId');
+  }
+
+  // Test 23: addGroupToPage with non-existent pageId throws
+  try {
+    await addGroupToPage('bad-page', 'good-group');
+    assert(false, 'addGroupToPage should have thrown');
+  } catch (e) {
+    assert(e.message === 'Page not found', 'addGroupToPage throws for invalid pageId');
+  }
+
+  // Test 24: removeGroupFromPage with non-existent pageId throws
+  try {
+    await removeGroupFromPage('bad-page', 'good-group');
+    assert(false, 'removeGroupFromPage should have thrown');
+  } catch (e) {
+    assert(e.message === 'Page not found', 'removeGroupFromPage throws for invalid pageId');
+  }
 
   console.log('\nAll tests passed.');
 }

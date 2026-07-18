@@ -101,17 +101,19 @@ async function updateTabPositions(groupId, orderedIds) {
 
 async function exportData() {
   const data = await getAllData();
+  const pages = data.pages ? Object.values(data.pages) : [];
   return JSON.stringify({
-    version: 1,
+    version: 2,
     exportedAt: new Date().toISOString(),
     groups: Object.values(data.groups),
-    tabs: Object.values(data.tabs)
+    tabs: Object.values(data.tabs),
+    pages
   }, null, 2);
 }
 
 async function importData(jsonStr) {
   const parsed = JSON.parse(jsonStr);
-  if (!parsed.version || !Array.isArray(parsed.groups) || !Array.isArray(parsed.tabs)) {
+  if (typeof parsed.version !== 'number' || !Array.isArray(parsed.groups) || !Array.isArray(parsed.tabs)) {
     throw new Error('Invalid import format');
   }
   const data = await getAllData();
@@ -120,6 +122,12 @@ async function importData(jsonStr) {
   }
   for (const t of parsed.tabs) {
     if (!data.tabs[t.id] && data.groups[t.groupId]) data.tabs[t.id] = t;
+  }
+  if (parsed.version >= 2 && Array.isArray(parsed.pages)) {
+    if (!data.pages) data.pages = {};
+    for (const p of parsed.pages) {
+      if (!data.pages[p.id]) data.pages[p.id] = p;
+    }
   }
   await saveAllData(data);
 }
