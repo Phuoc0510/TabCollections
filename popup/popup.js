@@ -1,6 +1,21 @@
 let pendingNewIcon = '📁';
 let pendingNewColor = '#4285f4';
 
+function showStatus(msg, type) {
+  let el = document.getElementById('popup-status');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'popup-status';
+    el.style.cssText = 'padding:6px 10px;margin:6px 0;border-radius:6px;font-size:12px;text-align:center;display:none';
+    document.getElementById('app').insertBefore(el, document.getElementById('bottom-actions'));
+  }
+  el.textContent = msg;
+  el.style.display = 'block';
+  el.style.background = type === 'error' ? '#fce8e6' : '#e6f4ea';
+  el.style.color = type === 'error' ? '#c5221f' : '#1e7e34';
+  setTimeout(() => { el.style.display = 'none'; }, 4000);
+}
+
 async function handleQuickSave() {
   const sessionData = await chrome.storage.session.get('pendingQuickSave');
   const pending = sessionData.pendingQuickSave;
@@ -43,15 +58,26 @@ async function handleQuickSave() {
   qsSaveBtn.addEventListener('click', async () => {
     const groupId = qsGroupSelect.value;
     if (!groupId) return;
-    await chrome.runtime.sendMessage({
-      action: 'addTabToGroup',
-      tab: pending,
-      groupId
-    });
-    qsSection.querySelector('.popup-actions').style.display = 'none';
-    qsDone.style.display = 'block';
-    await chrome.storage.session.remove('pendingQuickSave');
-    setTimeout(() => window.close(), 1200);
+    qsSaveBtn.disabled = true;
+    try {
+      const response = await chrome.runtime.sendMessage({
+        action: 'addTabToGroup',
+        tab: pending,
+        groupId
+      });
+      if (response && response.error) throw new Error(response.error);
+      qsSection.querySelector('.popup-actions').style.display = 'none';
+      qsDone.style.display = 'block';
+      qsDone.textContent = '✓ Saved!';
+      qsDone.style.color = '';
+      await chrome.storage.session.remove('pendingQuickSave');
+      setTimeout(() => window.close(), 1200);
+    } catch (err) {
+      qsSaveBtn.disabled = false;
+      qsDone.style.display = 'block';
+      qsDone.textContent = '✕ Failed: ' + err.message;
+      qsDone.style.color = 'var(--danger, #c5221f)';
+    }
   });
 }
 
@@ -210,16 +236,23 @@ document.addEventListener('DOMContentLoaded', async () => {
   addBtn.addEventListener('click', async () => {
     const groupId = groupSelect.value;
     if (!groupId) return;
+    addBtn.disabled = true;
     const checked = tabList.querySelectorAll('input[type="checkbox"]:checked');
     const selectedTabs = tabs.filter(t => Array.from(checked).some(c => c.value == t.id));
-    for (const t of selectedTabs) {
-      await chrome.runtime.sendMessage({
-        action: 'addTabToGroup',
-        tab: { title: t.title, url: t.url, favicon: t.favIconUrl || '' },
-        groupId
-      });
+    try {
+      for (const t of selectedTabs) {
+        const response = await chrome.runtime.sendMessage({
+          action: 'addTabToGroup',
+          tab: { title: t.title, url: t.url, favicon: t.favIconUrl || '' },
+          groupId
+        });
+        if (response && response.error) throw new Error(response.error);
+      }
+      window.close();
+    } catch (err) {
+      addBtn.disabled = false;
+      showStatus && showStatus('Failed to add tabs: ' + err.message, 'error');
     }
-    window.close();
   });
 
   manageBtn.addEventListener('click', () => {
