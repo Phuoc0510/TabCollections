@@ -110,12 +110,16 @@
 
 /* Status bar */
 .status-bar {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 9999;
   padding: 10px 16px;
   border-radius: var(--radius-md);
-  margin-bottom: 16px;
   display: none;
   font-size: 14px;
   animation: slideDown 300ms ease;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
 .status-bar.success {
@@ -168,7 +172,7 @@
   padding: 6px 0 4px;
   position: sticky;
   top: 0;
-  background: var(--bg-primary);
+  background: inherit;
   z-index: 1;
 }
 

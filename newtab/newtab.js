@@ -3,6 +3,7 @@ let modalCallback = null;
 const expandedGroupIds = new Set();
 let expandedInitialized = false;
 let privacyMode = false;
+const TITLE_KEY = 'tabCollectorTitle';
 
 const $ = id => document.getElementById(id);
 
@@ -18,17 +19,6 @@ function esc(s) {
   const d = document.createElement('div');
   d.textContent = s;
   return d.innerHTML;
-}
-
-function timeAgoStr(ts) {
-  const diff = Date.now() - ts;
-  const mins = Math.floor(diff / 60000);
-  if (mins < 1) return 'just now';
-  if (mins < 60) return `${mins}m ago`;
-  const hours = Math.floor(mins / 60);
-  if (hours < 24) return `${hours}h ago`;
-  const days = Math.floor(hours / 24);
-  return `${days}d ago`;
 }
 
 function faviconUrl(t) {
@@ -49,14 +39,13 @@ function renderTabEntry(t) {
   const title = t.title || (() => { try { return new URL(t.url).hostname; } catch { return 'Untitled'; } })();
   const displayUrl = t.url.length > 60 ? t.url.slice(0, 57) + '...' : t.url;
   const imgSrc = faviconUrl(t);
-  return `<div class="tab-entry" data-id="${t.id}" draggable="true">
+  return `<div class="tab-entry" data-id="${t.id}" data-url="${esc(t.url)}" draggable="true">
     <span class="tab-drag-handle" draggable="true">⠿</span>
     ${imgSrc ? `<img src="${imgSrc}" alt="" onerror="this.style.display='none'">` : ''}
     <div class="tab-info">
       <div class="tab-title">${esc(title)}</div>
       <div class="tab-url">${esc(displayUrl)}</div>
     </div>
-    <a class="tab-open" href="${esc(t.url)}" target="_blank">Open</a>
     <button class="tab-delete" data-id="${t.id}">✕</button>
   </div>`;
 }
@@ -86,7 +75,6 @@ async function render() {
 
   grid.innerHTML = groups.map(g => {
     const isExpanded = expandedGroupIds.has(g.id);
-    const timeAgo = g.updatedAt ? timeAgoStr(g.updatedAt) : '';
     const tabsHtml = g.tabs && g.tabs.length
       ? `<div class="group-tabs">${g.tabs.map(renderTabEntry).join('')}</div>`
       : `<div class="group-tabs group-tabs-empty">No tabs yet. Use the extension popup to add tabs.</div>`;
@@ -97,7 +85,7 @@ async function render() {
         <button class="group-header group-toggle" data-id="${g.id}" aria-expanded="${isExpanded}" aria-controls="group-content-${g.id}">
           <span class="group-icon">${g.icon || '📁'}</span>
           <span class="group-name">${esc(g.name)}</span>
-          <span class="group-meta">${g.tabs ? g.tabs.length : 0} tab${(g.tabs ? g.tabs.length : 0) !== 1 ? 's' : ''}${timeAgo ? ' · ' + timeAgo : ''}</span>
+          <span class="group-meta">${g.tabs ? g.tabs.length : 0} tab${(g.tabs ? g.tabs.length : 0) !== 1 ? 's' : ''}</span>
           <span class="group-chevron" aria-hidden="true">⌄</span>
         </button>
         <div id="group-content-${g.id}" class="group-content"${isExpanded ? '' : ' hidden'}>
@@ -135,17 +123,9 @@ $('groups-grid').addEventListener('click', async e => {
     return;
   }
 
-  const tabOpen = e.target.closest('.tab-open');
-  if (tabOpen) {
-    e.preventDefault();
-    e.stopPropagation();
-    await chrome.tabs.create({ url: tabOpen.href });
-    return;
-  }
-
   const tabEntry = e.target.closest('.tab-entry');
   if (tabEntry) {
-    await chrome.tabs.create({ url: tabEntry.querySelector('.tab-open').href });
+    await chrome.tabs.create({ url: tabEntry.dataset.url });
     return;
   }
 
@@ -531,16 +511,120 @@ function showEditModal(g) {
   });
 }
 
+// ── Title editing ──
+
+async function initTitle() {
+  const result = await chrome.storage.local.get(TITLE_KEY);
+  const saved = result[TITLE_KEY];
+  const h1 = $('app-title');
+  let currentTitle = saved || 'Tab Collections';
+  h1.textContent = currentTitle;
+
+  h1.addEventListener('click', function startEdit() {
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'app-title-input';
+    input.value = currentTitle;
+    input.maxLength = 100;
+
+    this.replaceWith(input);
+    input.focus();
+    input.select();
+
+    function finishEdit() {
+      const val = input.value.trim();
+      const newTitle = val || 'Tab Collections';
+      if (newTitle !== currentTitle) {
+        currentTitle = newTitle;
+        chrome.storage.local.set({ [TITLE_KEY]: newTitle });
+      }
+      const h1 = document.createElement('h1');
+      h1.id = 'app-title';
+      h1.className = 'app-title';
+      h1.textContent = currentTitle;
+      input.replaceWith(h1);
+      h1.addEventListener('click', startEdit);
+    }
+
+    input.addEventListener('blur', finishEdit);
+    input.addEventListener('keydown', e => {
+      if (e.key === 'Enter') { input.blur(); }
+      if (e.key === 'Escape') {
+        const h1 = document.createElement('h1');
+        h1.id = 'app-title';
+        h1.className = 'app-title';
+        h1.textContent = currentTitle;
+        input.replaceWith(h1);
+        h1.addEventListener('click', startEdit);
+      }
+    });
+  });
+}
+
 // Background customization
 const BG_KEY = 'tabCollectorBg';
-const PRESETS = [
-  { label: 'None', val: '' },
-  { label: 'Mountains', val: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200' },
-  { label: 'Forest', val: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1200' },
-  { label: 'Ocean', val: 'https://images.unsplash.com/photo-1505118380757-91f5f5632de0?w=1200' },
-  { label: 'City', val: 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=1200' },
-  { label: 'Stars', val: 'https://images.unsplash.com/photo-1516339901601-2e1b62dc0c1e?w=1200' },
-  { label: 'Abstract', val: 'https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=1200' },
+const BG_COLLECTIONS = [
+  {
+    label: 'Nature',
+    images: [
+      { label: 'Mountains', url: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1920&q=80' },
+      { label: 'Forest', url: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1920&q=80' },
+      { label: 'Lake', url: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=1920&q=80' },
+      { label: 'Waterfall', url: 'https://images.unsplash.com/photo-1432405972618-c60b0225b8f9?w=1920&q=80' },
+      { label: 'Sunset', url: 'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=1920&q=80' },
+      { label: 'Aurora', url: 'https://images.unsplash.com/photo-1483347756197-71ef80e8f73f?w=1920&q=80' },
+    ]
+  },
+  {
+    label: 'City',
+    images: [
+      { label: 'Skyline', url: 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=1920&q=80' },
+      { label: 'Night City', url: 'https://images.unsplash.com/photo-1519501025264-65ba15a82390?w=1920&q=80' },
+      { label: 'Tokyo', url: 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?w=1920&q=80' },
+      { label: 'New York', url: 'https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?w=1920&q=80' },
+      { label: 'Paris', url: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=1920&q=80' },
+      { label: 'Venice', url: 'https://images.unsplash.com/photo-1523906834658-6e9efc3c8c5b?w=1920&q=80' },
+    ]
+  },
+  {
+    label: 'Ocean',
+    images: [
+      { label: 'Waves', url: 'https://images.unsplash.com/photo-1505118380757-91f5f5632de0?w=1920&q=80' },
+      { label: 'Beach', url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1920&q=80' },
+      { label: 'Coastline', url: 'https://images.unsplash.com/photo-1505228395891-9a51e7e86bf6?w=1920&q=80' },
+      { label: 'Tropical', url: 'https://images.unsplash.com/photo-1540206395-68808572332f?w=1920&q=80' },
+      { label: 'Cliff', url: 'https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=1920&q=80' },
+    ]
+  },
+  {
+    label: 'Abstract',
+    images: [
+      { label: 'Flow', url: 'https://images.unsplash.com/photo-1541701494587-cb58502866ab?w=1920&q=80' },
+      { label: 'Geometric', url: 'https://images.unsplash.com/photo-1550859492-d5da9d8e45f3?w=1920&q=80' },
+      { label: 'Gradient', url: 'https://images.unsplash.com/photo-1557682250-33bd709cbe85?w=1920&q=80' },
+      { label: 'Neon', url: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=1920&q=80' },
+      { label: 'Fluid', url: 'https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?w=1920&q=80' },
+    ]
+  },
+  {
+    label: 'Dark',
+    images: [
+      { label: 'Stars', url: 'https://images.unsplash.com/photo-1516339901601-2e1b62dc0c1e?w=1920&q=80' },
+      { label: 'Galaxy', url: 'https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=1920&q=80' },
+      { label: 'Moon', url: 'https://images.unsplash.com/photo-1532767153582-b1a0e6145009?w=1920&q=80' },
+      { label: 'Northern Lights', url: 'https://images.unsplash.com/photo-1531366936337-7c912a4589a7?w=1920&q=80' },
+      { label: 'Misty', url: 'https://images.unsplash.com/photo-1504198453319-5ce911bafcde?w=1920&q=80' },
+    ]
+  },
+  {
+    label: 'Minimal',
+    images: [
+      { label: 'Clean', url: 'https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?w=1920&q=80' },
+      { label: 'Pastel', url: 'https://images.unsplash.com/photo-1557683311-eac922347aa1?w=1920&q=80' },
+      { label: 'Gold', url: 'https://images.unsplash.com/photo-1557682260-96773eb01377?w=1920&q=80' },
+      { label: 'Warm', url: 'https://images.unsplash.com/photo-1557682224-5b8590cd9ec5?w=1920&q=80' },
+    ]
+  },
 ];
 
 async function loadBg() {
@@ -572,19 +656,39 @@ function showBgModal() {
   const overlay = $('bg-modal-overlay');
   const presetsEl = $('bg-presets');
   const inputEl = $('bg-url-input');
+  let activeTab = 0;
 
-  presetsEl.innerHTML = PRESETS.map(p =>
-    `<div class="bg-preset" data-value="${p.val}" style="background-image:url(${p.val || ''})" title="${p.label}"></div>`
-  ).join('');
+  function renderGrid(currentUrl) {
+    const grid = $('bg-grid');
+    const collection = BG_COLLECTIONS[activeTab];
+    grid.innerHTML = collection.images.map(img =>
+      `<div class="bg-grid-item${img.url === currentUrl ? ' selected' : ''}" data-value="${img.url}" title="${img.label}" style="background-image:url(${encodeURI(img.url)})"></div>`
+    ).join('');
+    grid.querySelectorAll('.bg-grid-item').forEach(el => {
+      if (el.dataset.value === currentUrl) el.classList.add('selected');
+      el.addEventListener('click', () => {
+        grid.querySelectorAll('.bg-grid-item').forEach(x => x.classList.remove('selected'));
+        el.classList.add('selected');
+        inputEl.value = el.dataset.value;
+      });
+    });
+  }
+
+  presetsEl.innerHTML =
+    `<div class="bg-tabs">${BG_COLLECTIONS.map((c, i) =>
+      `<button class="bg-tab${i === 0 ? ' active' : ''}" data-index="${i}">${c.label}</button>`
+    ).join('')}</div>` +
+    `<div class="bg-grid" id="bg-grid"></div>`;
 
   loadBg().then(current => {
     inputEl.value = current;
-    presetsEl.querySelectorAll('.bg-preset').forEach(el => {
-      if (el.dataset.value === current) el.classList.add('selected');
-      el.addEventListener('click', () => {
-        presetsEl.querySelectorAll('.bg-preset').forEach(x => x.classList.remove('selected'));
-        el.classList.add('selected');
-        inputEl.value = el.dataset.value;
+    renderGrid(current);
+    presetsEl.querySelectorAll('.bg-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        activeTab = parseInt(tab.dataset.index);
+        presetsEl.querySelectorAll('.bg-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        renderGrid(inputEl.value);
       });
     });
   });
@@ -620,7 +724,7 @@ dropZone.addEventListener('drop', e => {
       await saveBg(dataUrl);
       await applyBg(dataUrl);
       $('bg-url-input').value = '📎 ' + file.name;
-      $('bg-presets').querySelectorAll('.bg-preset').forEach(el => el.classList.remove('selected'));
+      $('bg-presets').querySelectorAll('.bg-grid-item').forEach(el => el.classList.remove('selected'));
       showStatus('Background applied', 'success');
     } catch (err) {
       showStatus('Failed to save background: ' + err.message, 'error');
@@ -705,6 +809,7 @@ $('import-input').addEventListener('change', async e => {
   e.target.value = '';
 });
 
+initTitle();
 render();
 
 const STORAGE_KEY = 'tabCollector';

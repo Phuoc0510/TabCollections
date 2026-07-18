@@ -33,6 +33,24 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  cursor: pointer;
+}
+
+.app-title-input {
+  font-size: 26px;
+  font-weight: 700;
+  background: transparent;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  padding: 2px 8px;
+  outline: none;
+  font-family: inherit;
+  min-width: 200px;
+}
+
+.app-title-input:focus {
+  border-color: #4285f4;
 }
 
 .header-actions {
@@ -235,20 +253,6 @@
   display: block;
 }
 
-.tab-open {
-  text-decoration: none;
-  color: #4285f4;
-  font-size: 12px;
-  font-weight: 500;
-  padding: 4px 8px;
-  border-radius: 4px;
-  flex-shrink: 0;
-}
-
-.tab-open:hover {
-  background: #e8f0fe;
-}
-
 .tab-delete {
   background: none;
   border: none;
@@ -314,16 +318,46 @@
 }
 
 /* ── Background Modal ── */
-.bg-presets {
+.bg-tabs {
   display: flex;
-  gap: 10px;
+  gap: 6px;
   flex-wrap: wrap;
   margin-bottom: 12px;
 }
 
-.bg-preset {
-  width: 72px;
-  height: 48px;
+.bg-tab {
+  padding: 5px 12px;
+  border-radius: 20px;
+  border: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  font-family: inherit;
+}
+
+.bg-tab:hover {
+  border-color: #4285f4;
+  color: #4285f4;
+}
+
+.bg-tab.active {
+  background: #4285f4;
+  color: #fff;
+  border-color: #4285f4;
+}
+
+.bg-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.bg-grid-item {
+  height: 60px;
   border-radius: var(--radius-md);
   border: 2px solid transparent;
   cursor: pointer;
@@ -332,11 +366,11 @@
   transition: border-color var(--transition-fast);
 }
 
-.bg-preset:hover {
+.bg-grid-item:hover {
   border-color: #4285f4;
 }
 
-.bg-preset.selected {
+.bg-grid-item.selected {
   border-color: #4285f4;
 }
 
@@ -363,8 +397,12 @@
   z-index: 999;
   border-radius: var(--radius-lg);
   padding: 10px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
   width: 280px;
+  background: var(--glass-card-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-card-border);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
 }
 
 .icon-popover .icon-search {
@@ -403,7 +441,9 @@
   padding: 4px 0 2px;
   position: sticky;
   top: 0;
-  background: var(--bg-primary);
+  background: inherit;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   z-index: 1;
 }
 
