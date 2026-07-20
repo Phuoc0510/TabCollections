@@ -156,6 +156,22 @@
   white-space: nowrap;
 }
 
+.group-pin-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  padding: 2px 4px;
+  opacity: 0.5;
+  transition: opacity var(--transition-fast);
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.group-pin-btn:hover {
+  opacity: 1;
+}
+
 .group-chevron {
   color: var(--text-muted);
   font-size: 18px;

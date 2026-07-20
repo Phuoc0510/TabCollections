@@ -106,6 +106,7 @@ async function render() {
           <span class="group-icon">${g.icon || '📁'}</span>
           <span class="group-name">${esc(g.name)}</span>
           <span class="group-meta">${g.tabs ? g.tabs.length : 0} tab${(g.tabs ? g.tabs.length : 0) !== 1 ? 's' : ''}</span>
+          <button class="group-pin-btn" data-id="${g.id}" title="${g.pinned ? 'Unpin' : 'Pin to top'}">${g.pinned ? '📌' : '📍'}</button>
           <span class="group-chevron" aria-hidden="true">⌄</span>
         </button>
         <div id="group-content-${g.id}" class="group-content"${isExpanded ? '' : ' hidden'}>
@@ -126,6 +127,14 @@ $('groups-grid').addEventListener('click', async e => {
   if (!groupCard) return;
 
   const groupId = groupCard.dataset.id;
+
+  const pinBtn = e.target.closest('.group-pin-btn');
+  if (pinBtn) {
+    e.stopPropagation();
+    await chrome.runtime.sendMessage({ action: 'togglePinGroup', id: pinBtn.dataset.id });
+    await render();
+    return;
+  }
 
   const toggle = e.target.closest('.group-toggle');
   if (toggle) {
