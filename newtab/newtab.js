@@ -428,36 +428,46 @@ async function showTabPicker(groupId) {
   }
 
   list.innerHTML = tabs.map(t => `
-    <div class="tab-picker-entry" data-group-id="${groupId}" data-title="${esc(t.title)}" data-url="${esc(t.url)}" data-favicon="${esc(t.favIconUrl || '')}">
+    <label class="tab-picker-entry">
+      <input type="checkbox" class="tab-picker-cb" data-title="${esc(t.title)}" data-url="${esc(t.url)}" data-favicon="${esc(t.favIconUrl || '')}">
       ${t.favIconUrl ? `<img src="${esc(t.favIconUrl)}" alt="" onerror="this.style.display='none'">` : ''}
       <div class="tab-picker-info">
         <div class="tab-picker-title">${esc(t.title || t.url)}</div>
       </div>
-    </div>
+    </label>
   `).join('');
 
+  overlay.dataset.groupId = groupId;
   overlay.style.display = 'flex';
 }
 
-$('tab-picker-overlay').addEventListener('click', async e => {
-  const entry = e.target.closest('.tab-picker-entry');
-  if (!entry) {
-    if (e.target === $('tab-picker-overlay')) $('tab-picker-overlay').style.display = 'none';
-    return;
-  }
-  const groupId = entry.dataset.groupId;
-  await chrome.runtime.sendMessage({
-    action: 'addTabToGroup',
-    tab: {
-      title: entry.dataset.title,
-      url: entry.dataset.url,
-      favicon: entry.dataset.favicon
-    },
-    groupId
-  });
+$('tab-picker-cancel-btn').addEventListener('click', () => {
   $('tab-picker-overlay').style.display = 'none';
+});
+
+$('tab-picker-overlay').addEventListener('click', e => {
+  if (e.target === $('tab-picker-overlay')) $('tab-picker-overlay').style.display = 'none';
+});
+
+$('tab-picker-add-btn').addEventListener('click', async () => {
+  const overlay = $('tab-picker-overlay');
+  const groupId = overlay.dataset.groupId;
+  const checked = overlay.querySelectorAll('.tab-picker-cb:checked');
+  if (checked.length === 0) return;
+  for (const cb of checked) {
+    await chrome.runtime.sendMessage({
+      action: 'addTabToGroup',
+      tab: {
+        title: cb.dataset.title,
+        url: cb.dataset.url,
+        favicon: cb.dataset.favicon
+      },
+      groupId
+    });
+  }
+  overlay.style.display = 'none';
   await render();
-  showStatus('Tab added', 'success');
+  showStatus(`Added ${checked.length} tab${checked.length !== 1 ? 's' : ''}`, 'success');
 });
 
 function renderIconGrid(scroll, term, selectedIcon) {

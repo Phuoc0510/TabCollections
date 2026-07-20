@@ -613,6 +613,14 @@ body.has-bg .app-header {
   background: var(--hover-bg);
 }
 
+.tab-picker-cb {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  accent-color: #4285f4;
+  cursor: pointer;
+}
+
 .tab-picker-entry img {
   width: 16px;
   height: 16px;
