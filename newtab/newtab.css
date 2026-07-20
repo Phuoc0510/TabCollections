@@ -655,6 +655,7 @@ body.has-bg .app-header {
 }
 
 .fab-item {
+  position: relative;
   width: 48px;
   height: 48px;
   border-radius: 50%;
@@ -675,6 +676,32 @@ body.has-bg .app-header {
 .fab-item:hover {
   background: var(--hover-bg);
   transform: scale(1.1);
+}
+
+.fab-label {
+  position: absolute;
+  right: 56px;
+  top: 50%;
+  transform: translateY(-50%);
+  white-space: nowrap;
+  background: var(--glass-card-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 13px;
+  color: var(--text-primary);
+  font-weight: 500;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.12s, visibility 0.12s;
+}
+
+.fab-item:hover .fab-label {
+  opacity: 1;
+  visibility: visible;
 }
 
 .fab-item.active {
