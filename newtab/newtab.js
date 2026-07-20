@@ -842,6 +842,31 @@ $('search-input')?.addEventListener('input', () => {
   render();
 });
 
+const VIEW_KEY = 'viewMode';
+
+async function loadViewMode() {
+  const result = await chrome.storage.local.get(VIEW_KEY);
+  return result[VIEW_KEY] || 'grid';
+}
+
+async function toggleView() {
+  const current = document.getElementById('groups-view').classList.contains('view-list') ? 'list' : 'grid';
+  const next = current === 'grid' ? 'list' : 'grid';
+  document.getElementById('groups-view').classList.toggle('view-list', next === 'list');
+  document.getElementById('view-toggle-btn').textContent = next === 'grid' ? '▦ Grid' : '☰ List';
+  await chrome.storage.local.set({ [VIEW_KEY]: next });
+}
+
+$('view-toggle-btn').addEventListener('click', toggleView);
+
+// Init view mode on load
+loadViewMode().then(mode => {
+  if (mode === 'list') {
+    document.getElementById('groups-view').classList.add('view-list');
+    document.getElementById('view-toggle-btn').textContent = '☰ List';
+  }
+});
+
 initTitle();
 render();
 
