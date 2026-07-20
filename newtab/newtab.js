@@ -39,7 +39,7 @@ async function loadAll() {
   groups = await chrome.runtime.sendMessage({ action: 'getGroups' });
   const data = await chrome.runtime.sendMessage({ action: 'getAllData' });
   for (const g of groups) {
-    g.tabs = Object.values(data.tabs).filter(t => t.groupId === g.id && !t.deletedAt).sort((a, b) => (b.position ?? b.addedAt) - (a.position ?? a.addedAt));
+    g.tabs = Object.values(data.tabs).filter(t => t.groupId === g.id).sort((a, b) => (b.position ?? b.addedAt) - (a.position ?? a.addedAt));
   }
 }
 
@@ -110,6 +110,7 @@ async function render() {
         </button>
         <div id="group-content-${g.id}" class="group-content"${isExpanded ? '' : ' hidden'}>
           <div class="group-actions">
+            <button class="group-add-tab-btn" data-id="${g.id}">+ Add Tab</button>
             <button class="group-open-all-btn" data-id="${g.id}">Open All</button>
             <button class="group-edit-btn" data-id="${g.id}">Edit</button>
             <button class="group-delete-btn" data-id="${g.id}">Delete</button>
@@ -138,16 +139,28 @@ $('groups-grid').addEventListener('click', async e => {
   const tabDelete = e.target.closest('.tab-delete');
   if (tabDelete) {
     e.stopPropagation();
-    const tabId = tabDelete.dataset.id;
-    await chrome.runtime.sendMessage({ action: 'softDeleteTab', tabId });
+    await chrome.runtime.sendMessage({ action: 'removeTab', tabId: tabDelete.dataset.id });
     await render();
-    showToast('Tab deleted', tabId, 'tab');
     return;
   }
 
   const tabEntry = e.target.closest('.tab-entry');
   if (tabEntry) {
     await chrome.tabs.create({ url: tabEntry.dataset.url });
+    return;
+  }
+
+  const addTabBtn = e.target.closest('.group-add-tab-btn');
+  if (addTabBtn) {
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (!tab) return;
+    await chrome.runtime.sendMessage({
+      action: 'addTabToGroup',
+      tab: { title: tab.title, url: tab.url, favicon: tab.favIconUrl || '' },
+      groupId: addTabBtn.dataset.id
+    });
+    await render();
+    showStatus(`Tab added`, 'success');
     return;
   }
 
@@ -172,9 +185,9 @@ $('groups-grid').addEventListener('click', async e => {
     const g = groups.find(x => x.id === deleteBtn.dataset.id);
     if (!g) return;
     if (await showConfirm(`Delete "${g.name}" and all its tabs?`)) {
-      await chrome.runtime.sendMessage({ action: 'softDeleteGroup', id: g.id });
+      await chrome.runtime.sendMessage({ action: 'deleteGroup', id: g.id });
       await render();
-      showToast(`Deleted "${g.name}"`, g.id, 'group');
+      showStatus(`Deleted "${g.name}"`, 'success');
     }
     return;
   }
@@ -859,43 +872,6 @@ loadViewMode().then(mode => {
     document.getElementById('view-toggle-btn').textContent = '☰ List';
   }
 });
-
-let toastTimer = null;
-
-function showToast(message, id, type) {
-  const toast = $('toast');
-  const msgEl = $('toast-message');
-  const undoBtn = $('toast-undo-btn');
-  const progress = $('toast-progress');
-
-  if (toastTimer) clearTimeout(toastTimer);
-
-  msgEl.textContent = message;
-  undoBtn.onclick = async () => {
-    const action = type === 'group' ? 'restoreGroup' : 'restoreTab';
-    const param = type === 'group' ? { id } : { tabId: id };
-    await chrome.runtime.sendMessage({ action, ...param });
-    await render();
-    hideToast();
-  };
-
-  toast.style.display = 'flex';
-  progress.style.width = '100%';
-  progress.style.transition = 'none';
-
-  requestAnimationFrame(() => {
-    progress.style.transition = 'width 30s linear';
-    progress.style.width = '0%';
-  });
-
-  toastTimer = setTimeout(hideToast, 30000);
-}
-
-function hideToast() {
-  const toast = $('toast');
-  toast.style.display = 'none';
-  if (toastTimer) { clearTimeout(toastTimer); toastTimer = null; }
-}
 
 initTitle();
 render();
