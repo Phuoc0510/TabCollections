@@ -1,0 +1,69 @@
+body {
+  margin: 0;
+  padding: 12px;
+  font-family: 'Inter', sans-serif;
+  background: var(--bg, #f5f5f7);
+  color: var(--text-primary, #1a1a2e);
+  font-size: 13px;
+}
+
+.panel-header h1 {
+  font-size: 16px;
+  margin: 0 0 12px;
+  font-weight: 700;
+}
+
+.group-card {
+  margin-bottom: 8px;
+  border-radius: var(--radius-md);
+  background: var(--glass-card-bg);
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+}
+
+.group-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  cursor: pointer;
+  font-weight: 600;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+.group-icon { font-size: 18px; }
+.group-name { flex: 1; }
+.group-meta { font-size: 11px; color: var(--text-muted); }
+
+.group-tabs {
+  border-top: 1px solid var(--border-color);
+}
+
+.tab-entry {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px 6px 20px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.tab-entry:hover {
+  background: var(--hover-bg);
+}
+
+.tab-entry img {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.tab-info { flex: 1; min-width: 0; }
+
+.tab-title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 12px;
+}
