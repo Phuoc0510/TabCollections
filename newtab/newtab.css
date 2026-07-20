@@ -163,6 +163,24 @@
   transition: transform 180ms ease;
 }
 
+.group-actions-toggle {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+
+.group-actions-toggle:hover {
+  background: var(--hover-bg);
+  color: var(--text-primary);
+}
+
 .group-card.is-expanded .group-chevron {
   transform: rotate(180deg);
 }
@@ -178,32 +196,17 @@
   display: none;
 }
 
-.group-actions {
-  display: flex;
-  justify-content: flex-end;
-  padding: 8px 12px;
-  position: relative;
-}
-
 .group-actions-menu {
   display: flex;
   gap: 6px;
-  position: absolute;
-  right: 36px;
-  top: 6px;
-  padding: 4px 6px;
-  border-radius: var(--radius-sm);
-  background: var(--glass-card-bg, var(--bg));
-  border: 1px solid var(--border-color);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.12s, visibility 0.12s;
+  padding: 6px 12px;
+  border-top: 1px solid var(--border-color);
+  justify-content: flex-end;
+  display: none;
 }
 
-.group-actions.open .group-actions-menu {
-  opacity: 1;
-  visibility: visible;
+.group-actions-menu.open {
+  display: flex;
 }
 
 .group-actions-toggle {

@@ -106,18 +106,16 @@ async function render() {
           <span class="group-icon">${g.icon || '📁'}</span>
           <span class="group-name">${esc(g.name)}</span>
           <span class="group-meta">${g.tabs ? g.tabs.length : 0} tab${(g.tabs ? g.tabs.length : 0) !== 1 ? 's' : ''}</span>
+          <span class="group-actions-toggle" data-id="${g.id}" title="Actions">⋯</span>
           <span class="group-chevron" aria-hidden="true">⌄</span>
         </button>
+        <div class="group-actions-menu" data-id="${g.id}">
+          <button class="group-add-tab-btn icon-btn" title="Add Tab">＋</button>
+          <button class="group-open-all-btn icon-btn" title="Open All">↗</button>
+          <button class="group-edit-btn icon-btn" title="Edit">✎</button>
+          <button class="group-delete-btn icon-btn" title="Delete">🗑</button>
+        </div>
         <div id="group-content-${g.id}" class="group-content"${isExpanded ? '' : ' hidden'}>
-          <div class="group-actions">
-            <button class="group-actions-toggle icon-btn" title="Actions">⋯</button>
-            <div class="group-actions-menu">
-              <button class="group-add-tab-btn icon-btn" data-id="${g.id}" title="Add Tab">＋</button>
-              <button class="group-open-all-btn icon-btn" data-id="${g.id}" title="Open All">↗</button>
-              <button class="group-edit-btn icon-btn" data-id="${g.id}" title="Edit">✎</button>
-              <button class="group-delete-btn icon-btn" data-id="${g.id}" title="Delete">🗑</button>
-            </div>
-          </div>
           ${tabsHtml}
         </div>
       </div>
@@ -132,7 +130,7 @@ $('groups-grid').addEventListener('click', async e => {
   const groupId = groupCard.dataset.id;
 
   const toggle = e.target.closest('.group-toggle');
-  if (toggle) {
+  if (toggle && !e.target.closest('.group-actions-toggle')) {
     if (expandedGroupIds.has(groupId)) expandedGroupIds.delete(groupId);
     else expandedGroupIds.add(groupId);
     await render();
@@ -900,16 +898,18 @@ $('search-input')?.addEventListener('input', () => {
 $('groups-grid').addEventListener('click', e => {
   const toggle = e.target.closest('.group-actions-toggle');
   if (toggle) {
-    const actions = toggle.closest('.group-actions');
-    const wasOpen = actions.classList.contains('open');
-    document.querySelectorAll('.group-actions.open').forEach(el => el.classList.remove('open'));
-    if (!wasOpen) actions.classList.add('open');
+    const groupId = toggle.dataset.id;
+    const menu = document.querySelector(`.group-actions-menu[data-id="${groupId}"]`);
+    if (!menu) return;
+    const wasOpen = menu.classList.contains('open');
+    document.querySelectorAll('.group-actions-menu.open').forEach(el => el.classList.remove('open'));
+    if (!wasOpen) menu.classList.add('open');
   }
 });
 
 document.addEventListener('click', e => {
-  if (!e.target.closest('.group-actions')) {
-    document.querySelectorAll('.group-actions.open').forEach(el => el.classList.remove('open'));
+  if (!e.target.closest('.group-card-inner')) {
+    document.querySelectorAll('.group-actions-menu.open').forEach(el => el.classList.remove('open'));
   }
 });
 
