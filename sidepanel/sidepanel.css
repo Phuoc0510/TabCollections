@@ -35,6 +35,27 @@ body {
 .group-name { flex: 1; }
 .group-meta { font-size: 11px; color: var(--text-muted); }
 
+.add-tab-btn {
+  background: none;
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  width: 22px;
+  height: 22px;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  padding: 0;
+  transition: background 0.15s, color 0.15s;
+}
+.add-tab-btn:hover {
+  background: var(--hover-bg);
+  color: var(--text-primary);
+}
+
 .group-tabs {
   border-top: 1px solid var(--border-color);
 }

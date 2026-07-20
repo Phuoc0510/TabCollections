@@ -33,6 +33,7 @@ function render() {
         <span class="group-icon">${g.icon || '📁'}</span>
         <span class="group-name">${esc(g.name)}</span>
         <span class="group-meta">${g.tabs.length} tab${g.tabs.length !== 1 ? 's' : ''}</span>
+        <button class="add-tab-btn" title="Add current tab">+</button>
       </div>
       <div class="group-tabs">
         ${g.tabs.map(t => `
@@ -48,7 +49,22 @@ function render() {
   `).join('');
 }
 
-document.getElementById('groups-list').addEventListener('click', e => {
+document.getElementById('groups-list').addEventListener('click', async e => {
+  const btn = e.target.closest('.add-tab-btn');
+  if (btn) {
+    const card = btn.closest('.group-card');
+    const groupId = card.dataset.id;
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    if (!tab) return;
+    await chrome.runtime.sendMessage({
+      action: 'addTabToGroup',
+      tab: { title: tab.title, url: tab.url, favicon: tab.favIconUrl || '' },
+      groupId
+    });
+    await loadAll();
+    render();
+    return;
+  }
   const tabEntry = e.target.closest('.tab-entry');
   if (tabEntry) {
     chrome.tabs.create({ url: tabEntry.dataset.url });
