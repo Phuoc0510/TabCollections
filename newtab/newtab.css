@@ -601,3 +601,47 @@ body.has-bg .app-header {
 .view-list .group-card {
   width: 100%;
 }
+
+.toast {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  background: #1a1a2e;
+  color: #fff;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  z-index: 9999;
+  font-size: 14px;
+  min-width: 300px;
+  overflow: hidden;
+}
+
+.toast-undo-btn {
+  background: #4285f4;
+  color: #fff;
+  border: none;
+  padding: 6px 16px;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.toast-undo-btn:hover {
+  background: #5a95f5;
+}
+
+.toast-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: #4285f4;
+  width: 100%;
+}

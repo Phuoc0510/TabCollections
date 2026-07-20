@@ -147,8 +147,10 @@ $('groups-grid').addEventListener('click', async e => {
   const tabDelete = e.target.closest('.tab-delete');
   if (tabDelete) {
     e.stopPropagation();
-    await chrome.runtime.sendMessage({ action: 'removeTab', tabId: tabDelete.dataset.id });
+    const tabId = tabDelete.dataset.id;
+    await chrome.runtime.sendMessage({ action: 'softDeleteTab', tabId });
     await render();
+    showToast('Tab deleted', tabId, 'tab');
     return;
   }
 
@@ -179,9 +181,9 @@ $('groups-grid').addEventListener('click', async e => {
     const g = groups.find(x => x.id === deleteBtn.dataset.id);
     if (!g) return;
     if (await showConfirm(`Delete "${g.name}" and all its tabs?`)) {
-      await chrome.runtime.sendMessage({ action: 'deleteGroup', id: g.id });
+      await chrome.runtime.sendMessage({ action: 'softDeleteGroup', id: g.id });
       await render();
-      showStatus(`Deleted "${g.name}"`, 'success');
+      showToast(`Deleted "${g.name}"`, g.id, 'group');
     }
     return;
   }
@@ -866,6 +868,43 @@ loadViewMode().then(mode => {
     document.getElementById('view-toggle-btn').textContent = '☰ List';
   }
 });
+
+let toastTimer = null;
+
+function showToast(message, id, type) {
+  const toast = $('toast');
+  const msgEl = $('toast-message');
+  const undoBtn = $('toast-undo-btn');
+  const progress = $('toast-progress');
+
+  if (toastTimer) clearTimeout(toastTimer);
+
+  msgEl.textContent = message;
+  undoBtn.onclick = async () => {
+    const action = type === 'group' ? 'restoreGroup' : 'restoreTab';
+    const param = type === 'group' ? { id } : { tabId: id };
+    await chrome.runtime.sendMessage({ action, ...param });
+    await render();
+    hideToast();
+  };
+
+  toast.style.display = 'flex';
+  progress.style.width = '100%';
+  progress.style.transition = 'none';
+
+  requestAnimationFrame(() => {
+    progress.style.transition = 'width 30s linear';
+    progress.style.width = '0%';
+  });
+
+  toastTimer = setTimeout(hideToast, 30000);
+}
+
+function hideToast() {
+  const toast = $('toast');
+  toast.style.display = 'none';
+  if (toastTimer) { clearTimeout(toastTimer); toastTimer = null; }
+}
 
 initTitle();
 render();
