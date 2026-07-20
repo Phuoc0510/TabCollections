@@ -1,0 +1,35 @@
+<h2>🔄 Grid / List View Design</h2>
+
+<div class="section">
+  <h3>UI</h3>
+  <div style="text-align:left; padding:16px; background:var(--hover-bg); border-radius:8px; line-height:1.8;">
+    <strong>Toggle button trong header:</strong> ▦ Grid | ☰ List<br>
+    <strong>Trạng thái lưu:</strong> <code>chrome.storage.local</code> key <code>viewMode: 'grid' | 'list'</code><br>
+    <strong>Mặc định:</strong> grid (giữ nguyên UI hiện tại)
+  </div>
+</div>
+
+<div class="section" style="margin-top:16px;">
+  <h3>List View (khi toggle)</h3>
+  <div style="text-align:left; padding:16px; background:var(--hover-bg); border-radius:8px; line-height:1.8;">
+    CSS: class <code>.view-list</code> trên <code>#groups-view</code><br>
+    <br>
+    <strong>Grid (hiện tại):</strong> <code>display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr))</code><br>
+    <strong>List:</strong> <code>display: flex; flex-direction: column; max-width: 700px; margin: 0 auto;</code><br>
+    <br>
+    Card trong list view:<br>
+    — Nằm ngang, full width<br>
+    — Color bar ở bên trái (dọc)<br>
+    — Vẫn expand/collapse được (giống grid)<br>
+    — Drag-and-drop vẫn hoạt động
+  </div>
+</div>
+
+<div class="section" style="margin-top:16px;">
+  <h3>Files thay đổi</h3>
+  <ul style="text-align:left; line-height:2;">
+    <li><code>newtab/newtab.html</code> — thêm nút toggle trong header</li>
+    <li><code>newtab/newtab.js</code> — toggle logic + load/save viewMode</li>
+    <li><code>newtab/newtab.css</code> — <code>.view-list</code> styles</li>
+  </ul>
+</div>

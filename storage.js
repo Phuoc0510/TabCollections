@@ -20,10 +20,7 @@ async function getGroups() {
   const data = await getAllData();
   return Object.values(data.groups)
     .filter(g => !g.deletedAt)
-    .sort((a, b) => {
-      if (a.pinned !== b.pinned) return a.pinned ? -1 : 1;
-      return (b.position ?? b.updatedAt) - (a.position ?? a.updatedAt);
-    });
+    .sort((a, b) => (b.position ?? b.updatedAt) - (a.position ?? a.updatedAt));
 }
 
 async function getTabsByGroup(groupId) {
@@ -81,13 +78,6 @@ async function addTabToGroup(tabInfo, groupId) {
 async function removeTab(tabId) {
   const data = await getAllData();
   delete data.tabs[tabId];
-  await saveAllData(data);
-}
-
-async function togglePinGroup(id) {
-  const data = await getAllData();
-  if (!data.groups[id]) throw new Error('Group not found');
-  data.groups[id].pinned = !data.groups[id].pinned;
   await saveAllData(data);
 }
 
@@ -254,5 +244,5 @@ async function removeGroupFromPage(pageId, groupId) {
 }
 
 if (typeof module !== 'undefined') {
-  module.exports = { getAllData, saveAllData, getGroups, getTabsByGroup, createGroup, updateGroup, deleteGroup, addTabToGroup, removeTab, updateGroupPositions, updateTabPositions, exportData, importData, moveTabToGroup, getPages, createPage, updatePage, deletePage, addGroupToPage, removeGroupFromPage, togglePinGroup, softDeleteGroup, softDeleteTab, restoreGroup, restoreTab, purgeDeleted };
+  module.exports = { getAllData, saveAllData, getGroups, getTabsByGroup, createGroup, updateGroup, deleteGroup, addTabToGroup, removeTab, updateGroupPositions, updateTabPositions, exportData, importData, moveTabToGroup, getPages, createPage, updatePage, deletePage, addGroupToPage, removeGroupFromPage, softDeleteGroup, softDeleteTab, restoreGroup, restoreTab, purgeDeleted };
 }

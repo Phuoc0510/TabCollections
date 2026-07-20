@@ -33,7 +33,6 @@ export default [
         deletePage: 'readonly',
         addGroupToPage: 'readonly',
         removeGroupFromPage: 'readonly',
-        togglePinGroup: 'readonly',
         softDeleteGroup: 'readonly',
         softDeleteTab: 'readonly',
         restoreGroup: 'readonly',

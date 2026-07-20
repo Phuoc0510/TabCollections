@@ -1,0 +1,69 @@
+<h2>🔄 Grid / List View</h2>
+<p class="subtitle">Toggle giữa card view (hiện tại) và list view dọc</p>
+
+<div class="section">
+  <div style="margin-bottom:12px; display:flex; gap:8px; align-items:center;">
+    <span style="padding:6px 14px; border-radius:6px; font-size:13px; background:var(--color-primary); color:white; font-weight:500;">☰ List</span>
+    <span style="padding:6px 14px; border-radius:6px; font-size:13px; background:var(--hover-bg);">▦ Grid</span>
+  </div>
+
+  <h3>List View (dọc)</h3>
+  <div style="display:flex; flex-direction:column; gap:8px;">
+    <div style="display:flex; align-items:center; gap:10px; padding:10px 14px; background:var(--hover-bg); border-radius:8px;">
+      <span style="font-size:18px;">📁</span>
+      <div style="flex:1; min-width:0;">
+        <div style="font-weight:500; font-size:14px;">Work</div>
+        <div style="font-size:12px; color:var(--text-muted);">12 tabs — 3 pinned</div>
+      </div>
+      <span style="font-size:12px; color:var(--text-muted);">📌 ✕</span>
+    </div>
+    <div style="display:flex; align-items:center; gap:10px; padding:10px 14px; border-radius:8px;">
+      <span style="font-size:18px;">💻</span>
+      <div style="flex:1; min-width:0;">
+        <div style="font-weight:500; font-size:14px;">Dev Resources</div>
+        <div style="font-size:12px; color:var(--text-muted);">5 tabs</div>
+      </div>
+      <span style="font-size:12px; color:var(--text-muted);">📌 ✕</span>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:20px;">
+  <h3>Toggle button ở đâu?</h3>
+  <div class="options" style="grid-template-columns:1fr 1fr;">
+    <div class="option" data-choice="header" onclick="toggleSelect(this)">
+      <div class="letter">A</div>
+      <div class="content">
+        <h3>Header</h3>
+        <p>Nút toggle trong header bar, cạnh nút + New Collection</p>
+      </div>
+    </div>
+    <div class="option" data-choice="floating" onclick="toggleSelect(this)">
+      <div class="letter">B</div>
+      <div class="content">
+        <h3>Floating</h3>
+        <p>Icon nhỏ nổi ở góc, luôn accessible</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:20px;">
+  <h3>List view có cần expand được không?</h3>
+  <div class="options" style="grid-template-columns:1fr 1fr;">
+    <div class="option" data-choice="compact" onclick="toggleSelect(this)">
+      <div class="letter">A</div>
+      <div class="content">
+        <h3>Compact</h3>
+        <p>List chỉ show tên + số tab, không expand tabs bên trong</p>
+      </div>
+    </div>
+    <div class="option" data-choice="expandable" onclick="toggleSelect(this)">
+      <div class="letter">B</div>
+      <div class="content">
+        <h3>Expandable</h3>
+        <p>List view cũng có thể mở rộng để xem tabs bên trong</p>
+      </div>
+    </div>
+  </div>
+</div>

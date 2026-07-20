@@ -121,10 +121,6 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
           await deletePage(msg.id);
           sendResponse({ ok: true });
           break;
-        case 'togglePinGroup':
-          await togglePinGroup(msg.id);
-          sendResponse({ ok: true });
-          break;
         case 'softDeleteGroup':
           await softDeleteGroup(msg.id);
           await rebuildContextMenu();

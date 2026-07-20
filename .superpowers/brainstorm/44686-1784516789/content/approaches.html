@@ -1,0 +1,37 @@
+<h2>📋 Tổng hợp & Approach</h2>
+
+<div class="section">
+  <h3>Ưu đã confirm:</h3>
+  <ul style="text-align:left; line-height:1.8;">
+    <li>🔍 <strong>Search:</strong> Thanh search trong header, filter realtime theo tên collection + tab title + URL</li>
+    <li>📌 <strong>Pin:</strong> Icon 📌 trên card, click để pin/unpin, ghim lên đầu</li>
+    <li>🔄 <strong>Grid/List:</strong> Toggle trong header, list view expandable</li>
+    <li>🗑️ <strong>Undo:</strong> Toast bar kiểu Gmail, 30s, xóa collection = xóa cả tabs (undo được)</li>
+  </ul>
+</div>
+
+<div class="section" style="margin-top:20px;">
+  <h3>So sánh 2 approach cho Undo</h3>
+  <div class="pros-cons">
+    <div class="pros">
+      <h4>Approach A: In-memory undo (đơn giản hơn)</h4>
+      <ul>
+        <li>✅ Chỉ cần setTimeout + biến tạm trong JS</li>
+        <li>❌ F5 / đóng tab là mất cơ hội undo</li>
+        <li>❌ Toast dễ bị mất sync nếu nhiều storage change</li>
+      </ul>
+    </div>
+    <div class="cons">
+      <h4>Approach B: Soft-delete trong storage (đề xuất ✅)</h4>
+      <ul>
+        <li>✅ Data ở trong chrome.storage — reload trang vẫn undo được</li>
+        <li>✅ Dùng deletedAt field + cleanup timer ở background.js</li>
+        <li>❌ Phải code cleanup workers (setTimeout trong SW)</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:20px;">
+  <p>Tôi đề xuất <strong>Approach B (Soft-delete)</strong> cho undo vì extension data quý hơn in-memory tạm. Các features còn lại implement trực tiếp vào file hiện tại, giữ style code đơn giản.</p>
+</div>

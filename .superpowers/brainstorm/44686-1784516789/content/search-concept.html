@@ -1,0 +1,52 @@
+<h2>🔍 Tìm kiếm Tab / Collection</h2>
+<p class="subtitle">Tôi muốn hiểu rõ hơn về tính năng search bạn muốn</p>
+
+<div class="section">
+  <div style="display:flex; flex-direction:column; gap:16px; padding:20px; border:2px dashed var(--border-color); border-radius:12px;">
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      <input class="mock-input" placeholder="🔍 Search tabs and collections..." style="flex:1; min-width:200px;">
+      <div style="display:flex; gap:4px;">
+        <span style="padding:6px 12px; background:var(--color-primary); color:white; border-radius:6px; font-size:13px; font-weight:500;">All</span>
+        <span style="padding:6px 12px; background:var(--hover-bg); border-radius:6px; font-size:13px;">Groups</span>
+        <span style="padding:6px 12px; background:var(--hover-bg); border-radius:6px; font-size:13px;">Tabs</span>
+      </div>
+    </div>
+    <div style="padding:8px 12px; background:var(--hover-bg); border-radius:8px; font-size:13px; color:var(--text-muted);">
+      Real-time filter: gõ tên collection, tab title, hoặc URL — kết quả hiện ngay bên dưới
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Phạm vi tìm kiếm</h3>
+  <div class="options" style="grid-template-columns:1fr 1fr;">
+    <div class="option" data-choice="all" onclick="toggleSelect(this)">
+      <div class="letter">A</div>
+      <div class="content">
+        <h3>Tất cả</h3>
+        <p>Tìm trên toàn bộ collections và tabs</p>
+      </div>
+    </div>
+    <div class="option" data-choice="group-only" onclick="toggleSelect(this)">
+      <div class="letter">B</div>
+      <div class="content">
+        <h3>Chỉ collection name</h3>
+        <p>Filter theo tên collection</p>
+      </div>
+    </div>
+    <div class="option" data-choice="tab-only" onclick="toggleSelect(this)">
+      <div class="letter">C</div>
+      <div class="content">
+        <h3>Chỉ tab title/URL</h3>
+        <p>Filter theo tên tab hoặc URL</p>
+      </div>
+    </div>
+    <div class="option" data-choice="smart" onclick="toggleSelect(this)">
+      <div class="letter">D</div>
+      <div class="content">
+        <h3>Smart (gợi ý)</h3>
+        <p>Tìm collection + tab, highlight kết quả</p>
+      </div>
+    </div>
+  </div>
+</div>

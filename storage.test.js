@@ -17,7 +17,7 @@ function assert(condition, message) {
 }
 
 async function main() {
-  const { getAllData, saveAllData, getGroups, createGroup, updateGroup, deleteGroup, addTabToGroup, getTabsByGroup, removeTab, togglePinGroup, softDeleteGroup, softDeleteTab, restoreGroup, restoreTab, purgeDeleted, updateGroupPositions, updateTabPositions, exportData, importData, moveTabToGroup, getPages, createPage, updatePage, deletePage, addGroupToPage, removeGroupFromPage } = await import('./storage.js');
+  const { getAllData, saveAllData, getGroups, createGroup, updateGroup, deleteGroup, addTabToGroup, getTabsByGroup, removeTab, softDeleteGroup, softDeleteTab, restoreGroup, restoreTab, purgeDeleted, updateGroupPositions, updateTabPositions, exportData, importData, moveTabToGroup, getPages, createPage, updatePage, deletePage, addGroupToPage, removeGroupFromPage } = await import('./storage.js');
 
   let stored = {};
   chrome.storage.local.get = async () => stored;
@@ -197,19 +197,7 @@ async function main() {
     assert(e.message === 'Page not found', 'removeGroupFromPage throws for invalid pageId');
   }
 
-  // Test 25: togglePinGroup toggles pinned field
-  {
-    let g = await createGroup('PinTest', '📌');
-    assert(g.pinned === undefined || g.pinned === false, 'togglePinGroup initially false');
-    await togglePinGroup(g.id);
-    let data = await getAllData();
-    assert(data.groups[g.id].pinned === true, 'togglePinGroup sets pinned true');
-    await togglePinGroup(g.id);
-    data = await getAllData();
-    assert(data.groups[g.id].pinned === false, 'togglePinGroup sets pinned false');
-  }
-
-  // Test 26: softDeleteGroup sets deletedAt on group and tabs
+  // Test 25: softDeleteGroup sets deletedAt on group and tabs
   {
     let g = await createGroup('DelTest', '🗑️');
     let tab = await addTabToGroup({ title: 'DelTab', url: 'https://deltest.com' }, g.id);

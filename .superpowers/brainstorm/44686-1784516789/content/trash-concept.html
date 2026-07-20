@@ -1,0 +1,64 @@
+<h2>🗑️ Undo / Thùng rác</h2>
+<p class="subtitle">Deleted collections & tabs kept 30s for recovery</p>
+
+<div class="section">
+  <h3>UX Flow</h3>
+  <div style="display:flex; flex-direction:column; gap:12px;">
+    <div style="padding:16px; border:2px dashed var(--border-color); border-radius:10px;">
+      <div style="display:flex; align-items:center; gap:12px;">
+        <span style="font-size:24px;">🗑️</span>
+        <div style="flex:1;">
+          <strong>Deleted "Work"</strong>
+          <span style="display:block; font-size:12px; color:var(--text-muted);">12 tabs — Undo available for 30s</span>
+        </div>
+        <button style="padding:6px 16px; background:var(--color-primary); color:white; border:none; border-radius:6px; font-weight:600; cursor:pointer;">↩ Undo</button>
+      </div>
+    </div>
+    <div style="display:flex; align-items:center; gap:8px; font-size:13px; color:var(--text-muted);">
+      <span>⏱️ 30s</span>
+      <div style="flex:1; height:6px; background:var(--border-color); border-radius:3px;">
+        <div style="width:40%; height:100%; background:var(--color-primary); border-radius:3px;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:20px;">
+  <h3>Cách hiển thị Undo</h3>
+  <div class="options" style="grid-template-columns:1fr 1fr;">
+    <div class="option" data-choice="toast" onclick="toggleSelect(this)">
+      <div class="letter">A</div>
+      <div class="content">
+        <h3>Toast bar</h3>
+        <p>Thanh thông báo ở góc dưới, giống Gmail, có nút Undo</p>
+      </div>
+    </div>
+    <div class="option" data-choice="banner" onclick="toggleSelect(this)">
+      <div class="letter">B</div>
+      <div class="content">
+        <h3>Banner ngay trên grid</h3>
+        <p>Banner xuất hiện ở vị trí collection cũ, click Undo để khôi phục</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:20px;">
+  <h3>Xóa collection — tabs cũng bị xóa?</h3>
+  <div class="options" style="grid-template-columns:1fr 1fr;">
+    <div class="option" data-choice="with-tabs" onclick="toggleSelect(this)">
+      <div class="letter">A</div>
+      <div class="content">
+        <h3>Cả tabs</h3>
+        <p>Xóa collection = xóa luôn tabs bên trong (undo được)</p>
+      </div>
+    </div>
+    <div class="option" data-choice="keep-tabs" onclick="toggleSelect(this)">
+      <div class="letter">B</div>
+      <div class="content">
+        <h3>Giữ tabs</h3>
+        <p>Tabs về "Uncategorized", collection có thể undo riêng</p>
+      </div>
+    </div>
+  </div>
+</div>

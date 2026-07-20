@@ -1,0 +1,34 @@
+<h2>📌 Pin Design</h2>
+
+<div class="section">
+  <h3>Storage</h3>
+  <pre style="text-align:left; background:var(--hover-bg); padding:16px; border-radius:8px; font-size:13px; line-height:1.6;">
+function togglePinGroup(id):
+  group = data.groups[id]
+  group.pinned = !group.pinned
+
+// getGroups() bây giờ sort:
+// 1. pinned groups (pinned=true) — theo position
+// 2. unpinned groups — theo position
+  </pre>
+</div>
+
+<div class="section" style="margin-top:16px;">
+  <h3>UI — icon 📌 trên card</h3>
+  <div style="text-align:left; padding:16px; background:var(--hover-bg); border-radius:8px; line-height:1.8;">
+    <strong>Vị trí:</strong> Góc phải header group, cạnh group-meta<br>
+    <strong>Trạng thái:</strong> 📌 (filled) nếu pinned, ◌ (outline) nếu không<br>
+    <strong>Click:</strong> toggle pin → render lại → showStatus<br>
+    <strong>Hover:</strong> tooltip "Pin to top" / "Unpin"
+  </div>
+</div>
+
+<div class="section" style="margin-top:16px;">
+  <h3>Files thay đổi</h3>
+  <ul style="text-align:left; line-height:2;">
+    <li><code>storage.js</code> — thêm <code>togglePinGroup()</code>, sửa <code>getGroups()</code> sort</li>
+    <li><code>background.js</code> — thêm message handler cho <code>togglePinGroup</code></li>
+    <li><code>newtab/newtab.js</code> — thêm pin button trong render + click handler</li>
+    <li><code>newtab/newtab.css</code> — style pin button</li>
+  </ul>
+</div>

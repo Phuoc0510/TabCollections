@@ -1,0 +1,34 @@
+<h2>🔍 Search Design</h2>
+
+<div class="section">
+  <h3>UI</h3>
+  <div style="text-align:left; padding:16px; background:var(--hover-bg); border-radius:8px; line-height:1.8;">
+    <strong>Vị trí:</strong> Header bar, cạnh các nút bên phải<br>
+    <strong>Input:</strong> <code>&lt;input type="search" placeholder="🔍 Search collections and tabs..."&gt;</code><br>
+    <strong>Behavior:</strong> Filter realtime khi gõ (debounce 150ms)
+  </div>
+</div>
+
+<div class="section" style="margin-top:16px;">
+  <h3>Logic trong newtab.js</h3>
+  <pre style="text-align:left; background:var(--hover-bg); padding:16px; border-radius:8px; font-size:13px; line-height:1.6;">
+function matchesSearch(item, term):
+  term = term.toLowerCase()
+  return item.name.includes(term)           // collection name
+      || item.title.includes(term)          // tab title
+      || item.url.toLowerCase().includes(term) // URL
+
+// filterGroups(groups, term) — filter groups + tabs bên trong
+// Nếu term rỗng → show all
+// Nếu có term → chỉ show groups có tab match hoặc name match
+  </pre>
+</div>
+
+<div class="section" style="margin-top:16px;">
+  <h3>Files thay đổi</h3>
+  <ul style="text-align:left; line-height:2;">
+    <li><code>newtab/newtab.html</code> — thêm <code>&lt;input&gt;</code> trong header</li>
+    <li><code>newtab/newtab.js</code> — thêm hàm filter + event listener</li>
+    <li><code>newtab/newtab.css</code> — style cho search input</li>
+  </ul>
+</div>

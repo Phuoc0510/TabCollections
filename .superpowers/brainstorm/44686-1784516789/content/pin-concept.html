@@ -1,0 +1,47 @@
+<h2>📌 Pin Collection</h2>
+<p class="subtitle">Collections được ghim sẽ luôn ở trên cùng</p>
+
+<div class="section">
+  <h3>Cách hoạt động</h3>
+  <div style="display:flex; flex-direction:column; gap:12px;">
+    <div style="display:flex; align-items:center; gap:12px; padding:14px; background:var(--hover-bg); border-radius:10px;">
+      <span style="font-size:20px;">📌</span>
+      <div><strong>Work</strong><br><span style="font-size:13px; color:var(--text-muted);">12 tabs</span></div>
+      <span style="margin-left:auto; font-size:12px; color:var(--color-primary); background:rgba(66,133,244,0.1); padding:4px 8px; border-radius:6px;">Pinned</span>
+    </div>
+    <div style="display:flex; align-items:center; gap:12px; padding:14px; background:var(--hover-bg); border-radius:10px;">
+      <span style="font-size:20px;">📌</span>
+      <div><strong>Personal</strong><br><span style="font-size:13px; color:var(--text-muted);">5 tabs</span></div>
+      <span style="margin-left:auto; font-size:12px; color:var(--color-primary); background:rgba(66,133,244,0.1); padding:4px 8px; border-radius:6px;">Pinned</span>
+    </div>
+    <hr style="border-color:var(--border-color); margin:4px 0;">
+    <div style="display:flex; align-items:center; gap:12px; padding:14px; border-radius:10px; opacity:0.7;">
+      <span style="font-size:20px;">🗂️</span>
+      <div><strong>Projects</strong><br><span style="font-size:13px; color:var(--text-muted);">8 tabs</span></div>
+    </div>
+    <div style="display:flex; align-items:center; gap:12px; padding:14px; border-radius:10px; opacity:0.7;">
+      <span style="font-size:20px;">💻</span>
+      <div><strong>Dev Resources</strong><br><span style="font-size:13px; color:var(--text-muted);">3 tabs</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h3>Tương tác</h3>
+  <div class="options" style="grid-template-columns:1fr 1fr;">
+    <div class="option" data-choice="hover" onclick="toggleSelect(this)">
+      <div class="letter">A</div>
+      <div class="content">
+        <h3>Pin icon trên card</h3>
+        <p>Click icon 📌 ở góc card để pin/unpin</p>
+      </div>
+    </div>
+    <div class="option" data-choice="context" onclick="toggleSelect(this)">
+      <div class="letter">B</div>
+      <div class="content">
+        <h3>Right-click menu</h3>
+        <p>Pin/Unpin trong menu Edit hoặc context</p>
+      </div>
+    </div>
+  </div>
+</div>

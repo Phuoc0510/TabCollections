@@ -1,0 +1,39 @@
+<h2>🏗️ Data Model Changes</h2>
+
+<div class="section">
+  <h3>storage.js — thêm fields</h3>
+  <pre style="text-align:left; background:var(--hover-bg); padding:16px; border-radius:8px; font-size:13px; line-height:1.6;">
+// Group object — thêm:
+{
+  ...existing,
+  <strong>pinned: false</strong>,           // boolean, pin lên đầu
+  <strong>deletedAt: null</strong>,         // timestamp nếu bị soft-delete
+}
+
+// Tab object — thêm:
+{
+  ...existing,
+  <strong>deletedAt: null</strong>,         // timestamp nếu bị soft-delete
+}
+  </pre>
+</div>
+
+<div class="section">
+  <h3>Thay đổi storage functions</h3>
+  <ul style="text-align:left; line-height:2;">
+    <li><code>getGroups()</code> — filter bỏ groups có <code>deletedAt</code>, sort pinned lên trước</li>
+    <li><code>getTabsByGroup()</code> — filter bỏ tabs có <code>deletedAt</code></li>
+    <li><code>deleteGroup(id)</code> → <code>softDeleteGroup(id)</code> — set <code>deletedAt: Date.now()</code> thay vì xóa hẳn</li>
+    <li><code>removeTab(id)</code> → <code>softRemoveTab(id)</code> — set <code>deletedAt: Date.now()</code></li>
+    <li><code>restoreGroup(id)</code> + <code>restoreTab(id)</code> — mới, xóa <code>deletedAt</code></li>
+    <li><code>purgeDeleted()</code> — mới, hard-delete items có <code>deletedAt &lt; 30s ago</code></li>
+  </ul>
+</div>
+
+<div class="section">
+  <h3>background.js — cleanup timer</h3>
+  <ul style="text-align:left; line-height:2;">
+    <li>Thêm <code>chrome.alarms</code> hoặc <code>setInterval</code> trong SW</li>
+    <li>Mỗi 15s: gọi <code>purgeDeleted()</code> để cleanup items quá 30s</li>
+  </ul>
+</div>

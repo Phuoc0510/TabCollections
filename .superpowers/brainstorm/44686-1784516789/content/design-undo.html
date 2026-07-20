@@ -1,0 +1,51 @@
+<h2>🗑️ Undo / Trash Design</h2>
+
+<div class="section">
+  <h3>Soft-Delete Flow</h3>
+  <div style="text-align:left; padding:16px; background:var(--hover-bg); border-radius:8px; line-height:1.8;">
+    <strong>Khi user click Delete:</strong><br>
+    1. <code>softDeleteGroup(id)</code> → set <code>group.deletedAt = Date.now()</code><br>
+    2. <code>softDeleteTab(id)</code> → set <code>tab.deletedAt = Date.now()</code><br>
+    3. Toast bar hiện: "Deleted "Work" — ↩️ Undo"<br>
+    4. Items biến mất khỏi grid (getGroups/getTabsByTab filter ra)<br>
+    <br>
+    <strong>Nếu user click Undo (trong 30s):</strong><br>
+    5. <code>restoreGroup(id)</code> → set <code>deletedAt = null</code><br>
+    6. <code>restoreTab(id)</code> → set <code>deletedAt = null</code><br>
+    7. Items xuất hiện lại, render → hide toast<br>
+    <br>
+    <strong>Nếu hết 30s:</strong><br>
+    8. <code>purgeDeleted()</code> → xóa hẳn items có <code>deletedAt &lt; now - 30000</code><br>
+    9. Toast tự ẩn
+  </div>
+</div>
+
+<div class="section" style="margin-top:16px;">
+  <h3>Toast UI</h3>
+  <div style="text-align:left; padding:16px; background:var(--hover-bg); border-radius:8px; line-height:1.8;">
+    <strong>Vị trí:</strong> Fixed bottom-center, z-index cao nhất<br>
+    <strong>Style:</strong> Nền tối, chữ trắng, bo góc<br>
+    <strong>Nội dung:</strong> "Deleted 'X'" + nút "Undo" màu primary<br>
+    <strong>Countdown:</strong> Thanh progress bar 30s chạy ngang<br>
+    <strong>Tự động:</strong> Ẩn sau 30s hoặc khi click Undo
+  </div>
+</div>
+
+<div class="section" style="margin-top:16px;">
+  <h3>Storage & Background</h3>
+  <ul style="text-align:left; line-height:2;">
+    <li><code>storage.js</code> — <code>softDeleteGroup/softDeleteTab/restoreGroup/restoreTab/purgeDeleted</code></li>
+    <li><code>background.js</code> — message handlers, <code>setInterval(purgeDeleted, 15000)</code></li>
+  </ul>
+</div>
+
+<div class="section" style="margin-top:16px;">
+  <h3>Files thay đổi</h3>
+  <ul style="text-align:left; line-height:2;">
+    <li><code>storage.js</code> — 5 functions mới, sửa getGroups/getTabsByGroup filter deletedAt</li>
+    <li><code>background.js</code> — message handlers + cleanup interval</li>
+    <li><code>newtab/newtab.html</code> — toast container</li>
+    <li><code>newtab/newtab.js</code> — toast show/hide logic, undo click handler</li>
+    <li><code>newtab/newtab.css</code> — toast styles</li>
+  </ul>
+</div>
