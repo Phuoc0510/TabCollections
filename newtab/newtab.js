@@ -207,8 +207,7 @@ function togglePrivacy() {
   privacyMode = !privacyMode;
   document.body.classList.toggle('privacy-mode', privacyMode);
   chrome.storage.local.set({ privacyMode });
-  const hpBtn = document.getElementById('header-privacy-toggle');
-  if (hpBtn) hpBtn.classList.toggle('active', privacyMode);
+  document.getElementById('fab-privacy')?.classList.toggle('active', privacyMode);
 }
 
 // ── Drag and drop reorder ──
@@ -826,7 +825,22 @@ dropZone.addEventListener('drop', e => {
   reader.readAsDataURL(file);
 });
 
-$('customize-btn').addEventListener('click', showBgModal);
+// ── FAB ──
+
+function closeFab() {
+  document.getElementById('fab').classList.remove('open');
+}
+
+$('fab-toggle').addEventListener('click', e => {
+  e.stopPropagation();
+  document.getElementById('fab').classList.toggle('open');
+});
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('#fab')) closeFab();
+});
+
+$('fab-customize').addEventListener('click', () => { closeFab(); showBgModal(); });
 
 $('bg-cancel-btn').addEventListener('click', () => { $('bg-modal-overlay').style.display = 'none'; });
 $('bg-modal-overlay').addEventListener('click', e => {
@@ -861,14 +875,14 @@ chrome.storage.local.get('privacyMode').then(result => {
   privacyMode = !!result.privacyMode;
   if (privacyMode) {
     document.body.classList.add('privacy-mode');
-    const hpBtn = document.getElementById('header-privacy-toggle');
-    if (hpBtn) hpBtn.classList.add('active');
+    document.getElementById('fab-privacy')?.classList.add('active');
   }
 });
 
-$('header-privacy-toggle').addEventListener('click', togglePrivacy);
+$('fab-privacy').addEventListener('click', () => { closeFab(); togglePrivacy(); });
 
-$('export-btn').addEventListener('click', async () => {
+$('fab-export').addEventListener('click', async () => {
+  closeFab();
   const response = await chrome.runtime.sendMessage({ action: 'exportData' });
   if (response && response.error) { showStatus('Export failed: ' + response.error, 'error'); return; }
   const json = response;
@@ -882,7 +896,7 @@ $('export-btn').addEventListener('click', async () => {
   showStatus('Exported', 'success');
 });
 
-$('import-btn').addEventListener('click', () => $('import-input').click());
+$('fab-import').addEventListener('click', () => { closeFab(); $('import-input').click(); });
 
 $('import-input').addEventListener('change', async e => {
   const file = e.target.files[0];
