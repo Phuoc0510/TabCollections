@@ -39,7 +39,7 @@ async function loadAll() {
   groups = await chrome.runtime.sendMessage({ action: 'getGroups' });
   const data = await chrome.runtime.sendMessage({ action: 'getAllData' });
   for (const g of groups) {
-    g.tabs = Object.values(data.tabs).filter(t => t.groupId === g.id).sort((a, b) => (b.position ?? b.addedAt) - (a.position ?? a.addedAt));
+    g.tabs = Object.values(data.tabs).filter(t => t.groupId === g.id && !t.deletedAt).sort((a, b) => (b.position ?? b.addedAt) - (a.position ?? a.addedAt));
   }
 }
 
