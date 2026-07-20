@@ -28,12 +28,12 @@ function render() {
   empty.style.display = 'none';
 
   list.innerHTML = groups.map(g => `
-    <details class="group-card" data-id="${g.id}">
-      <summary class="group-header">
+    <div class="group-card" data-id="${g.id}">
+      <div class="group-header">
         <span class="group-icon">${g.icon || '📁'}</span>
         <span class="group-name">${esc(g.name)}</span>
         <span class="group-meta">${g.tabs.length} tab${g.tabs.length !== 1 ? 's' : ''}</span>
-      </summary>
+      </div>
       <div class="group-tabs">
         ${g.tabs.map(t => `
           <div class="tab-entry" data-url="${esc(t.url)}">
@@ -44,7 +44,7 @@ function render() {
           </div>
         `).join('')}
       </div>
-    </details>
+    </div>
   `).join('');
 }
 
