@@ -655,20 +655,20 @@ body.has-bg .app-header {
 }
 
 .fab-item {
-  width: 40px;
-  height: 40px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   border: 1px solid var(--border-color);
   background: var(--glass-card-bg);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   color: var(--text-primary);
-  font-size: 18px;
+  font-size: 22px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
   transition: background 0.15s, transform 0.1s;
 }
 
@@ -684,18 +684,18 @@ body.has-bg .app-header {
 }
 
 .fab-toggle {
-  width: 48px;
-  height: 48px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
   border: none;
   background: #4285f4;
   color: #fff;
-  font-size: 22px;
+  font-size: 26px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(66, 133, 244, 0.35);
+  box-shadow: 0 4px 16px rgba(66, 133, 244, 0.4);
   transition: transform 0.2s;
 }
 
