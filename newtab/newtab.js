@@ -120,7 +120,14 @@ async function render() {
         </div>
       </div>
     </article>`;
-  }).join('');
+  }).join('') + `<article class="group-card add-card glass-card" id="new-group-card">
+    <div class="group-card-inner">
+      <button class="group-header add-card-btn" id="new-group-btn">
+        <span class="group-icon">＋</span>
+        <span class="group-name">New Collection</span>
+      </button>
+    </div>
+  </article>`;
 }
 
 $('groups-grid').addEventListener('click', async e => {
@@ -184,6 +191,15 @@ $('groups-grid').addEventListener('click', async e => {
     }
     return;
   }
+
+  if (e.target.closest('#new-group-card') || e.target.closest('#new-group-btn')) {
+    showModal('New Collection', '', '📁', '#4285f4', async (name, icon, color) => {
+      const response = await chrome.runtime.sendMessage({ action: 'createGroup', name, icon, color });
+      if (response && response.error) { showStatus('Create failed: ' + response.error, 'error'); return; }
+      await render();
+      showStatus(`Created "${name}"`, 'success');
+    });
+  }
 });
 
 // Privacy toggle
@@ -224,7 +240,7 @@ $('groups-grid').addEventListener('dragstart', e => {
 $('groups-grid').addEventListener('dragover', e => {
   e.preventDefault();
   if (!dragSrcEl || !dragSrcEl.isConnected) { dragSrcEl = null; return; }
-  const target = e.target.closest('.group-card');
+  const target = e.target.closest('.group-card:not(.add-card)');
   if (!target || target === dragSrcEl) return;
   e.dataTransfer.dropEffect = 'move';
 
@@ -254,7 +270,7 @@ $('groups-grid').addEventListener('dragend', async e => {
   dragSrcEl = null;
   dragSrcId = null;
   if (srcId) {
-    const cards = [...$('groups-grid').querySelectorAll('.group-card')];
+    const cards = [...$('groups-grid').querySelectorAll('.group-card')].filter(c => c.dataset.id);
     const ids = cards.map(c => c.dataset.id);
     await chrome.runtime.sendMessage({ action: 'updateGroupPositions', orderedIds: ids });
   }
@@ -284,7 +300,7 @@ $('groups-grid').addEventListener('dragstart', e => {
 
 $('groups-grid').addEventListener('dragover', e => {
   const entry = e.target.closest('.tab-entry');
-  const targetCard = e.target.closest('.group-card');
+  const targetCard = e.target.closest('.group-card:not(.add-card)');
 
   if (!tabDragSrcEl || !tabDragSrcEl.isConnected) {
     if (!targetCard) return;
@@ -332,6 +348,7 @@ $('groups-grid').addEventListener('drop', async e => {
   if (!targetCard) return;
 
   if (!tabDragSrcEl && !dragSrcEl) {
+    if (!targetCard.dataset.id) return;
     document.querySelectorAll('.group-card.drag-target').forEach(el => el.classList.remove('drag-target'));
     dragTargetGroupId = null;
     try {
@@ -543,15 +560,6 @@ function hideModal() {
   $('name-error').style.display = 'none';
   modalCallback = null;
 }
-
-$('new-group-btn').addEventListener('click', () => {
-  showModal('New Collection', '', '📁', '#4285f4', async (name, icon, color) => {
-    const response = await chrome.runtime.sendMessage({ action: 'createGroup', name, icon, color });
-    if (response && response.error) { showStatus('Create failed: ' + response.error, 'error'); return; }
-    await render();
-    showStatus(`Created "${name}"`, 'success');
-  });
-});
 
 $('modal-confirm-btn').addEventListener('click', () => {
   const name = $('group-name-input').value.trim();
