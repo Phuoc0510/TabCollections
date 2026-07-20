@@ -110,10 +110,10 @@ async function render() {
         </button>
         <div id="group-content-${g.id}" class="group-content"${isExpanded ? '' : ' hidden'}>
           <div class="group-actions">
-            <button class="group-add-tab-btn" data-id="${g.id}">+ Add Tab</button>
-            <button class="group-open-all-btn" data-id="${g.id}">Open All</button>
-            <button class="group-edit-btn" data-id="${g.id}">Edit</button>
-            <button class="group-delete-btn" data-id="${g.id}">Delete</button>
+            <button class="group-add-tab-btn icon-btn" data-id="${g.id}" title="Add Tab">＋</button>
+            <button class="group-open-all-btn icon-btn" data-id="${g.id}" title="Open All">↗</button>
+            <button class="group-edit-btn icon-btn" data-id="${g.id}" title="Edit">✎</button>
+            <button class="group-delete-btn icon-btn" data-id="${g.id}" title="Delete">✕</button>
           </div>
           ${tabsHtml}
         </div>

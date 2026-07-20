@@ -191,31 +191,29 @@
   border-radius: var(--radius-sm);
 }
 
-.group-open-all-btn {
-  color: #4285f4;
-  border-color: #4285f4;
+.icon-btn {
+  width: 28px;
+  height: 28px;
+  padding: 0 !important;
+  font-size: 14px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  background: transparent;
+  cursor: pointer;
+  transition: background var(--transition-fast), color var(--transition-fast);
 }
 
-.group-open-all-btn:hover {
-  background: #e8f0fe;
-}
-
-.group-edit-btn {
-  color: var(--text-secondary);
-}
-
-.group-edit-btn:hover {
+.icon-btn:hover {
   background: var(--hover-bg);
 }
 
-.group-delete-btn {
-  color: var(--danger);
-  border-color: transparent;
-}
-
-.group-delete-btn:hover {
-  background: var(--danger-hover-bg);
-}
+.group-open-all-btn { color: #4285f4; }
+.group-open-all-btn:hover { background: #e8f0fe; }
+.group-delete-btn { color: var(--danger); }
+.group-delete-btn:hover { background: var(--danger-hover-bg); }
 
 /* ── Tab Entries ── */
 .group-tabs {
