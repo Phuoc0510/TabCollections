@@ -2,7 +2,7 @@
 
 > A Chrome/Brave extension for collecting, organizing, and managing browser tabs — right from your new tab page.
 
-[![Version](https://img.shields.io/badge/version-2.0.0-blue)](https://github.com/Phuoc0510/TabCollections/releases)
+[![Version](https://img.shields.io/badge/version-2.1.0-blue)](https://github.com/Phuoc0510/TabCollections/releases)
 [![Manifest](https://img.shields.io/badge/manifest-v3-green)](https://developer.chrome.com/docs/extensions/reference/manifest)
 
 ---
@@ -147,6 +147,12 @@ Data flows through `chrome.storage.local`. The background service worker acts as
 ---
 
 ## Changelog
+
+### v2.1.0
+- Inline collection-title editing and compact collection cards
+- Background image collections with tabbed selection
+- Improved glass UI and popup error/status feedback
+- Quick Save keyboard shortcut (`Ctrl+Shift+Y`, `Command+Shift+Y` on macOS)
 
 ### v2.0.0
 - Drag URL from browser address bar onto group cards
