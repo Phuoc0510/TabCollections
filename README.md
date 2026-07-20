@@ -2,7 +2,7 @@
 
 > A Chrome/Brave extension for collecting, organizing, and managing browser tabs — right from your new tab page.
 
-[![Version](https://img.shields.io/badge/version-2.1.0-blue)](https://github.com/Phuoc0510/TabCollections/releases)
+[![Version](https://img.shields.io/badge/version-2.2.0-blue)](https://github.com/Phuoc0510/TabCollections/releases)
 [![Manifest](https://img.shields.io/badge/manifest-v3-green)](https://developer.chrome.com/docs/extensions/reference/manifest)
 
 ---
@@ -20,6 +20,14 @@
 - **Reorder groups** — drag cards to rearrange, positions persist automatically
 - **Reorder tabs** — rearrange tabs within a group using drag handles
 - **Drop URLs from browser** — drag any URL from the address bar onto a group card to save it
+
+### Search & View
+- **Realtime search** — filter collections and tabs by name, title, or URL
+- **Grid / List toggle** — switch between compact grid and detailed list view
+
+### Side Panel
+- **Quick access** — open a view‑only collection browser in the side panel
+- **Keyboard shortcut** — `Ctrl+Shift+S` (`Cmd+Shift+S` on macOS)
 
 ### Customization
 - **Background images** — presets, paste URL, or drop an image file
@@ -72,8 +80,24 @@ git clone https://github.com/Phuoc0510/TabCollections.git
 | Reorder cards | Drag card by its header |
 | Reorder tabs | Drag `⠿` handle on any tab entry |
 
+### Side Panel
+
+| Action | How |
+|--------|-----|
+| Open Side Panel | `Ctrl+Shift+S` / `Cmd+Shift+S` |
+| Browse collections | Expand/collapse cards |
+| Open a tab | Click any tab entry — opens in a new tab |
+
+### Keyboard Shortcuts
+
+| Shortcut | Action |
+|----------|--------|
+| `Ctrl+Shift+Y` / `Cmd+Shift+Y` | Quick Save current tab |
+| `Ctrl+Shift+S` / `Cmd+Shift+S` | Open Side Panel |
 
 ---
+
+
 
 ## Project Structure
 
@@ -88,6 +112,10 @@ TabCollection/
 │   ├── popup.html
 │   ├── popup.css
 │   └── popup.js
+├── sidepanel/               # Side panel (view-only browser)
+│   ├── sidepanel.html
+│   ├── sidepanel.css
+│   └── sidepanel.js
 ├── newtab/                  # New tab page (chrome_url_overrides)
 │   ├── newtab.html
 │   ├── newtab.css
@@ -134,12 +162,13 @@ npm run format               # Format with Prettier
 │  └────────────┘  └────────────┘  └───────────────┘  │
 └──────────┬────────────────────────────────┬──────────┘
            │ chrome.runtime.sendMessage     │
-           ▼                                ▼
-┌──────────────────┐           ┌──────────────────────┐
-│   Popup (popup/) │           │ New Tab Page (newtab/)│
-│  Save tabs from  │           │  View, manage, drag   │
-│  current window  │           │  collections & tabs   │
-└──────────────────┘           └──────────────────────┘
+            ▼                    ▼                    ▼
+┌──────────────────┐  ┌──────────────────┐  ┌──────────────────────┐
+│   Popup (popup/) │  │ Side Panel       │  │ New Tab Page (newtab/)│
+│  Save tabs from  │  │  View-only       │  │  View, manage, drag   │
+│  current window  │  │  collection      │  │  collections & tabs   │
+│                  │  │  browser         │  │                       │
+└──────────────────┘  └──────────────────┘  └──────────────────────┘
 ```
 
 Data flows through `chrome.storage.local`. The background service worker acts as the single source of truth — both the popup and new tab page send messages via `chrome.runtime.sendMessage` for all mutations.
@@ -147,6 +176,11 @@ Data flows through `chrome.storage.local`. The background service worker acts as
 ---
 
 ## Changelog
+
+### v2.2.0
+- Realtime search — filter collections and tabs by name, title, or URL
+- Grid / List view toggle on the new tab page
+- Side Panel — view-only collection browser (`Ctrl+Shift+S` / `Cmd+Shift+S`)
 
 ### v2.1.0
 - Inline collection-title editing and compact collection cards
