@@ -6,7 +6,8 @@
   "permissions": [
     "storage",
     "contextMenus",
-    "tabs"
+    "tabs",
+    "sidePanel"
   ],
   "background": {
     "service_worker": "background.js"
@@ -14,6 +15,9 @@
   "action": {
     "default_popup": "popup/popup.html",
     "default_title": "Tab Collection"
+  },
+  "side_panel": {
+    "default_path": "sidepanel/sidepanel.html"
   },
   "chrome_url_overrides": {
     "newtab": "newtab/newtab.html"
@@ -33,6 +37,13 @@
         "mac": "Command+Shift+Y"
       },
       "description": "Quick Save current tab to a collection"
+    },
+    "open-side-panel": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+S",
+        "mac": "Command+Shift+S"
+      },
+      "description": "Open Side Panel"
     }
   }
 }

@@ -121,24 +121,6 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
           await deletePage(msg.id);
           sendResponse({ ok: true });
           break;
-        case 'softDeleteGroup':
-          await softDeleteGroup(msg.id);
-          await rebuildContextMenu();
-          sendResponse({ ok: true });
-          break;
-        case 'softDeleteTab':
-          await softDeleteTab(msg.tabId);
-          sendResponse({ ok: true });
-          break;
-        case 'restoreGroup':
-          await restoreGroup(msg.id);
-          await rebuildContextMenu();
-          sendResponse({ ok: true });
-          break;
-        case 'restoreTab':
-          await restoreTab(msg.tabId);
-          sendResponse({ ok: true });
-          break;
         default:
           sendResponse({ error: 'Unknown action' });
       }
@@ -169,6 +151,11 @@ chrome.commands.onCommand.addListener(async (command) => {
   }
 });
 
-setInterval(() => {
-  purgeDeleted().catch(err => console.error('Purge failed:', err));
-}, 15000);
+chrome.commands.onCommand.addListener((command) => {
+  if (command === 'open-side-panel') {
+    chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
+      if (tab) chrome.sidePanel.open({ windowId: tab.windowId });
+    });
+  }
+});
+
