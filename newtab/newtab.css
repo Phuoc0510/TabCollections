@@ -180,18 +180,30 @@
 
 .group-actions {
   display: flex;
-  gap: 6px;
   justify-content: flex-end;
   padding: 8px 12px;
+  position: relative;
 }
 
 .group-actions-menu {
   display: flex;
   gap: 6px;
+  position: absolute;
+  right: 36px;
+  top: 6px;
+  padding: 4px 6px;
+  border-radius: var(--radius-sm);
+  background: var(--glass-card-bg, var(--bg));
+  border: 1px solid var(--border-color);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.12s, visibility 0.12s;
 }
 
-.group-actions:not(.open) .group-actions-menu {
-  display: none;
+.group-actions.open .group-actions-menu {
+  opacity: 1;
+  visibility: visible;
 }
 
 .group-actions-toggle {

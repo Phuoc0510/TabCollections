@@ -901,7 +901,15 @@ $('groups-grid').addEventListener('click', e => {
   const toggle = e.target.closest('.group-actions-toggle');
   if (toggle) {
     const actions = toggle.closest('.group-actions');
-    actions.classList.toggle('open');
+    const wasOpen = actions.classList.contains('open');
+    document.querySelectorAll('.group-actions.open').forEach(el => el.classList.remove('open'));
+    if (!wasOpen) actions.classList.add('open');
+  }
+});
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('.group-actions')) {
+    document.querySelectorAll('.group-actions.open').forEach(el => el.classList.remove('open'));
   }
 });
 
