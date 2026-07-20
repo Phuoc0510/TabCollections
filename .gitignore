@@ -5,3 +5,5 @@ node_modules/
 .idea/
 *.swp
 *.swo
+.freebuff/
+.playwright-mcp/
