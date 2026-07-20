@@ -21,6 +21,14 @@ function esc(s) {
   return d.innerHTML;
 }
 
+function matchesSearch(item, term) {
+  if (!term) return true;
+  const lower = term.toLowerCase();
+  return (item.name && item.name.toLowerCase().includes(lower))
+    || (item.title && item.title.toLowerCase().includes(lower))
+    || (item.url && item.url.toLowerCase().includes(lower));
+}
+
 function faviconUrl(t) {
   if (t.favicon) return t.favicon;
   try { return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(new URL(t.url).hostname)}&sz=16`; }
@@ -61,6 +69,18 @@ async function render() {
   if (!expandedInitialized) {
     groups.forEach(g => expandedGroupIds.add(g.id));
     expandedInitialized = true;
+  }
+
+  const searchTerm = ($('search-input')?.value || '').trim().toLowerCase();
+  if (searchTerm) {
+    groups = groups.map(g => {
+      const matchingTabs = (g.tabs || []).filter(t => matchesSearch(t, searchTerm));
+      const nameMatch = matchesSearch(g, searchTerm);
+      if (nameMatch || matchingTabs.length > 0) {
+        return { ...g, tabs: nameMatch ? g.tabs : matchingTabs };
+      }
+      return null;
+    }).filter(Boolean);
   }
 
   const grid = $('groups-grid');
@@ -807,6 +827,10 @@ $('import-input').addEventListener('change', async e => {
     showStatus('Import failed: ' + err.message, 'error');
   }
   e.target.value = '';
+});
+
+$('search-input')?.addEventListener('input', () => {
+  render();
 });
 
 initTitle();

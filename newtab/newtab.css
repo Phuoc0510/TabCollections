@@ -58,6 +58,27 @@
   gap: 8px;
 }
 
+.search-input {
+  padding: 8px 14px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--glass-bg);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-family: inherit;
+  width: 220px;
+  outline: none;
+  transition: border-color var(--transition-fast);
+}
+
+.search-input:focus {
+  border-color: #4285f4;
+}
+
+.search-input::placeholder {
+  color: var(--text-muted);
+}
+
 /* ── Groups Grid ── */
 .groups-grid {
   display: grid;
