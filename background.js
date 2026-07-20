@@ -121,6 +121,28 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
           await deletePage(msg.id);
           sendResponse({ ok: true });
           break;
+        case 'togglePinGroup':
+          await togglePinGroup(msg.id);
+          sendResponse({ ok: true });
+          break;
+        case 'softDeleteGroup':
+          await softDeleteGroup(msg.id);
+          await rebuildContextMenu();
+          sendResponse({ ok: true });
+          break;
+        case 'softDeleteTab':
+          await softDeleteTab(msg.tabId);
+          sendResponse({ ok: true });
+          break;
+        case 'restoreGroup':
+          await restoreGroup(msg.id);
+          await rebuildContextMenu();
+          sendResponse({ ok: true });
+          break;
+        case 'restoreTab':
+          await restoreTab(msg.tabId);
+          sendResponse({ ok: true });
+          break;
         default:
           sendResponse({ error: 'Unknown action' });
       }
@@ -150,3 +172,7 @@ chrome.commands.onCommand.addListener(async (command) => {
     console.error('Quick Save failed:', err);
   }
 });
+
+setInterval(() => {
+  purgeDeleted().catch(err => console.error('Purge failed:', err));
+}, 15000);
