@@ -18,15 +18,13 @@ async function saveAllData(data) {
 
 async function getGroups() {
   const data = await getAllData();
-  return Object.values(data.groups)
-    .filter(g => !g.deletedAt)
-    .sort((a, b) => (b.position ?? b.updatedAt) - (a.position ?? a.updatedAt));
+  return Object.values(data.groups).sort((a, b) => (b.position ?? b.updatedAt) - (a.position ?? a.updatedAt));
 }
 
 async function getTabsByGroup(groupId) {
   const data = await getAllData();
   return Object.values(data.tabs)
-    .filter(t => t.groupId === groupId && !t.deletedAt)
+    .filter(t => t.groupId === groupId)
     .sort((a, b) => (b.position ?? b.addedAt) - (a.position ?? a.addedAt));
 }
 
@@ -79,59 +77,6 @@ async function removeTab(tabId) {
   const data = await getAllData();
   delete data.tabs[tabId];
   await saveAllData(data);
-}
-
-async function softDeleteGroup(id) {
-  const data = await getAllData();
-  if (!data.groups[id]) throw new Error('Group not found');
-  data.groups[id].deletedAt = Date.now();
-  for (const tab of Object.values(data.tabs)) {
-    if (tab.groupId === id) tab.deletedAt = Date.now();
-  }
-  await saveAllData(data);
-}
-
-async function softDeleteTab(id) {
-  const data = await getAllData();
-  if (!data.tabs[id]) throw new Error('Tab not found');
-  data.tabs[id].deletedAt = Date.now();
-  await saveAllData(data);
-}
-
-async function restoreGroup(id) {
-  const data = await getAllData();
-  if (!data.groups[id]) throw new Error('Group not found');
-  data.groups[id].deletedAt = null;
-  for (const tab of Object.values(data.tabs)) {
-    if (tab.groupId === id) tab.deletedAt = null;
-  }
-  await saveAllData(data);
-}
-
-async function restoreTab(id) {
-  const data = await getAllData();
-  if (!data.tabs[id]) throw new Error('Tab not found');
-  data.tabs[id].deletedAt = null;
-  await saveAllData(data);
-}
-
-async function purgeDeleted() {
-  const data = await getAllData();
-  const cutoff = Date.now() - 30000;
-  let changed = false;
-  for (const [id, group] of Object.entries(data.groups)) {
-    if (group.deletedAt && group.deletedAt < cutoff) {
-      delete data.groups[id];
-      changed = true;
-    }
-  }
-  for (const [id, tab] of Object.entries(data.tabs)) {
-    if (tab.deletedAt && tab.deletedAt < cutoff) {
-      delete data.tabs[id];
-      changed = true;
-    }
-  }
-  if (changed) await saveAllData(data);
 }
 
 async function updateGroupPositions(orderedIds) {
@@ -244,5 +189,5 @@ async function removeGroupFromPage(pageId, groupId) {
 }
 
 if (typeof module !== 'undefined') {
-  module.exports = { getAllData, saveAllData, getGroups, getTabsByGroup, createGroup, updateGroup, deleteGroup, addTabToGroup, removeTab, updateGroupPositions, updateTabPositions, exportData, importData, moveTabToGroup, getPages, createPage, updatePage, deletePage, addGroupToPage, removeGroupFromPage, softDeleteGroup, softDeleteTab, restoreGroup, restoreTab, purgeDeleted };
+  module.exports = { getAllData, saveAllData, getGroups, getTabsByGroup, createGroup, updateGroup, deleteGroup, addTabToGroup, removeTab, updateGroupPositions, updateTabPositions, exportData, importData, moveTabToGroup, getPages, createPage, updatePage, deletePage, addGroupToPage, removeGroupFromPage };
 }

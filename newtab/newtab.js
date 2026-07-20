@@ -152,15 +152,7 @@ $('groups-grid').addEventListener('click', async e => {
 
   const addTabBtn = e.target.closest('.group-add-tab-btn');
   if (addTabBtn) {
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    if (!tab) return;
-    await chrome.runtime.sendMessage({
-      action: 'addTabToGroup',
-      tab: { title: tab.title, url: tab.url, favicon: tab.favIconUrl || '' },
-      groupId: addTabBtn.dataset.id
-    });
-    await render();
-    showStatus(`Tab added`, 'success');
+    showTabPicker(addTabBtn.dataset.id);
     return;
   }
 
@@ -423,6 +415,50 @@ function hideConfirm() {
   $('confirm-cancel-btn').onclick = null;
   $('confirm-overlay').onclick = null;
 }
+
+async function showTabPicker(groupId) {
+  const tabs = await chrome.tabs.query({ currentWindow: true });
+  const list = $('tab-picker-list');
+  const overlay = $('tab-picker-overlay');
+
+  if (tabs.length === 0) {
+    list.innerHTML = '<div class="tab-picker-empty">No open tabs in this window.</div>';
+    overlay.style.display = 'flex';
+    return;
+  }
+
+  list.innerHTML = tabs.map(t => `
+    <div class="tab-picker-entry" data-group-id="${groupId}" data-title="${esc(t.title)}" data-url="${esc(t.url)}" data-favicon="${esc(t.favIconUrl || '')}">
+      ${t.favIconUrl ? `<img src="${esc(t.favIconUrl)}" alt="" onerror="this.style.display='none'">` : ''}
+      <div class="tab-picker-info">
+        <div class="tab-picker-title">${esc(t.title || t.url)}</div>
+      </div>
+    </div>
+  `).join('');
+
+  overlay.style.display = 'flex';
+}
+
+$('tab-picker-overlay').addEventListener('click', async e => {
+  const entry = e.target.closest('.tab-picker-entry');
+  if (!entry) {
+    if (e.target === $('tab-picker-overlay')) $('tab-picker-overlay').style.display = 'none';
+    return;
+  }
+  const groupId = entry.dataset.groupId;
+  await chrome.runtime.sendMessage({
+    action: 'addTabToGroup',
+    tab: {
+      title: entry.dataset.title,
+      url: entry.dataset.url,
+      favicon: entry.dataset.favicon
+    },
+    groupId
+  });
+  $('tab-picker-overlay').style.display = 'none';
+  await render();
+  showStatus('Tab added', 'success');
+});
 
 function renderIconGrid(scroll, term, selectedIcon) {
   const cats = term

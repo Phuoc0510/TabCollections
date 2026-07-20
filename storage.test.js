@@ -17,7 +17,7 @@ function assert(condition, message) {
 }
 
 async function main() {
-  const { getAllData, saveAllData, getGroups, createGroup, updateGroup, deleteGroup, addTabToGroup, getTabsByGroup, removeTab, softDeleteGroup, softDeleteTab, restoreGroup, restoreTab, purgeDeleted, updateGroupPositions, updateTabPositions, exportData, importData, moveTabToGroup, getPages, createPage, updatePage, deletePage, addGroupToPage, removeGroupFromPage } = await import('./storage.js');
+  const { getAllData, saveAllData, getGroups, createGroup, updateGroup, deleteGroup, addTabToGroup, getTabsByGroup, removeTab, updateGroupPositions, updateTabPositions, exportData, importData, moveTabToGroup, getPages, createPage, updatePage, deletePage, addGroupToPage, removeGroupFromPage } = await import('./storage.js');
 
   let stored = {};
   chrome.storage.local.get = async () => stored;
@@ -195,56 +195,6 @@ async function main() {
     assert(false, 'removeGroupFromPage should have thrown');
   } catch (e) {
     assert(e.message === 'Page not found', 'removeGroupFromPage throws for invalid pageId');
-  }
-
-  // Test 25: softDeleteGroup sets deletedAt on group and tabs
-  {
-    let g = await createGroup('DelTest', '🗑️');
-    let tab = await addTabToGroup({ title: 'DelTab', url: 'https://deltest.com' }, g.id);
-    await softDeleteGroup(g.id);
-    let data = await getAllData();
-    assert(data.groups[g.id].deletedAt > 0, 'softDeleteGroup sets deletedAt');
-    assert(data.tabs[tab.id].deletedAt > 0, 'softDeleteGroup deletes tabs too');
-    let groups = await getGroups();
-    assert(!groups.find(x => x.id === g.id), 'getGroups hides soft-deleted group');
-  }
-
-  // Test 27: restoreGroup clears deletedAt
-  {
-    let g = await createGroup('RestTest', '♻️');
-    let tab = await addTabToGroup({ title: 'RestTab', url: 'https://resttest.com' }, g.id);
-    await softDeleteGroup(g.id);
-    await restoreGroup(g.id);
-    let data = await getAllData();
-    assert(data.groups[g.id].deletedAt === null, 'restoreGroup clears deletedAt');
-    assert(data.tabs[tab.id].deletedAt === null, 'restoreGroup restores tabs');
-    let groups = await getGroups();
-    assert(groups.find(x => x.id === g.id), 'getGroups shows restored group');
-  }
-
-  // Test 28: softDeleteTab / restoreTab single tab
-  {
-    let g = await createGroup('SingleTab', '📄');
-    let t1 = await addTabToGroup({ title: 'Keep', url: 'https://keep.com' }, g.id);
-    let t2 = await addTabToGroup({ title: 'Remove', url: 'https://remove.com' }, g.id);
-    await softDeleteTab(t2.id);
-    let tabs = await getTabsByGroup(g.id);
-    assert(tabs.length === 1 && tabs[0].id === t1.id, 'softDeleteTab removes single tab from view');
-    await restoreTab(t2.id);
-    tabs = await getTabsByGroup(g.id);
-    assert(tabs.length === 2, 'restoreTab brings tab back');
-  }
-
-  // Test 29: purgeDeleted hard-deletes expired items
-  {
-    let g = await createGroup('Expired', '⏰');
-    await softDeleteGroup(g.id);
-    let data = await getAllData();
-    data.groups[g.id].deletedAt = Date.now() - 60000;
-    await saveAllData(data);
-    await purgeDeleted();
-    data = await getAllData();
-    assert(!data.groups[g.id], 'purgeDeleted removes expired group');
   }
 
   console.log('\nAll tests passed.');
