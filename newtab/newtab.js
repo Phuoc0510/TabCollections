@@ -110,10 +110,13 @@ async function render() {
         </button>
         <div id="group-content-${g.id}" class="group-content"${isExpanded ? '' : ' hidden'}>
           <div class="group-actions">
-            <button class="group-add-tab-btn icon-btn" data-id="${g.id}" title="Add Tab">＋</button>
-            <button class="group-open-all-btn icon-btn" data-id="${g.id}" title="Open All">↗</button>
-            <button class="group-edit-btn icon-btn" data-id="${g.id}" title="Edit">✎</button>
-            <button class="group-delete-btn icon-btn" data-id="${g.id}" title="Delete">🗑</button>
+            <button class="group-actions-toggle icon-btn" title="Actions">⋯</button>
+            <div class="group-actions-menu">
+              <button class="group-add-tab-btn icon-btn" data-id="${g.id}" title="Add Tab">＋</button>
+              <button class="group-open-all-btn icon-btn" data-id="${g.id}" title="Open All">↗</button>
+              <button class="group-edit-btn icon-btn" data-id="${g.id}" title="Edit">✎</button>
+              <button class="group-delete-btn icon-btn" data-id="${g.id}" title="Delete">🗑</button>
+            </div>
           </div>
           ${tabsHtml}
         </div>
@@ -892,6 +895,14 @@ $('import-input').addEventListener('change', async e => {
 
 $('search-input')?.addEventListener('input', () => {
   render();
+});
+
+$('groups-grid').addEventListener('click', e => {
+  const toggle = e.target.closest('.group-actions-toggle');
+  if (toggle) {
+    const actions = toggle.closest('.group-actions');
+    actions.classList.toggle('open');
+  }
 });
 
 const VIEW_KEY = 'viewMode';

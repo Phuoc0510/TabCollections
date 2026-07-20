@@ -183,13 +183,23 @@
   gap: 6px;
   justify-content: flex-end;
   padding: 8px 12px;
-  opacity: 0;
-  transition: opacity 0.15s;
 }
 
-.group-card:hover .group-actions,
-.group-card:focus-within .group-actions {
-  opacity: 1;
+.group-actions-menu {
+  display: flex;
+  gap: 6px;
+}
+
+.group-actions:not(.open) .group-actions-menu {
+  display: none;
+}
+
+.group-actions-toggle {
+  transition: transform 0.15s;
+}
+
+.group-actions.open .group-actions-toggle {
+  transform: rotate(90deg);
 }
 
 .group-actions button {
