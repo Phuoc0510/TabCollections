@@ -18,11 +18,6 @@ async function loadAll() {
   }
 }
 
-function esc(s) {
-  const d = document.createElement('div');
-  d.textContent = s;
-  return d.innerHTML;
-}
 
 function render() {
   const list = document.getElementById('groups-list');

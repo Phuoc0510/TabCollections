@@ -1,3 +1,15 @@
+function esc(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
+
+function faviconUrl(t) {
+  if (t.favicon || t.favIconUrl) return t.favicon || t.favIconUrl;
+  try { return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(new URL(t.url).hostname)}&sz=16`; }
+  catch { return ''; }
+}
+
 const ICON_CATEGORIES = [
   { name: '💻 Dev', icons: ['💻', '📁', '🗂️', '📄', '🔧', '⚙️', '🌐', '🔗', '🧩', '📊', '🚀', '🔥', '💡', '📦', '🐛', '🧪', '⚡', '🗄️'] },
   { name: '😀 Smileys', icons: ['😀', '😃', '😄', '😁', '😆', '😂', '🤣', '😊', '😇', '🥰', '😘', '😍', '🤩', '😋', '😛', '😝', '😜', '🤪', '🥳', '😎', '🤓', '🧐', '🤔', '🤯', '🥶', '🥵', '😱', '😨', '😰', '😥', '😢', '😭', '😤', '😡', '🤬', '💀', '👻', '🤖', '🎃', '😺', '😸', '😹'] },

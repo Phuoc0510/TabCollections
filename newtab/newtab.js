@@ -15,11 +15,7 @@ function showStatus(msg, type) {
   setTimeout(() => { bar.style.display = 'none'; }, 3000);
 }
 
-function esc(s) {
-  const d = document.createElement('div');
-  d.textContent = s;
-  return d.innerHTML;
-}
+
 
 function matchesSearch(item, term) {
   if (!term) return true;
@@ -29,11 +25,6 @@ function matchesSearch(item, term) {
     || (item.url && item.url.toLowerCase().includes(lower));
 }
 
-function faviconUrl(t) {
-  if (t.favicon) return t.favicon;
-  try { return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(new URL(t.url).hostname)}&sz=16`; }
-  catch { return ''; }
-}
 
 async function loadAll() {
   groups = await chrome.runtime.sendMessage({ action: 'getGroups' });

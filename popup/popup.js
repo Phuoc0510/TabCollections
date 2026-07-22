@@ -100,11 +100,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   let groups = [...initialGroups];
 
-  function faviconUrl(tab) {
-    if (tab.favIconUrl) return tab.favIconUrl;
-    try { return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(new URL(tab.url).hostname)}&sz=16`; }
-    catch { return ''; }
-  }
 
   function renderTabs() {
     tabList.innerHTML = tabs.map(t => `
