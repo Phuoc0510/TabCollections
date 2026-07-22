@@ -39,13 +39,13 @@ function renderTabEntry(t) {
   const displayUrl = t.url.length > 60 ? t.url.slice(0, 57) + '...' : t.url;
   const imgSrc = faviconUrl(t);
   return `<div class="tab-entry" data-id="${t.id}" data-url="${esc(t.url)}" draggable="true">
-    <span class="tab-drag-handle" draggable="true">⠿</span>
+    <span class="tab-drag-handle" draggable="true">${icon('dragHandle')}</span>
     ${imgSrc ? `<img src="${imgSrc}" alt="" onerror="this.style.display='none'">` : ''}
     <div class="tab-info">
       <div class="tab-title">${esc(title)}</div>
       <div class="tab-url">${esc(displayUrl)}</div>
     </div>
-    <button class="tab-delete" data-id="${t.id}">✕</button>
+    <button class="tab-delete" data-id="${t.id}">${icon('x')}</button>
   </div>`;
 }
 
@@ -97,14 +97,14 @@ async function render() {
           <span class="group-icon">${g.icon || '📁'}</span>
           <span class="group-name">${esc(g.name)}</span>
           <span class="group-meta">${g.tabs ? g.tabs.length : 0} tab${(g.tabs ? g.tabs.length : 0) !== 1 ? 's' : ''}</span>
-          <span class="group-actions-toggle" data-id="${g.id}" title="Actions">⋯</span>
-          <span class="group-chevron" aria-hidden="true">⌄</span>
+          <span class="group-actions-toggle" data-id="${g.id}" title="Actions">${icon('moreH')}</span>
+          <span class="group-chevron" aria-hidden="true">${icon('chevronDown')}</span>
         </button>
         <div class="group-actions-menu" data-id="${g.id}">
-          <div class="icon-btn-wrap"><button class="group-add-tab-btn icon-btn" data-id="${g.id}" title="Add Tab">＋</button><span class="tooltip">Add Tab</span></div>
-          <div class="icon-btn-wrap"><button class="group-open-all-btn icon-btn" data-id="${g.id}" title="Open All">↗</button><span class="tooltip">Open All</span></div>
-          <div class="icon-btn-wrap"><button class="group-edit-btn icon-btn" data-id="${g.id}" title="Edit">✎</button><span class="tooltip">Edit</span></div>
-          <div class="icon-btn-wrap"><button class="group-delete-btn icon-btn" data-id="${g.id}" title="Delete">🗑</button><span class="tooltip">Delete</span></div>
+          <div class="icon-btn-wrap"><button class="group-add-tab-btn icon-btn" data-id="${g.id}" title="Add Tab">${icon('plus')}</button><span class="tooltip">Add Tab</span></div>
+          <div class="icon-btn-wrap"><button class="group-open-all-btn icon-btn" data-id="${g.id}" title="Open All">${icon('externalLink')}</button><span class="tooltip">Open All</span></div>
+          <div class="icon-btn-wrap"><button class="group-edit-btn icon-btn" data-id="${g.id}" title="Edit">${icon('edit')}</button><span class="tooltip">Edit</span></div>
+          <div class="icon-btn-wrap"><button class="group-delete-btn icon-btn" data-id="${g.id}" title="Delete">${icon('trash')}</button><span class="tooltip">Delete</span></div>
         </div>
         <div id="group-content-${g.id}" class="group-content"${isExpanded ? '' : ' hidden'}>
           ${tabsHtml}
@@ -114,7 +114,7 @@ async function render() {
   }).join('') + `<article class="group-card add-card glass-card" id="new-group-card">
     <div class="group-card-inner">
       <button class="group-header add-card-btn" id="new-group-btn">
-        <span class="group-icon">＋</span>
+        <span class="group-icon">${icon('plusCircle')}</span>
         <span class="group-name">New Collection</span>
       </button>
     </div>
@@ -199,6 +199,8 @@ function togglePrivacy() {
   document.body.classList.toggle('privacy-mode', privacyMode);
   chrome.storage.local.set({ privacyMode });
   document.getElementById('fab-privacy')?.classList.toggle('active', privacyMode);
+  const iconEl = document.querySelector('#fab-privacy .btn-icon');
+  if (iconEl) iconEl.innerHTML = privacyMode ? icon('eyeOff') : icon('eye');
 }
 
 // ── Drag and drop (merged: card reorder + tab reorder + external drop) ──
@@ -785,7 +787,7 @@ document.addEventListener('click', e => {
 $('fab-customize').addEventListener('click', () => { closeFab(); showBgModal(); });
 
 const THEME_KEY = 'themeMode';
-const THEME_ICONS = { system: '💻', light: '☀️', dark: '🌙' };
+const THEME_ICONS = { system: icon('monitor'), light: icon('sun'), dark: icon('moon') };
 const THEME_LABELS = { system: 'System', light: 'Light', dark: 'Dark' };
 const THEME_CYCLE = ['system', 'light', 'dark'];
 
@@ -804,7 +806,7 @@ function applyTheme(theme) {
   if (btn) {
     btn.querySelector('.fab-label').textContent = 'Theme: ' + THEME_LABELS[theme];
     btn.title = 'Theme: ' + THEME_LABELS[theme];
-    btn.querySelector('.btn-icon').textContent = THEME_ICONS[theme];
+    btn.querySelector('.btn-icon').innerHTML = THEME_ICONS[theme];
   }
 }
 
@@ -833,7 +835,7 @@ function showHelp() {
     <tr><td><b>Popup</b></td><td>Click the extension icon → check tabs → pick a group → <b>Add to Group</b></td></tr>
     <tr><td><b>Right-click</b></td><td>Right-click any tab → <b>Add to Tab Collection</b> → choose a group</td></tr>
     <tr><td><b>Drag URL</b></td><td>Drag a URL from the address bar onto any group card on this page</td></tr>
-    <tr><td><b>Side panel</b></td><td>Press <kbd>Cmd+Shift+S</kbd> → click the <b>+</b> button on any collection</td></tr>
+    <tr><td><b>Side panel</b></td><td>Press <kbd>Cmd+Shift+S</kbd> → click the <b>Add Tab</b> button on any collection</td></tr>
     <tr><td><b>Quick Save</b></td><td>Press <kbd>Cmd+Shift+Y</kbd> to save the current tab via a popup</td></tr>
   </table>
 </section>
@@ -841,47 +843,47 @@ function showHelp() {
 <section class="help-section">
   <h3>📁 Managing Collections</h3>
   <table class="help-table">
-    <tr><td><b>Create</b></td><td>Click the <b>＋ New Collection</b> card at the bottom of the grid</td></tr>
+    <tr><td><b>Create</b></td><td>Click <b>New Collection</b> card at the bottom of the grid</td></tr>
     <tr><td><b>Rename</b></td><td>Click the page title <b>"Tab Collections"</b> to edit it</td></tr>
     <tr><td><b>Expand</b></td><td>Click a collection header to show/hide its tabs</td></tr>
-    <tr><td><b>Actions</b></td><td>Expand a card → click <b>⋯</b> → choose action (add tab / open all / edit / delete)</td></tr>
-    <tr><td><b>Edit</b></td><td>Click <b>⋯</b> → <b>✎</b> to change name, icon, or color</td></tr>
-    <tr><td><b>Delete</b></td><td>Click <b>⋯</b> → <b>🗑</b> to remove a collection and all its tabs</td></tr>
+    <tr><td><b>Actions</b></td><td>Expand a card → click <b>Actions</b> → choose action (add tab / open all / edit / delete)</td></tr>
+    <tr><td><b>Edit</b></td><td>Click <b>Actions</b> → <b>Edit</b> to change name, icon, or color</td></tr>
+    <tr><td><b>Delete</b></td><td>Click <b>Actions</b> → <b>Delete</b> to remove a collection and all its tabs</td></tr>
     <tr><td><b>Reorder</b></td><td>Drag any collection card by its header to rearrange</td></tr>
-    <tr><td><b>Add tabs</b></td><td>Click <b>⋯</b> → <b>＋</b> → pick tabs from the current window (checkboxes)</td></tr>
-    <tr><td><b>Open all</b></td><td>Click <b>⋯</b> → <b>↗</b> to open every tab in a collection</td></tr>
+    <tr><td><b>Add tabs</b></td><td>Click <b>Actions</b> → <b>Add Tab</b> → pick tabs from the current window (checkboxes)</td></tr>
+    <tr><td><b>Open all</b></td><td>Click <b>Actions</b> → <b>Open All</b> to open every tab in a collection</td></tr>
     <tr><td><b>Click a tab</b></td><td>Click any tab entry — navigates the current page to that URL</td></tr>
   </table>
 </section>
 
 <section class="help-section">
   <h3>🔄 Rearranging Tabs</h3>
-  <p>Drag the <b>⠿</b> handle on any tab to reorder within its group. Drag a tab onto another collection card to move it there.</p>
+  <p>Drag the handle on any tab to reorder within its group. Drag a tab onto another collection card to move it there.</p>
 </section>
 
 <section class="help-section">
   <h3>🔍 Search & View</h3>
   <table class="help-table">
     <tr><td><b>Search</b></td><td>Type in the search bar to filter collections and tabs by name, title, or URL</td></tr>
-    <tr><td><b>Grid / List</b></td><td>Click <b>▦</b> / <b>☰</b> in the header to toggle between compact grid and list view</td></tr>
+    <tr><td><b>Grid / List</b></td><td>Click the <b>Grid/List toggle</b> in the header to switch view</td></tr>
   </table>
 </section>
 
 <section class="help-section">
   <h3>🖼️ Customization</h3>
   <table class="help-table">
-    <tr><td><b>Background</b></td><td>Open FAB (<b>⚙</b>) → <b>🎨</b> → pick a preset, paste a URL, or drop an image file</td></tr>
+    <tr><td><b>Background</b></td><td>Open FAB → Customize → pick a preset, paste a URL, or drop an image file</td></tr>
     <tr><td><b>Icons & Colors</b></td><td>When creating/editing a collection, choose from 350+ emoji icons and 10 accent colors</td></tr>
-    <tr><td><b>Theme</b></td><td>Open FAB → <b>💻/☀️/🌙</b> to cycle between System / Light / Dark</td></tr>
+    <tr><td><b>Theme</b></td><td>Open FAB → <b>Theme</b> toggle to cycle System / Light / Dark</td></tr>
   </table>
 </section>
 
 <section class="help-section">
   <h3>📊 Data Management</h3>
   <table class="help-table">
-    <tr><td><b>Export</b></td><td>Open FAB → <b>📤</b> to download all collections as a JSON file</td></tr>
-    <tr><td><b>Import</b></td><td>Open FAB → <b>📥</b> to restore collections from a JSON file</td></tr>
-    <tr><td><b>Privacy</b></td><td>Open FAB → <b>👁</b> to blur tab titles and URLs on screen</td></tr>
+    <tr><td><b>Export</b></td><td>Open FAB → <b>Export</b> to download all collections as a JSON file</td></tr>
+    <tr><td><b>Import</b></td><td>Open FAB → <b>Import</b> to restore collections from a JSON file</td></tr>
+    <tr><td><b>Privacy</b></td><td>Open FAB → Privacy toggle to blur tab titles and URLs on screen</td></tr>
   </table>
 </section>
 
@@ -952,6 +954,8 @@ chrome.storage.local.get('privacyMode').then(result => {
   if (privacyMode) {
     document.body.classList.add('privacy-mode');
     document.getElementById('fab-privacy')?.classList.add('active');
+    const iconEl = document.querySelector('#fab-privacy .btn-icon');
+    if (iconEl) iconEl.innerHTML = icon('eyeOff');
   }
 });
 

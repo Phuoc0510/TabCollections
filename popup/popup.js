@@ -118,7 +118,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function renderGroups() {
     groupSelect.innerHTML = groups.map(g => `<option value="${g.id}">${g.icon} ${g.name}</option>`).join('') +
-      '<option value="__new__">➕ New Group...</option>';
+      '<option value="__new__">+ New Group...</option>';
     if (!groupSelect.value && groups.length > 0) {
       groupSelect.value = groups[0].id;
     }
@@ -150,7 +150,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const term = (document.getElementById('icon-search')?.value || '').toLowerCase().trim();
 
     container.innerHTML =
-      '<input type="text" class="icon-search" id="icon-search" placeholder="🔍 Search icons...">' +
+      '<input type="text" class="icon-search" id="icon-search" placeholder="Search icons...">' +
       '<div class="icon-grid-scroll"></div>';
 
     const scroll = container.querySelector('.icon-grid-scroll');

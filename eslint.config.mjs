@@ -13,6 +13,7 @@ export default [
         chrome: 'writable',
         esc: 'writable',
         faviconUrl: 'writable',
+        icon: 'writable',
         ICON_CATEGORIES: 'readonly',
         ICONS: 'readonly',
         COLORS: 'readonly',
@@ -46,7 +47,7 @@ export default [
     },
   },
   {
-    files: ['constants.js'],
+    files: ['constants.js', 'icons.js'],
     rules: {
       'no-unused-vars': 'off',
     },

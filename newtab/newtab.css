@@ -643,9 +643,7 @@ body.has-bg .app-header {
   height: 48px;
   border-radius: 50%;
   border: 1px solid var(--border-color);
-  background: var(--glass-card-bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  background: var(--bg-primary, #ffffff);
   color: var(--text-primary);
   font-size: 22px;
   cursor: pointer;
@@ -653,12 +651,13 @@ body.has-bg .app-header {
   align-items: center;
   justify-content: center;
   box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-  transition: background 0.15s, transform 0.1s;
+  transition: transform 0.1s;
 }
 
 .fab-item:hover {
-  background: var(--hover-bg);
-  transform: scale(1.1);
+  background: var(--bg-primary, #ffffff) !important;
+  transform: scale(1.15);
+  opacity: 1 !important;
 }
 
 .fab-label {
@@ -698,21 +697,20 @@ body.has-bg .app-header {
   height: 56px;
   border-radius: 50%;
   border: 1px solid var(--border-color);
-  background: var(--glass-card-bg);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: var(--bg-primary, #ffffff);
   color: var(--text-primary);
-  font-size: 26px;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-  transition: transform 0.2s, background 0.15s;
+  transition: transform 0.2s;
 }
 
 .fab-toggle:hover {
-  transform: scale(1.08);
+  background: var(--bg-primary, #ffffff) !important;
+  transform: scale(1.12);
+  opacity: 1 !important;
 }
 
 .fab.open .fab-toggle {
