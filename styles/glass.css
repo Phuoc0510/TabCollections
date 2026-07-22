@@ -24,14 +24,14 @@
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) .glass-strong {
-    background: rgba(20, 30, 35, 0.8);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(20, 30, 35, 0.55);
+    border: 1px solid rgba(255, 255, 255, 0.06);
   }
 }
 
 :root[data-theme="dark"] .glass-strong {
-  background: rgba(20, 30, 35, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(20, 30, 35, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
 .glass-hover {
