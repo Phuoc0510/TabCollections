@@ -1,8 +1,3 @@
-@import '../styles/variables.css';
-@import '../styles/glass.css';
-@import '../styles/components.css';
-@import '../styles/animations.css';
-
 .popup-app {
   width: 400px;
   max-height: 500px;
@@ -65,7 +60,7 @@
 
 .tab-item input[type="checkbox"] {
   margin: 0;
-  accent-color: #4285f4;
+  accent-color: var(--accent);
 }
 
 .tab-item img {
@@ -167,13 +162,13 @@
 }
 
 .popup-icons .icon-item:hover {
-  border-color: #ccc;
+  border-color: var(--border-color-hover);
   background: var(--hover-bg);
 }
 
 .popup-icons .icon-item.selected {
-  border-color: #4285f4;
-  background: #e8f0fe;
+  border-color: var(--accent);
+  background: var(--accent-selected-bg);
 }
 
 .popup-icons .icon-search {
@@ -187,7 +182,7 @@
 }
 
 .popup-icons .icon-search:focus {
-  border-color: #4285f4;
+  border-color: var(--accent);
 }
 
 /* ── Color Picker ── */

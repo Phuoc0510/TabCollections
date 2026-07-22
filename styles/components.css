@@ -1,14 +1,12 @@
-@import 'variables.css';
-
 /* Buttons */
 .btn-primary {
-  background: #4285f4;
+  background: var(--accent);
   color: #fff;
-  border-color: #4285f4;
+  border-color: var(--accent);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
 }
-.btn-primary:hover { background: #3b78e7; }
+.btn-primary:hover { background: var(--accent-hover); }
 .btn-primary:disabled {
   background: rgba(204, 204, 204, 0.6);
   border-color: transparent;
@@ -94,7 +92,7 @@
 }
 
 .modal-input:focus {
-  border-color: #4285f4;
+  border-color: var(--accent);
 }
 
 .modal-input.error {
@@ -146,7 +144,7 @@
 }
 
 .icon-search:focus {
-  border-color: #4285f4;
+  border-color: var(--accent);
 }
 
 .icon-grid-scroll {
@@ -196,13 +194,13 @@
 }
 
 .icon-item:hover {
-  border-color: #ccc;
+  border-color: var(--border-color-hover);
   background: var(--hover-bg);
 }
 
 .icon-item.selected {
-  border-color: #4285f4;
-  background: #e8f0fe;
+  border-color: var(--accent);
+  background: var(--accent-selected-bg);
 }
 
 /* Color picker shared */
@@ -222,11 +220,11 @@
 }
 
 .pick-color:hover {
-  border-color: #4285f4;
+  border-color: var(--accent);
   transform: scale(1.1);
 }
 
 .pick-color.selected {
-  border-color: #4285f4;
-  box-shadow: 0 0 0 2px #fff, 0 0 0 4px #4285f4;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--accent);
 }

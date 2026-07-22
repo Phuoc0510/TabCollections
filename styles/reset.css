@@ -28,7 +28,7 @@ button {
 
 button:hover {
   background: var(--hover-bg);
-  border-color: #4285f4;
+  border-color: var(--accent);
 }
 
 input, select {
@@ -37,5 +37,5 @@ input, select {
 }
 
 input:focus, select:focus {
-  border-color: #4285f4;
+  border-color: var(--accent);
 }
