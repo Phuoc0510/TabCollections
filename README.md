@@ -2,7 +2,7 @@
 
 > A Chrome/Brave extension for collecting, organizing, and managing browser tabs — right from your new tab page.
 
-[![Version](https://img.shields.io/badge/version-2.2.0-blue)](https://github.com/Phuoc0510/TabCollections/releases)
+[![Version](https://img.shields.io/badge/version-2.3.0-blue)](https://github.com/Phuoc0510/TabCollections/releases)
 [![Manifest](https://img.shields.io/badge/manifest-v3-green)](https://developer.chrome.com/docs/extensions/reference/manifest)
 
 ---
@@ -10,30 +10,42 @@
 ## Features
 
 ### Collection Management
-- **Save tabs** via popup or right-click context menu
+- **Save tabs** via popup, right-click context menu, or side panel
 - **Organize by topic** — create groups with custom icons (350+ emoji) and accent colors
 - **Inline view** — saved tabs displayed directly on your new tab page
 - **Expandable cards** — compact group cards with collapsible content
 - **Open All** — restore an entire collection in one click
+- **Privacy mode** — blur tab titles and URLs with one toggle
 
 ### Drag & Drop
 - **Reorder groups** — drag cards to rearrange, positions persist automatically
 - **Reorder tabs** — rearrange tabs within a group using drag handles
+- **Cross-group moves** — drag a tab from one group to another
 - **Drop URLs from browser** — drag any URL from the address bar onto a group card to save it
 
 ### Search & View
 - **Realtime search** — filter collections and tabs by name, title, or URL
 - **Grid / List toggle** — switch between compact grid and detailed list view
 
+### Tab Picker
+- **Add from open tabs** — click **+** on any card to pick from all open tabs
+- **Multi-select** — choose multiple tabs at once with checkboxes
+
 ### Side Panel
-- **Quick access** — open a view‑only collection browser in the side panel
+- **Quick access** — view-only collection browser in the Chrome side panel
 - **Keyboard shortcut** — `Ctrl+Shift+S` (`Cmd+Shift+S` on macOS)
+- **Quick add** — `+` button to save the current tab to any collection
+- **Auto-close** — opens links in a new tab and closes the panel
+
+### Theme
+- **Light / Dark / System** — choose your preference via the floating action button
+- **Improved dark mode** — optimized contrast and glass transparency for readability
 
 ### Customization
 - **Background images** — presets, paste URL, or drop an image file
 - **350+ icons** across 12 categories with live search
 - **10 accent colors** per collection
-- **Automatic dark mode** — follows system preference
+- **Editable title** — click the page title to rename
 
 ### Data Management
 - **Export / Import** — backup and restore collections as JSON
@@ -69,24 +81,19 @@ git clone https://github.com/Phuoc0510/TabCollections.git
 | **Popup** | Click extension icon → check tabs → select group → **Add to Group** |
 | **Context menu** | Right-click any tab → **Add to Tab Collection** → choose group |
 | **Drag URL** | Drag URL from address bar onto any group card on the new tab page |
+| **Side panel** | Open with `Cmd+Shift+S` → click **+** on any collection |
+| **Quick Save** | `Cmd+Shift+Y` to save current tab via popup |
 
-### Organizing
+### Managing Collections
 
 | Action | How |
 |--------|-----|
-| Create collection | Click **+ New Collection** |
-| Edit collection | Expand card → **Edit** |
-| Delete collection | Expand card → **Delete** |
+| Create collection | Click **＋ New Collection** card at the end of the grid |
+| Edit collection | Expand card → click **⋯** → **✎** |
+| Delete collection | Expand card → click **⋯** → **🗑** |
 | Reorder cards | Drag card by its header |
-| Reorder tabs | Drag `⠿` handle on any tab entry |
-
-### Side Panel
-
-| Action | How |
-|--------|-----|
-| Open Side Panel | `Ctrl+Shift+S` / `Cmd+Shift+S` |
-| Browse collections | Expand/collapse cards |
-| Open a tab | Click any tab entry — opens in a new tab |
+| Add tabs | Expand card → click **⋯** → **＋** → choose from open tabs |
+| Open all tabs | Expand card → click **⋯** → **↗** |
 
 ### Keyboard Shortcuts
 
@@ -95,9 +102,19 @@ git clone https://github.com/Phuoc0510/TabCollections.git
 | `Ctrl+Shift+Y` / `Cmd+Shift+Y` | Quick Save current tab |
 | `Ctrl+Shift+S` / `Cmd+Shift+S` | Open Side Panel |
 
+### Floating Action Button (FAB)
+
+The **⚙** button at the bottom-right gives quick access to:
+
+| Button | Action |
+|--------|--------|
+| 📤 | Export collections as JSON |
+| 📥 | Import collections from JSON |
+| 🎨 | Customize background image |
+| 💻 / ☀️ / 🌙 | Toggle theme (System / Light / Dark) |
+| 👁 | Toggle privacy mode |
+
 ---
-
-
 
 ## Project Structure
 
@@ -112,7 +129,7 @@ TabCollection/
 │   ├── popup.html
 │   ├── popup.css
 │   └── popup.js
-├── sidepanel/               # Side panel (view-only browser)
+├── sidepanel/               # Side panel (collection browser)
 │   ├── sidepanel.html
 │   ├── sidepanel.css
 │   └── sidepanel.js
@@ -162,20 +179,28 @@ npm run format               # Format with Prettier
 │  └────────────┘  └────────────┘  └───────────────┘  │
 └──────────┬────────────────────────────────┬──────────┘
            │ chrome.runtime.sendMessage     │
-            ▼                    ▼                    ▼
+           ▼                    ▼                    ▼
 ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────────┐
 │   Popup (popup/) │  │ Side Panel       │  │ New Tab Page (newtab/)│
-│  Save tabs from  │  │  View-only       │  │  View, manage, drag   │
-│  current window  │  │  collection      │  │  collections & tabs   │
-│                  │  │  browser         │  │                       │
+│  Save tabs from  │  │  Browse & add    │  │  View, manage, drag   │
+│  current window  │  │  collections     │  │  collections & tabs   │
 └──────────────────┘  └──────────────────┘  └──────────────────────┘
 ```
 
-Data flows through `chrome.storage.local`. The background service worker acts as the single source of truth — both the popup and new tab page send messages via `chrome.runtime.sendMessage` for all mutations.
+Data flows through `chrome.storage.local`. The background service worker acts as the single source of truth — the popup, side panel, and new tab page all send messages via `chrome.runtime.sendMessage` for all mutations.
 
 ---
 
 ## Changelog
+
+### v2.3.0
+- Theme picker — toggle between Light / Dark / System from the FAB
+- Tab picker — multi-select from open tabs when adding to a collection
+- Floating Action Button (FAB) — export, import, customize, theme, privacy
+- Icon-only action buttons with ⋯ dropdown menu on each card
+- Redesigned header — search bar expands between title and controls
+- New Collection card at the end of the grid (replaces header button)
+- Improved dark mode readability (opaque glass, brighter text)
 
 ### v2.2.0
 - Realtime search — filter collections and tabs by name, title, or URL
@@ -186,7 +211,7 @@ Data flows through `chrome.storage.local`. The background service worker acts as
 - Inline collection-title editing and compact collection cards
 - Background image collections with tabbed selection
 - Improved glass UI and popup error/status feedback
-- Quick Save keyboard shortcut (`Ctrl+Shift+Y`, `Command+Shift+Y` on macOS)
+- Quick Save keyboard shortcut (`Ctrl+Shift+Y` / `Cmd+Shift+Y`)
 
 ### v2.0.0
 - Drag URL from browser address bar onto group cards
