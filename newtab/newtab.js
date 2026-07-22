@@ -946,7 +946,9 @@ async function toggleView() {
   const current = document.getElementById('groups-view').classList.contains('view-list') ? 'list' : 'grid';
   const next = current === 'grid' ? 'list' : 'grid';
   document.getElementById('groups-view').classList.toggle('view-list', next === 'list');
-  document.getElementById('view-toggle-btn').textContent = next === 'grid' ? '▦ Grid' : '☰ List';
+  const btn = document.getElementById('view-toggle-btn');
+  btn.textContent = next === 'grid' ? '▦' : '☰';
+  btn.title = next === 'grid' ? 'Switch to List' : 'Switch to Grid';
   await chrome.storage.local.set({ [VIEW_KEY]: next });
 }
 
@@ -956,7 +958,9 @@ $('view-toggle-btn').addEventListener('click', toggleView);
 loadViewMode().then(mode => {
   if (mode === 'list') {
     document.getElementById('groups-view').classList.add('view-list');
-    document.getElementById('view-toggle-btn').textContent = '☰ List';
+    const btn = document.getElementById('view-toggle-btn');
+    btn.textContent = '☰';
+    btn.title = 'Switch to Grid';
   }
 });
 
