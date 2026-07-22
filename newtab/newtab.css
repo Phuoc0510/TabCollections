@@ -13,11 +13,9 @@
 
 .app-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
   margin-bottom: 32px;
-  flex-wrap: wrap;
-  gap: 12px;
+  gap: 16px;
   border-radius: var(--radius-xl);
   padding: 16px 20px;
 }
@@ -28,7 +26,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  min-width: 0;
+  flex-shrink: 0;
   background: linear-gradient(135deg, var(--text-primary), var(--text-secondary));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -51,11 +49,6 @@
 
 .app-title-input:focus {
   border-color: #4285f4;
-}
-
-.header-actions {
-  display: flex;
-  gap: 8px;
 }
 
 .btn-ghost {
@@ -90,24 +83,33 @@
 }
 
 .search-input {
-  padding: 8px 14px;
+  flex: 1;
+  max-width: 480px;
+  min-width: 160px;
+  padding: 10px 16px;
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
   background: var(--glass-bg);
   color: var(--text-primary);
-  font-size: 13px;
+  font-size: 14px;
   font-family: inherit;
-  width: 220px;
   outline: none;
-  transition: border-color var(--transition-fast);
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 .search-input:focus {
   border-color: #4285f4;
+  box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.12);
 }
 
 .search-input::placeholder {
   color: var(--text-muted);
+}
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
 /* ── Groups Grid ── */
