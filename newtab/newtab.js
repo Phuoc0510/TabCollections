@@ -909,6 +909,15 @@ $('help-overlay').addEventListener('click', e => {
   if (e.target === $('help-overlay')) $('help-overlay').style.display = 'none';
 });
 
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    ['help-overlay', 'bg-modal-overlay', 'tab-picker-overlay', 'modal-overlay'].forEach(id => {
+      const el = $(id);
+      if (el && el.style.display === 'flex') el.style.display = 'none';
+    });
+  }
+});
+
 $('bg-cancel-btn').addEventListener('click', () => { $('bg-modal-overlay').style.display = 'none'; });
 $('bg-modal-overlay').addEventListener('click', e => {
   if (e.target === $('bg-modal-overlay')) $('bg-modal-overlay').style.display = 'none';

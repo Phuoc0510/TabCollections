@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,7 +14,7 @@
   <link rel="stylesheet" href="newtab.css">
 </head>
 <body>
-  <div id="app" class="app">
+  <div id="app" class="app" role="main">
     <header class="app-header glass-strong">
       <h1 id="app-title" class="app-title">Tab Collections</h1>
       <input type="search" id="search-input" class="search-input" placeholder="🔍 Search collections and tabs...">
@@ -33,7 +33,7 @@
     </div>
   </div>
 
-  <div id="fab" class="fab">
+  <div id="fab" class="fab" role="navigation" aria-label="Quick actions">
     <div id="fab-menu" class="fab-menu">
       <button id="fab-export" class="fab-item" title="Export"><span class="fab-label">Export</span><span class="btn-icon">📤</span></button>
       <button id="fab-import" class="fab-item" title="Import"><span class="fab-label">Import</span><span class="btn-icon">📥</span></button>
@@ -47,7 +47,7 @@
 
   <input type="file" id="import-input" accept=".json" style="display:none">
 
-  <div id="modal-overlay" class="modal-overlay" style="display:none">
+  <div id="modal-overlay" class="modal-overlay" style="display:none" role="dialog" aria-modal="true" aria-labelledby="modal-title">
     <div id="modal" class="modal">
       <h2 id="modal-title">New Collection</h2>
       <label for="group-name-input">Name <span class="required">*</span></label>
@@ -64,9 +64,9 @@
     </div>
   </div>
 
-  <div id="bg-modal-overlay" class="modal-overlay" style="display:none">
+  <div id="bg-modal-overlay" class="modal-overlay" style="display:none" role="dialog" aria-modal="true" aria-labelledby="bg-modal-title">
     <div id="bg-modal" class="modal" style="width:500px">
-      <h2>Customize Background</h2>
+      <h2 id="bg-modal-title">Customize Background</h2>
       <label>Presets</label>
       <div id="bg-presets" class="bg-presets"></div>
       <div id="bg-drop-zone" class="bg-drop-zone">
@@ -82,7 +82,7 @@
     </div>
   </div>
 
-  <div id="confirm-overlay" class="modal-overlay" style="display:none">
+  <div id="confirm-overlay" class="modal-overlay" style="display:none" role="alertdialog" aria-modal="true" aria-labelledby="confirm-message">
     <div id="confirm-modal" class="modal">
       <p id="confirm-message" class="confirm-message"></p>
       <div class="modal-actions">
@@ -97,9 +97,9 @@
     <div class="icon-grid-scroll"></div>
   </div>
 
-  <div id="tab-picker-overlay" class="modal-overlay" style="display:none">
+  <div id="tab-picker-overlay" class="modal-overlay" style="display:none" role="dialog" aria-modal="true" aria-labelledby="tab-picker-title">
     <div id="tab-picker-modal" class="modal" style="width:420px;max-height:80vh;display:flex;flex-direction:column">
-      <h2>Select tabs to add</h2>
+      <h2 id="tab-picker-title">Select tabs to add</h2>
       <div id="tab-picker-list" class="tab-picker-list"></div>
       <div class="modal-actions" style="margin-top:12px;border-top:1px solid var(--border-color);padding-top:12px">
         <button id="tab-picker-cancel-btn" class="btn-ghost">Cancel</button>
@@ -108,10 +108,10 @@
     </div>
   </div>
 
-  <div id="help-overlay" class="modal-overlay" style="display:none">
+  <div id="help-overlay" class="modal-overlay" style="display:none" role="dialog" aria-modal="true" aria-labelledby="help-modal-title">
     <div id="help-modal" class="modal" style="width:640px;max-height:85vh;display:flex;flex-direction:column">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-        <h2 style="margin:0">❓ Help & Guide</h2>
+        <h2 id="help-modal-title" style="margin:0">❓ Help & Guide</h2>
         <button id="help-close-btn" class="btn-ghost" style="font-size:18px;padding:4px 10px">✕</button>
       </div>
       <div id="help-content" class="help-content"></div>
