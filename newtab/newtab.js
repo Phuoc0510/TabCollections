@@ -101,10 +101,10 @@ async function render() {
           <span class="group-chevron" aria-hidden="true">⌄</span>
         </button>
         <div class="group-actions-menu" data-id="${g.id}">
-          <button class="group-add-tab-btn icon-btn" title="Add Tab">＋</button>
-          <button class="group-open-all-btn icon-btn" title="Open All">↗</button>
-          <button class="group-edit-btn icon-btn" title="Edit">✎</button>
-          <button class="group-delete-btn icon-btn" title="Delete">🗑</button>
+          <div class="icon-btn-wrap"><button class="group-add-tab-btn icon-btn" data-id="${g.id}" title="Add Tab">＋</button><span class="tooltip">Add Tab</span></div>
+          <div class="icon-btn-wrap"><button class="group-open-all-btn icon-btn" data-id="${g.id}" title="Open All">↗</button><span class="tooltip">Open All</span></div>
+          <div class="icon-btn-wrap"><button class="group-edit-btn icon-btn" data-id="${g.id}" title="Edit">✎</button><span class="tooltip">Edit</span></div>
+          <div class="icon-btn-wrap"><button class="group-delete-btn icon-btn" data-id="${g.id}" title="Delete">🗑</button><span class="tooltip">Delete</span></div>
         </div>
         <div id="group-content-${g.id}" class="group-content"${isExpanded ? '' : ' hidden'}>
           ${tabsHtml}
