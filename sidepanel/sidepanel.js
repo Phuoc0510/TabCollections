@@ -68,7 +68,7 @@ document.getElementById('groups-list').addEventListener('click', async e => {
   const tabEntry = e.target.closest('.tab-entry');
   if (tabEntry) {
     chrome.tabs.create({ url: tabEntry.dataset.url });
-    chrome.sidePanel.close();
+    chrome.windows.getCurrent(w => chrome.sidePanel.close(w.id));
   }
 });
 
