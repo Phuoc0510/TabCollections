@@ -961,7 +961,6 @@ function showHelp() {
 }
 
 $('fab-help').addEventListener('click', () => { closeFab(); showHelp(); });
-$('header-help-btn').addEventListener('click', showHelp);
 
 $('help-close-btn').addEventListener('click', () => { $('help-overlay').style.display = 'none'; });
 $('help-overlay').addEventListener('click', e => {
