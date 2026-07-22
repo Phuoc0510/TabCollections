@@ -4,11 +4,11 @@
   --text-primary: #1a1a2e;
   --text-secondary: #4a4a6a;
   --text-muted: #8888aa;
-  --glass-bg: rgba(255, 255, 255, 0.55);
+  --glass-bg: rgba(255, 255, 255, 0.35);
   --glass-border: rgba(255, 255, 255, 0.4);
   --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
   --glass-blur: 20px;
-  --glass-card-bg: rgba(255, 255, 255, 0.65);
+  --glass-card-bg: rgba(255, 255, 255, 0.4);
   --glass-card-border: rgba(255, 255, 255, 0.45);
   --glass-card-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
   --border-color: #e0e0e0;
