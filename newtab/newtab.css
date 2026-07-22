@@ -365,13 +365,17 @@
   padding: 4px 6px;
   font-size: 14px;
   border-radius: 4px;
-  opacity: 0.5;
+  opacity: 0;
   flex-shrink: 0;
   transition: opacity var(--transition-fast), background var(--transition-fast);
 }
 
+.tab-entry:hover .tab-delete {
+  opacity: 0.5;
+}
+
 .tab-delete:hover {
-  opacity: 1;
+  opacity: 1 !important;
   background: var(--danger-hover-bg);
 }
 
@@ -383,7 +387,12 @@
   flex-shrink: 0;
   user-select: none;
   line-height: 1;
-  transition: color var(--transition-fast);
+  opacity: 0;
+  transition: opacity var(--transition-fast), color var(--transition-fast);
+}
+
+.tab-entry:hover .tab-drag-handle {
+  opacity: 1;
 }
 
 .tab-drag-handle:hover {
