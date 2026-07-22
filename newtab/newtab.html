@@ -20,6 +20,7 @@
       <input type="search" id="search-input" class="search-input" placeholder="🔍 Search collections and tabs...">
       <div class="header-actions">
         <button id="view-toggle-btn" class="btn-ghost" title="Switch to List"><span class="btn-icon">▦</span><span class="btn-label">Grid view</span></button>
+        <button id="header-help-btn" class="btn-ghost" title="Help" style="font-size:16px">❓</button>
       </div>
     </header>
 
@@ -28,7 +29,7 @@
     <div id="groups-view">
       <div id="groups-grid" class="groups-grid animate-stagger"></div>
       <div id="empty-state" class="empty-state" style="display:none">
-        <p>No collections yet. Use the extension popup to add tabs, or click "+ New Collection" to start.</p>
+        <p>No collections yet. Click <b>＋ New Collection</b> card below to start, or open the FAB (<b>⚙</b>) → <b>❓</b> for help.</p>
       </div>
     </div>
   </div>
@@ -40,6 +41,7 @@
       <button id="fab-customize" class="fab-item" title="Customize"><span class="fab-label">Customize</span><span class="btn-icon">🎨</span></button>
       <button id="fab-theme" class="fab-item" title="Theme: System"><span class="fab-label">Theme: System</span><span class="btn-icon">💻</span></button>
       <button id="fab-privacy" class="fab-item" title="Privacy"><span class="fab-label">Privacy</span><span class="btn-icon">👁</span></button>
+      <button id="fab-help" class="fab-item" title="Help"><span class="fab-label">Help</span><span class="btn-icon">❓</span></button>
     </div>
     <button id="fab-toggle" class="fab-toggle">⚙</button>
   </div>
@@ -104,6 +106,16 @@
         <button id="tab-picker-cancel-btn" class="btn-ghost">Cancel</button>
         <button id="tab-picker-add-btn" class="btn-primary">Add Selected</button>
       </div>
+    </div>
+  </div>
+
+  <div id="help-overlay" class="modal-overlay" style="display:none">
+    <div id="help-modal" class="modal" style="width:640px;max-height:85vh;display:flex;flex-direction:column">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <h2 style="margin:0">❓ Help & Guide</h2>
+        <button id="help-close-btn" class="btn-ghost" style="font-size:18px;padding:4px 10px">✕</button>
+      </div>
+      <div id="help-content" class="help-content"></div>
     </div>
   </div>
 

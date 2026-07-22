@@ -876,6 +876,98 @@ $('fab-theme').addEventListener('click', async () => {
   applyTheme(next);
 });
 
+function showHelp() {
+  const overlay = $('help-overlay');
+  const content = $('help-content');
+  content.innerHTML = `
+<section class="help-section">
+  <h3>📚 Getting Started</h3>
+  <p>Tab Collection lets you save, organize, and quickly access your browser tabs. All data is stored locally in your browser and never sent anywhere.</p>
+</section>
+
+<section class="help-section">
+  <h3>💾 Saving Tabs</h3>
+  <table class="help-table">
+    <tr><td><b>Popup</b></td><td>Click the extension icon → check tabs → pick a group → <b>Add to Group</b></td></tr>
+    <tr><td><b>Right-click</b></td><td>Right-click any tab → <b>Add to Tab Collection</b> → choose a group</td></tr>
+    <tr><td><b>Drag URL</b></td><td>Drag a URL from the address bar onto any group card on this page</td></tr>
+    <tr><td><b>Side panel</b></td><td>Press <kbd>Cmd+Shift+S</kbd> → click the <b>+</b> button on any collection</td></tr>
+    <tr><td><b>Quick Save</b></td><td>Press <kbd>Cmd+Shift+Y</kbd> to save the current tab via a popup</td></tr>
+  </table>
+</section>
+
+<section class="help-section">
+  <h3>📁 Managing Collections</h3>
+  <table class="help-table">
+    <tr><td><b>Create</b></td><td>Click the <b>＋ New Collection</b> card at the bottom of the grid</td></tr>
+    <tr><td><b>Rename</b></td><td>Click the page title <b>"Tab Collections"</b> to edit it</td></tr>
+    <tr><td><b>Expand</b></td><td>Click a collection header to show/hide its tabs</td></tr>
+    <tr><td><b>Actions</b></td><td>Expand a card → click <b>⋯</b> → choose action (add tab / open all / edit / delete)</td></tr>
+    <tr><td><b>Edit</b></td><td>Click <b>⋯</b> → <b>✎</b> to change name, icon, or color</td></tr>
+    <tr><td><b>Delete</b></td><td>Click <b>⋯</b> → <b>🗑</b> to remove a collection and all its tabs</td></tr>
+    <tr><td><b>Reorder</b></td><td>Drag any collection card by its header to rearrange</td></tr>
+    <tr><td><b>Add tabs</b></td><td>Click <b>⋯</b> → <b>＋</b> → pick tabs from the current window (checkboxes)</td></tr>
+    <tr><td><b>Open all</b></td><td>Click <b>⋯</b> → <b>↗</b> to open every tab in a collection</td></tr>
+    <tr><td><b>Click a tab</b></td><td>Click any tab entry — navigates the current page to that URL</td></tr>
+  </table>
+</section>
+
+<section class="help-section">
+  <h3>🔄 Rearranging Tabs</h3>
+  <p>Drag the <b>⠿</b> handle on any tab to reorder within its group. Drag a tab onto another collection card to move it there.</p>
+</section>
+
+<section class="help-section">
+  <h3>🔍 Search & View</h3>
+  <table class="help-table">
+    <tr><td><b>Search</b></td><td>Type in the search bar to filter collections and tabs by name, title, or URL</td></tr>
+    <tr><td><b>Grid / List</b></td><td>Click <b>▦</b> / <b>☰</b> in the header to toggle between compact grid and list view</td></tr>
+  </table>
+</section>
+
+<section class="help-section">
+  <h3>🖼️ Customization</h3>
+  <table class="help-table">
+    <tr><td><b>Background</b></td><td>Open FAB (<b>⚙</b>) → <b>🎨</b> → pick a preset, paste a URL, or drop an image file</td></tr>
+    <tr><td><b>Icons & Colors</b></td><td>When creating/editing a collection, choose from 350+ emoji icons and 10 accent colors</td></tr>
+    <tr><td><b>Theme</b></td><td>Open FAB → <b>💻/☀️/🌙</b> to cycle between System / Light / Dark</td></tr>
+  </table>
+</section>
+
+<section class="help-section">
+  <h3>📊 Data Management</h3>
+  <table class="help-table">
+    <tr><td><b>Export</b></td><td>Open FAB → <b>📤</b> to download all collections as a JSON file</td></tr>
+    <tr><td><b>Import</b></td><td>Open FAB → <b>📥</b> to restore collections from a JSON file</td></tr>
+    <tr><td><b>Privacy</b></td><td>Open FAB → <b>👁</b> to blur tab titles and URLs on screen</td></tr>
+  </table>
+</section>
+
+<section class="help-section">
+  <h3>🪟 Side Panel</h3>
+  <p>Press <kbd>Ctrl+Shift+S</kbd> (<kbd>Cmd+Shift+S</kbd> on Mac) to open the Side Panel. Browse all collections, click the <b>+</b> button to add the current tab, or click any tab to open it in a new tab (the panel closes automatically).</p>
+</section>
+
+<section class="help-section">
+  <h3>⌨️ Keyboard Shortcuts</h3>
+  <table class="help-table">
+    <tr><td><kbd>Ctrl+Shift+Y</kbd> / <kbd>Cmd+Shift+Y</kbd></td><td>Quick Save current tab</td></tr>
+    <tr><td><kbd>Ctrl+Shift+S</kbd> / <kbd>Cmd+Shift+S</kbd></td><td>Open Side Panel</td></tr>
+  </table>
+  <p style="margin-top:8px;color:var(--text-muted);font-size:12px">Customize shortcuts at <code>chrome://extensions/shortcuts</code></p>
+</section>
+`;
+  overlay.style.display = 'flex';
+}
+
+$('fab-help').addEventListener('click', () => { closeFab(); showHelp(); });
+$('header-help-btn').addEventListener('click', showHelp);
+
+$('help-close-btn').addEventListener('click', () => { $('help-overlay').style.display = 'none'; });
+$('help-overlay').addEventListener('click', e => {
+  if (e.target === $('help-overlay')) $('help-overlay').style.display = 'none';
+});
+
 $('bg-cancel-btn').addEventListener('click', () => { $('bg-modal-overlay').style.display = 'none'; });
 $('bg-modal-overlay').addEventListener('click', e => {
   if (e.target === $('bg-modal-overlay')) $('bg-modal-overlay').style.display = 'none';
