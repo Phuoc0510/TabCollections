@@ -154,7 +154,7 @@ $('groups-grid').addEventListener('click', async e => {
 
   const tabEntry = e.target.closest('.tab-entry');
   if (tabEntry) {
-    await chrome.tabs.create({ url: tabEntry.dataset.url });
+    await chrome.tabs.update({ url: tabEntry.dataset.url });
     return;
   }
 
