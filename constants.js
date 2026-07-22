@@ -1,3 +1,5 @@
+/* exported esc, faviconUrl, ICONS, COLORS */
+
 function esc(s) {
   const d = document.createElement('div');
   d.textContent = s;

@@ -11,6 +11,8 @@ export default [
         ...globals.webextensions,
         ...globals.node,
         chrome: 'writable',
+        esc: 'writable',
+        faviconUrl: 'writable',
         ICON_CATEGORIES: 'readonly',
         ICONS: 'readonly',
         COLORS: 'readonly',
@@ -41,6 +43,12 @@ export default [
       'prefer-const': 'warn',
       'no-var': 'error',
       'no-empty': ['warn', { allowEmptyCatch: true }],
+    },
+  },
+  {
+    files: ['constants.js'],
+    rules: {
+      'no-unused-vars': 'off',
     },
   },
   {

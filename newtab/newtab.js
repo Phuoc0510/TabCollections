@@ -201,7 +201,7 @@ function togglePrivacy() {
   document.getElementById('fab-privacy')?.classList.toggle('active', privacyMode);
 }
 
-// ── Drag and drop reorder ──
+// ── Drag and drop (merged: card reorder + tab reorder + external drop) ──
 
 let dragSrcId = null;
 let dragSrcEl = null;
@@ -213,10 +213,20 @@ let dragSrcGroupId = null;
 let dragTargetGroupId = null;
 
 $('groups-grid').addEventListener('dragstart', e => {
+  const entry = e.target.closest('.tab-entry');
+  if (entry) {
+    const handle = e.target.closest('.tab-drag-handle');
+    if (!handle) { e.preventDefault(); return; }
+    tabDragSrcEl = entry;
+    isDragging = true;
+    dragSrcGroupId = entry.closest('.group-card')?.dataset.id || null;
+    entry.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', entry.dataset.id);
+    return;
+  }
   const card = e.target.closest('.group-card');
   if (!card) return;
-  // Don't start card drag if dragging a tab entry
-  if (e.target.closest('.tab-entry')) return;
   pendingRender = false;
   isDragging = true;
   dragSrcEl = card;
@@ -229,106 +239,42 @@ $('groups-grid').addEventListener('dragstart', e => {
 
 $('groups-grid').addEventListener('dragover', e => {
   e.preventDefault();
-  if (!dragSrcEl || !dragSrcEl.isConnected) { dragSrcEl = null; return; }
-  const target = e.target.closest('.group-card:not(.add-card)');
-  if (!target || target === dragSrcEl) return;
-  e.dataTransfer.dropEffect = 'move';
-
-  const grid = target.parentNode;
-  const cards = [...grid.querySelectorAll('.group-card')];
-  const srcIdx = cards.indexOf(dragSrcEl);
-  const tgtIdx = cards.indexOf(target);
-
-  // Insert AFTER target when dragging downward, BEFORE when dragging upward
-  const refNode = srcIdx < tgtIdx ? target.nextSibling : target;
-  // Skip if insertion point hasn't changed or would be a no-op
-  if (refNode === lastRefNode) return;
-  if (refNode === dragSrcEl) return;
-  if (refNode && dragSrcEl.nextSibling === refNode) return;
-
-  lastRefNode = refNode;
-  grid.insertBefore(dragSrcEl, refNode);
-});
-
-$('groups-grid').addEventListener('drop', e => {
-  e.preventDefault();
-});
-
-$('groups-grid').addEventListener('dragend', async e => {
-  if (dragSrcEl) dragSrcEl.style.opacity = '';
-  const srcId = dragSrcId;
-  dragSrcEl = null;
-  dragSrcId = null;
-  if (srcId) {
-    const cards = [...$('groups-grid').querySelectorAll('.group-card')].filter(c => c.dataset.id);
-    const ids = cards.map(c => c.dataset.id);
-    await chrome.runtime.sendMessage({ action: 'updateGroupPositions', orderedIds: ids });
-  }
-  isDragging = false;
-  if (pendingRender) {
-    pendingRender = false;
-    render().catch(err => console.error('Delayed render after drag failed:', err));
-  }
-});
-
-// ── Tab drag-and-drop reorder ──
-
-$('groups-grid').addEventListener('dragstart', e => {
-  const entry = e.target.closest('.tab-entry');
-  if (!entry) return;
-  const handle = e.target.closest('.tab-drag-handle');
-  if (!handle) { e.preventDefault(); return; }
-
-  tabDragSrcEl = entry;
-  isDragging = true;
-  const parentCard = entry.closest('.group-card');
-  dragSrcGroupId = parentCard?.dataset.id || null;
-  entry.classList.add('dragging');
-  e.dataTransfer.effectAllowed = 'move';
-  e.dataTransfer.setData('text/plain', entry.dataset.id);
-});
-
-$('groups-grid').addEventListener('dragover', e => {
-  const entry = e.target.closest('.tab-entry');
   const targetCard = e.target.closest('.group-card:not(.add-card)');
-
-  if (!tabDragSrcEl || !tabDragSrcEl.isConnected) {
-    if (!targetCard) return;
-    // External drag — allow copy onto card (validated at drop)
-    if (!dragSrcEl) {
-      dragTargetGroupId = targetCard.dataset.id;
-      e.preventDefault();
-      e.dataTransfer.dropEffect = 'copy';
-      document.querySelectorAll('.group-card.drag-target').forEach(el => el.classList.remove('drag-target'));
-      targetCard.classList.add('drag-target');
-    }
-    return;
-  }
   if (!targetCard) return;
 
-  if (targetCard.dataset.id !== dragSrcGroupId) {
-    dragTargetGroupId = targetCard.dataset.id;
-    e.preventDefault();
+  if (tabDragSrcEl && tabDragSrcEl.isConnected) {
+    if (targetCard.dataset.id !== dragSrcGroupId) {
+      dragTargetGroupId = targetCard.dataset.id;
+      e.dataTransfer.dropEffect = 'move';
+      document.querySelectorAll('.group-card.drag-target').forEach(el => el.classList.remove('drag-target'));
+      targetCard.classList.add('drag-target');
+      return;
+    }
+    dragTargetGroupId = null;
+    const entry = e.target.closest('.tab-entry');
+    if (!entry || entry === tabDragSrcEl) return;
     e.dataTransfer.dropEffect = 'move';
-    document.querySelectorAll('.group-card.drag-target').forEach(el => el.classList.remove('drag-target'));
-    targetCard.classList.add('drag-target');
+    const container = entry.parentNode;
+    const midY = entry.getBoundingClientRect().top + entry.getBoundingClientRect().height / 2;
+    container.insertBefore(tabDragSrcEl, e.clientY < midY ? entry : entry.nextSibling);
     return;
   }
 
-  dragTargetGroupId = null;
-  // Same group: existing tab reorder
-  if (!entry || entry === tabDragSrcEl) return;
-  e.preventDefault();
+  if (!dragSrcEl || !dragSrcEl.isConnected) { dragSrcEl = null; return; }
+  if (targetCard === dragSrcEl) return;
   e.dataTransfer.dropEffect = 'move';
+  const grid = targetCard.parentNode;
+  const cards = [...grid.querySelectorAll('.group-card')];
+  const refNode = cards.indexOf(dragSrcEl) < cards.indexOf(targetCard) ? targetCard.nextSibling : targetCard;
+  if (refNode === lastRefNode || refNode === dragSrcEl || (refNode && dragSrcEl.nextSibling === refNode)) return;
+  lastRefNode = refNode;
+  grid.insertBefore(dragSrcEl, refNode);
 
-  const container = entry.parentNode;
-  const rect = entry.getBoundingClientRect();
-  const midY = rect.top + rect.height / 2;
-
-  if (e.clientY < midY) {
-    container.insertBefore(tabDragSrcEl, entry);
-  } else {
-    container.insertBefore(tabDragSrcEl, entry.nextSibling);
+  if (!tabDragSrcEl && !dragTargetGroupId && targetCard) {
+    dragTargetGroupId = targetCard.dataset.id;
+    e.dataTransfer.dropEffect = 'copy';
+    document.querySelectorAll('.group-card.drag-target').forEach(el => el.classList.remove('drag-target'));
+    targetCard.classList.add('drag-target');
   }
 });
 
@@ -336,73 +282,78 @@ $('groups-grid').addEventListener('drop', async e => {
   e.preventDefault();
   const targetCard = e.target.closest('.group-card');
   if (!targetCard) return;
+  document.querySelectorAll('.group-card.drag-target').forEach(el => el.classList.remove('drag-target'));
 
-  if (!tabDragSrcEl && !dragSrcEl) {
-    if (!targetCard.dataset.id) return;
-    document.querySelectorAll('.group-card.drag-target').forEach(el => el.classList.remove('drag-target'));
-    dragTargetGroupId = null;
-    try {
-      let url = e.dataTransfer.getData('text/uri-list') || e.dataTransfer.getData('text/plain');
-      if (!url && e.dataTransfer.items) {
-        for (const item of e.dataTransfer.items) {
-          if (item.kind === 'string') {
-            url = await new Promise(r => item.getAsString(r));
-            if (url) break;
-          }
+  if (tabDragSrcEl || dragSrcEl) return;
+
+  if (!targetCard.dataset.id) return;
+  dragTargetGroupId = null;
+  try {
+    let url = e.dataTransfer.getData('text/uri-list') || e.dataTransfer.getData('text/plain');
+    if (!url && e.dataTransfer.items) {
+      for (const item of e.dataTransfer.items) {
+        if (item.kind === 'string') {
+          url = await new Promise(r => item.getAsString(r));
+          if (url) break;
         }
       }
-      if (!url) return;
-      url = url.trim();
-      let title = url;
-      try { title = new URL(url).hostname; } catch {}
-      await chrome.runtime.sendMessage({
-        action: 'addTabToGroup',
-        tab: { title, url, favicon: '' },
-        groupId: targetCard.dataset.id
-      });
-    } catch (err) {
-      console.warn('External drop failed:', err);
     }
+    if (!url) return;
+    url = url.trim();
+    let title = url;
+    try { title = new URL(url).hostname; } catch {}
+    await chrome.runtime.sendMessage({
+      action: 'addTabToGroup',
+      tab: { title, url, favicon: '' },
+      groupId: targetCard.dataset.id
+    });
+  } catch (err) {
+    console.warn('External drop failed:', err);
   }
 });
 
-$('groups-grid').addEventListener('dragend', async e => {
+$('groups-grid').addEventListener('dragend', async _e => {
   document.querySelectorAll('.group-card.drag-target').forEach(el => el.classList.remove('drag-target'));
 
-  const src = tabDragSrcEl;
+  const tabSrc = tabDragSrcEl;
   tabDragSrcEl = null;
-  if (!src) { isDragging = false; dragSrcGroupId = null; return; }
-  src.classList.remove('dragging');
+  if (tabSrc) {
+    tabSrc.classList.remove('dragging');
+    const srcGroupId = dragSrcGroupId;
+    const targetId = dragTargetGroupId;
+    dragSrcGroupId = null;
+    dragTargetGroupId = null;
 
-  const srcGroupId = dragSrcGroupId;
-  const targetId = dragTargetGroupId;
-  dragSrcGroupId = null;
-  dragTargetGroupId = null;
-
-  if (targetId && srcGroupId && targetId !== srcGroupId) {
-    await chrome.runtime.sendMessage({
-      action: 'moveTabToGroup',
-      tabId: src.dataset.id,
-      targetGroupId: targetId
-    });
-    isDragging = false;
-    return;
+    if (targetId && srcGroupId && targetId !== srcGroupId) {
+      await chrome.runtime.sendMessage({ action: 'moveTabToGroup', tabId: tabSrc.dataset.id, targetGroupId: targetId });
+    } else {
+      const container = tabSrc.parentNode;
+      if (container) {
+        const groupCard = container.closest('.group-card');
+        if (groupCard) {
+          const orderedIds = [...container.querySelectorAll('.tab-entry')].map(el => el.dataset.id);
+          await chrome.runtime.sendMessage({ action: 'updateTabPositions', groupId: groupCard.dataset.id, orderedIds });
+        }
+      }
+    }
   }
 
-  // Same group reorder
-  const container = src.parentNode;
-  if (!container) { isDragging = false; return; }
-  const groupCard = container.closest('.group-card');
-  if (!groupCard) { isDragging = false; return; }
+  if (dragSrcEl) dragSrcEl.style.opacity = '';
+  const srcId = dragSrcId;
+  dragSrcEl = null;
+  dragSrcId = null;
+  dragSrcGroupId = null;
+  dragTargetGroupId = null;
+  if (srcId) {
+    const ids = [...$('groups-grid').querySelectorAll('.group-card')].filter(c => c.dataset.id).map(c => c.dataset.id);
+    await chrome.runtime.sendMessage({ action: 'updateGroupPositions', orderedIds: ids });
+  }
 
-  const entries = [...container.querySelectorAll('.tab-entry')];
-  const orderedIds = entries.map(el => el.dataset.id);
-  await chrome.runtime.sendMessage({
-    action: 'updateTabPositions',
-    groupId: groupCard.dataset.id,
-    orderedIds
-  });
   isDragging = false;
+  if (pendingRender) {
+    pendingRender = false;
+    render().catch(err => console.error('Delayed render after drag failed:', err));
+  }
 });
 
 function showConfirm(message) {
