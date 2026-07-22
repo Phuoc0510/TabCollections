@@ -1,5 +1,13 @@
 let groups = [];
 
+async function applyTheme() {
+  const result = await chrome.storage.local.get('themeMode');
+  const theme = result.themeMode || 'system';
+  const root = document.documentElement;
+  if (theme === 'system') root.removeAttribute('data-theme');
+  else root.setAttribute('data-theme', theme);
+}
+
 async function loadAll() {
   groups = await chrome.runtime.sendMessage({ action: 'getGroups' });
   const data = await chrome.runtime.sendMessage({ action: 'getAllData' });
@@ -72,4 +80,4 @@ document.getElementById('groups-list').addEventListener('click', async e => {
   }
 });
 
-loadAll().then(render);
+applyTheme().then(() => loadAll().then(render));

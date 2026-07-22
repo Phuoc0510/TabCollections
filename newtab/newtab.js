@@ -842,6 +842,40 @@ document.addEventListener('click', e => {
 
 $('fab-customize').addEventListener('click', () => { closeFab(); showBgModal(); });
 
+const THEME_KEY = 'themeMode';
+const THEME_ICONS = { system: '💻', light: '☀️', dark: '🌙' };
+const THEME_LABELS = { system: 'System', light: 'Light', dark: 'Dark' };
+const THEME_CYCLE = ['system', 'light', 'dark'];
+
+async function loadTheme() {
+  const result = await chrome.storage.local.get(THEME_KEY);
+  const theme = result[THEME_KEY] || 'system';
+  applyTheme(theme);
+  return theme;
+}
+
+function applyTheme(theme) {
+  const root = document.documentElement;
+  if (theme === 'system') root.removeAttribute('data-theme');
+  else root.setAttribute('data-theme', theme);
+  const btn = document.getElementById('fab-theme');
+  if (btn) {
+    btn.querySelector('.fab-label').textContent = 'Theme: ' + THEME_LABELS[theme];
+    btn.title = 'Theme: ' + THEME_LABELS[theme];
+    btn.querySelector('.btn-icon').textContent = THEME_ICONS[theme];
+  }
+}
+
+$('fab-theme').addEventListener('click', async () => {
+  closeFab();
+  const result = await chrome.storage.local.get(THEME_KEY);
+  const current = result[THEME_KEY] || 'system';
+  const idx = THEME_CYCLE.indexOf(current);
+  const next = THEME_CYCLE[(idx + 1) % THEME_CYCLE.length];
+  await chrome.storage.local.set({ [THEME_KEY]: next });
+  applyTheme(next);
+});
+
 $('bg-cancel-btn').addEventListener('click', () => { $('bg-modal-overlay').style.display = 'none'; });
 $('bg-modal-overlay').addEventListener('click', e => {
   if (e.target === $('bg-modal-overlay')) $('bg-modal-overlay').style.display = 'none';
@@ -967,7 +1001,7 @@ loadViewMode().then(mode => {
 });
 
 initTitle();
-render();
+loadTheme().then(() => render());
 
 const STORAGE_KEY = 'tabCollector';
 chrome.storage.onChanged.addListener((changes, area) => {

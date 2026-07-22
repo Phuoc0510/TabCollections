@@ -39,7 +39,7 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --bg-primary: #0c1211;
     --bg-secondary: #141a19;
     --text-primary: #e8eaed;
@@ -60,4 +60,26 @@
     --error-text: #f28b82;
     --overlay-bg: rgba(0, 0, 0, 0.7);
   }
+}
+
+:root[data-theme="dark"] {
+  --bg-primary: #0c1211;
+  --bg-secondary: #141a19;
+  --text-primary: #e8eaed;
+  --text-secondary: #c4c7cc;
+  --text-muted: #9aa0a6;
+  --glass-bg: rgba(255, 255, 255, 0.06);
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  --glass-card-bg: rgba(255, 255, 255, 0.05);
+  --glass-card-border: rgba(255, 255, 255, 0.1);
+  --glass-card-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+  --border-color: rgba(255, 255, 255, 0.1);
+  --hover-bg: rgba(138, 180, 248, 0.1);
+  --danger-hover-bg: #3c1f1e;
+  --success-bg: #1e3a2f;
+  --success-text: #81c995;
+  --error-bg: #3c1f1e;
+  --error-text: #f28b82;
+  --overlay-bg: rgba(0, 0, 0, 0.7);
 }

@@ -23,10 +23,15 @@
 }
 
 @media (prefers-color-scheme: dark) {
-  .glass-strong {
+  :root:not([data-theme="light"]) .glass-strong {
     background: rgba(20, 26, 25, 0.8);
     border: 1px solid rgba(255, 255, 255, 0.08);
   }
+}
+
+:root[data-theme="dark"] .glass-strong {
+  background: rgba(20, 26, 25, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .glass-hover {
