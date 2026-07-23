@@ -1020,7 +1020,9 @@ let editingTabId = null;
 $('groups-grid').addEventListener('click', e => {
   const editBtn = e.target.closest('.tab-edit');
   if (!editBtn) return;
+  e.stopPropagation();
   const tabEntry = editBtn.closest('.tab-entry');
+  if (!tabEntry) return;
   editingTabId = tabEntry.dataset.id;
   const titleEl = tabEntry.querySelector('.tab-title');
   tabEditTitleInput.value = titleEl.textContent;
@@ -1045,14 +1047,14 @@ $('tab-edit-save-btn').addEventListener('click', async () => {
   const title = tabEditTitleInput.value.trim();
   const url = tabEditUrlInput.value.trim();
   if (!title || !url) return;
-  try {
-    await chrome.runtime.sendMessage({ action: 'updateTab', tabId: editingTabId, updates: { title, url } });
-    tabEditOverlay.style.display = 'none';
-    editingTabId = null;
-    await render();
-  } catch (err) {
-    showStatus('Failed to update tab: ' + err.message, 'error');
+  const response = await chrome.runtime.sendMessage({ action: 'updateTab', tabId: editingTabId, updates: { title, url } });
+  if (response && response.error) {
+    showStatus('Failed to update tab: ' + response.error, 'error');
+    return;
   }
+  tabEditOverlay.style.display = 'none';
+  editingTabId = null;
+  await render();
 });
 
 tabEditTitleInput.addEventListener('keydown', e => {
