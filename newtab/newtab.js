@@ -916,7 +916,7 @@ $('help-overlay').addEventListener('click', e => {
 
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
-    ['help-overlay', 'bg-modal-overlay', 'tab-picker-overlay', 'modal-overlay'].forEach(id => {
+    ['help-overlay', 'bg-modal-overlay', 'tab-picker-overlay', 'modal-overlay', 'tab-edit-overlay'].forEach(id => {
       const el = $(id);
       if (el && el.style.display === 'flex') el.style.display = 'none';
     });
@@ -994,6 +994,57 @@ $('import-input').addEventListener('change', async e => {
     showStatus('Import failed: ' + err.message, 'error');
   }
   e.target.value = '';
+});
+
+// Tab edit modal
+const tabEditOverlay = $('tab-edit-overlay');
+const tabEditTitleInput = $('tab-edit-title-input');
+const tabEditUrlInput = $('tab-edit-url-input');
+let editingTabId = null;
+
+$('groups-grid').addEventListener('click', e => {
+  const editBtn = e.target.closest('.tab-edit');
+  if (!editBtn) return;
+  const tabEntry = editBtn.closest('.tab-entry');
+  editingTabId = tabEntry.dataset.id;
+  const titleEl = tabEntry.querySelector('.tab-title');
+  tabEditTitleInput.value = titleEl.textContent;
+  tabEditUrlInput.value = tabEntry.dataset.url;
+  tabEditOverlay.style.display = 'flex';
+  tabEditTitleInput.focus();
+});
+
+$('tab-edit-cancel-btn').addEventListener('click', () => {
+  tabEditOverlay.style.display = 'none';
+  editingTabId = null;
+});
+
+$('tab-edit-overlay').addEventListener('click', e => {
+  if (e.target === tabEditOverlay) {
+    tabEditOverlay.style.display = 'none';
+    editingTabId = null;
+  }
+});
+
+$('tab-edit-save-btn').addEventListener('click', async () => {
+  const title = tabEditTitleInput.value.trim();
+  const url = tabEditUrlInput.value.trim();
+  if (!title || !url) return;
+  try {
+    await chrome.runtime.sendMessage({ action: 'updateTab', tabId: editingTabId, updates: { title, url } });
+    tabEditOverlay.style.display = 'none';
+    editingTabId = null;
+    await render();
+  } catch (err) {
+    showStatus('Failed to update tab: ' + err.message, 'error');
+  }
+});
+
+tabEditTitleInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter') $('tab-edit-save-btn').click();
+});
+tabEditUrlInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter') $('tab-edit-save-btn').click();
 });
 
 $('search-input')?.addEventListener('input', () => {
