@@ -45,7 +45,10 @@ function renderTabEntry(t) {
       <div class="tab-title">${esc(title)}</div>
       <div class="tab-url">${esc(displayUrl)}</div>
     </div>
-    <button class="tab-delete" data-id="${t.id}">${icon('x')}</button>
+    <div class="tab-actions">
+      <button class="tab-edit" data-id="${t.id}">${icon('edit')}</button>
+      <button class="tab-delete" data-id="${t.id}">${icon('x')}</button>
+    </div>
   </div>`;
 }
 
