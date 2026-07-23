@@ -167,6 +167,15 @@ async function moveTabToGroup(tabId, targetGroupId) {
   });
 }
 
+async function updateTab(tabId, updates) {
+  return enqueueWrite(async () => {
+    const data = await getAllData();
+    if (!data.tabs[tabId]) throw new Error('Tab not found');
+    data.tabs[tabId] = { ...data.tabs[tabId], ...updates };
+    await saveAllData(data);
+  });
+}
+
 async function getPages() {
   const data = await getAllData();
   if (!data.pages) return [];
@@ -224,5 +233,5 @@ async function removeGroupFromPage(pageId, groupId) {
 }
 
 if (typeof module !== 'undefined') {
-  module.exports = { getAllData, saveAllData, getGroups, getTabsByGroup, createGroup, updateGroup, deleteGroup, addTabToGroup, removeTab, updateGroupPositions, updateTabPositions, exportData, importData, moveTabToGroup, getPages, createPage, updatePage, deletePage, addGroupToPage, removeGroupFromPage };
+  module.exports = { getAllData, saveAllData, getGroups, getTabsByGroup, createGroup, updateGroup, deleteGroup, addTabToGroup, removeTab, updateTab, updateGroupPositions, updateTabPositions, exportData, importData, moveTabToGroup, getPages, createPage, updatePage, deletePage, addGroupToPage, removeGroupFromPage };
 }

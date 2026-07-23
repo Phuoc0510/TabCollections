@@ -30,6 +30,7 @@ export default [
         updateGroupPositions: 'readonly',
         updateTabPositions: 'readonly',
         moveTabToGroup: 'readonly',
+        updateTab: 'readonly',
         getPages: 'readonly',
         createPage: 'readonly',
         updatePage: 'readonly',

@@ -17,7 +17,7 @@ function assert(condition, message) {
 }
 
 async function main() {
-  const { getAllData, saveAllData, getGroups, createGroup, updateGroup, deleteGroup, addTabToGroup, getTabsByGroup, removeTab, exportData, importData, moveTabToGroup, getPages, createPage, updatePage, deletePage, addGroupToPage, removeGroupFromPage } = await import('./storage.js');
+  const { getAllData, saveAllData, getGroups, createGroup, updateGroup, deleteGroup, addTabToGroup, getTabsByGroup, removeTab, exportData, importData, moveTabToGroup, updateTab, getPages, createPage, updatePage, deletePage, addGroupToPage, removeGroupFromPage } = await import('./storage.js');
 
   let stored = {};
   chrome.storage.local.get = async () => stored;
@@ -126,26 +126,52 @@ async function main() {
     console.log(`PASS: ${name}`);
   }
 
-  // Test 15: createPage & getPages
+  // Test 15: updateTab changes title, keeps other fields unchanged
+  {
+    const tabEntry = await addTabToGroup({ title: 'OrigTitle', url: 'https://orig.com' }, 'g1');
+    await updateTab(tabEntry.id, { title: 'New Title' });
+    const data = await getAllData();
+    assert(data.tabs[tabEntry.id].title === 'New Title', 'updateTab changes title');
+    assert(data.tabs[tabEntry.id].url === 'https://orig.com', 'updateTab keeps other fields unchanged');
+  }
+
+  // Test 16: updateTab changes url
+  {
+    const data1 = await getAllData();
+    const targetTab = Object.values(data1.tabs).find(t => t.title === 'New Title');
+    await updateTab(targetTab.id, { url: 'https://newurl.com' });
+    const data2 = await getAllData();
+    assert(data2.tabs[targetTab.id].url === 'https://newurl.com', 'updateTab changes url');
+  }
+
+  // Test 17: updateTab throws for invalid tabId
+  try {
+    await updateTab('nonexistent', { title: 'x' });
+    assert(false, 'updateTab should have thrown');
+  } catch (e) {
+    assert(e.message.includes('not found'), 'updateTab throws for invalid tabId');
+  }
+
+  // Test 18: createPage & getPages
   const p1 = await createPage('Work', '💼', ['group-id-1']);
   assert(p1.id && p1.name === 'Work' && p1.icon === '💼' && Array.isArray(p1.groupIds), 'createPage basic');
 
-  // Test 16: getPages returns pages sorted by position
+  // Test 19: getPages returns pages sorted by position
   const p2 = await createPage('Personal', '👤', []);
   let pages = await getPages();
   assert(pages.length === 2 && pages[0].name === 'Work', 'getPages sorted by position');
 
-  // Test 17: updatePage renames page
+  // Test 20: updatePage renames page
   await updatePage(p1.id, { name: 'Office' });
   pages = await getPages();
   assert(pages.find(p => p.id === p1.id).name === 'Office', 'updatePage name');
 
-  // Test 18: deletePage removes page (groups inside are NOT deleted)
+  // Test 21: deletePage removes page (groups inside are NOT deleted)
   await deletePage(p2.id);
   pages = await getPages();
   assert(pages.length === 1 && pages[0].id === p1.id, 'deletePage');
 
-  // Test 19: addGroupToPage / removeGroupFromPage
+  // Test 22: addGroupToPage / removeGroupFromPage
   const g_temp = await createGroup('Temp', '📁');
   await addGroupToPage(p1.id, g_temp.id);
   let pagesData = await getAllData();
@@ -154,13 +180,13 @@ async function main() {
   pagesData = await getAllData();
   assert(!pagesData.pages[p1.id].groupIds.includes(g_temp.id), 'removeGroupFromPage');
 
-  // Test 20: exportData version updated and includes pages
+  // Test 23: exportData version updated and includes pages
   await createPage('ExpPage', '📄', []);
   const jsonStr2 = await exportData();
   const parsed2 = JSON.parse(jsonStr2);
   assert(parsed2.version === 2 && Array.isArray(parsed2.pages), 'exportData version 2 includes pages');
 
-  // Test 21: importData v2 includes pages
+  // Test 24: importData v2 includes pages
   await saveAllData({ groups: {}, tabs: {} });
   const newImport = JSON.stringify({
     version: 2,
@@ -173,7 +199,7 @@ async function main() {
   const afterV2 = await getAllData();
   assert(afterV2.pages && afterV2.pages['p-import'], 'importData v2 includes pages');
 
-  // Test 22: updatePage with non-existent ID throws
+  // Test 25: updatePage with non-existent ID throws
   try {
     await updatePage('nonexistent', { name: 'Fail' });
     assert(false, 'updatePage should have thrown');
@@ -181,7 +207,7 @@ async function main() {
     assert(e.message === 'Page not found', 'updatePage throws for invalid pageId');
   }
 
-  // Test 23: addGroupToPage with non-existent pageId throws
+  // Test 26: addGroupToPage with non-existent pageId throws
   try {
     await addGroupToPage('bad-page', 'good-group');
     assert(false, 'addGroupToPage should have thrown');
@@ -189,7 +215,7 @@ async function main() {
     assert(e.message === 'Page not found', 'addGroupToPage throws for invalid pageId');
   }
 
-  // Test 24: removeGroupFromPage with non-existent pageId throws
+  // Test 27: removeGroupFromPage with non-existent pageId throws
   try {
     await removeGroupFromPage('bad-page', 'good-group');
     assert(false, 'removeGroupFromPage should have thrown');
