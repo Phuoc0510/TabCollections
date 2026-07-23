@@ -357,29 +357,13 @@
   display: block;
 }
 
-.tab-delete {
-  background: none;
-  border: none;
-  color: var(--danger);
-  cursor: pointer;
-  padding: 4px 6px;
-  font-size: 14px;
-  border-radius: 4px;
-  opacity: 0;
+/* ── Tab Actions Toggle (⋯) ── */
+.tab-actions-wrapper {
+  position: relative;
   flex-shrink: 0;
-  transition: opacity var(--transition-fast), background var(--transition-fast);
 }
 
-.tab-entry:hover .tab-delete {
-  opacity: 0.5;
-}
-
-.tab-delete:hover {
-  opacity: 1 !important;
-  background: var(--danger-hover-bg);
-}
-
-.tab-edit {
+.tab-actions-toggle {
   background: none;
   border: none;
   cursor: pointer;
@@ -388,22 +372,55 @@
   color: var(--text-muted);
   line-height: 1;
   opacity: 0;
-  flex-shrink: 0;
   transition: opacity var(--transition-fast), color var(--transition-fast);
 }
-.tab-entry:hover .tab-edit {
+.tab-entry:hover .tab-actions-toggle {
   opacity: 0.5;
 }
-.tab-edit:hover {
+.tab-actions-toggle:hover {
   opacity: 1 !important;
   color: var(--text-primary);
 }
 
-.tab-actions {
+/* ── Tab Actions Floating Popup ── */
+.tab-actions-popup {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: calc(100% + 4px);
+  z-index: 50;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  box-shadow: var(--glass-shadow);
+  min-width: 120px;
+  overflow: hidden;
+}
+.tab-actions-popup.open {
+  display: block;
+}
+
+.tab-actions-popup button {
   display: flex;
   align-items: center;
-  gap: 2px;
-  flex-shrink: 0;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 12px;
+  border: none;
+  background: none;
+  color: var(--text-primary);
+  font-size: 13px;
+  cursor: pointer;
+  text-align: left;
+}
+.tab-actions-popup button:hover {
+  background: var(--hover-bg);
+}
+.tab-actions-popup .tab-delete {
+  color: var(--danger);
+}
+.tab-actions-popup .tab-delete:hover {
+  background: var(--danger-hover-bg);
 }
 
 .tab-drag-handle {

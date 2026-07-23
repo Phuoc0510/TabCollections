@@ -45,9 +45,12 @@ function renderTabEntry(t) {
       <div class="tab-title">${esc(title)}</div>
       <div class="tab-url">${esc(displayUrl)}</div>
     </div>
-    <div class="tab-actions">
-      <button class="tab-edit" data-id="${t.id}">${icon('edit')}</button>
-      <button class="tab-delete" data-id="${t.id}">${icon('x')}</button>
+    <div class="tab-actions-wrapper">
+      <button class="tab-actions-toggle" data-id="${t.id}" title="Actions">${icon('moreH')}</button>
+      <div class="tab-actions-popup">
+        <button class="tab-edit" data-id="${t.id}">${icon('edit')} Edit</button>
+        <button class="tab-delete" data-id="${t.id}">${icon('trash')} Delete</button>
+      </div>
     </div>
   </div>`;
 }
@@ -143,6 +146,16 @@ $('groups-grid').addEventListener('click', async e => {
     e.stopPropagation();
     await chrome.runtime.sendMessage({ action: 'removeTab', tabId: tabDelete.dataset.id });
     await render();
+    return;
+  }
+
+  const tabActionsToggle = e.target.closest('.tab-actions-toggle');
+  if (tabActionsToggle) {
+    const popup = tabActionsToggle.parentElement.querySelector('.tab-actions-popup');
+    if (!popup) return;
+    const wasOpen = popup.classList.contains('open');
+    document.querySelectorAll('.tab-actions-popup.open').forEach(el => el.classList.remove('open'));
+    if (!wasOpen) popup.classList.add('open');
     return;
   }
 
@@ -1066,6 +1079,9 @@ $('groups-grid').addEventListener('click', e => {
 document.addEventListener('click', e => {
   if (!e.target.closest('.group-card-inner')) {
     document.querySelectorAll('.group-actions-menu.open').forEach(el => el.classList.remove('open'));
+  }
+  if (!e.target.closest('.tab-entry')) {
+    document.querySelectorAll('.tab-actions-popup.open').forEach(el => el.classList.remove('open'));
   }
 });
 
