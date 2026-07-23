@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Tab Collection",
-  "version": "2.1.0",
+  "version": "2.5.0",
   "description": "Collect tabs into groups and manage them from your new tab page",
   "permissions": [
     "storage",

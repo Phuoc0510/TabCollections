@@ -2,7 +2,7 @@
 
 > A Chrome/Brave extension for collecting, organizing, and managing browser tabs — right from your new tab page.
 
-[![Version](https://img.shields.io/badge/version-2.3.0-blue)](https://github.com/Phuoc0510/TabCollections/releases)
+[![Version](https://img.shields.io/badge/version-2.5.0-blue)](https://github.com/Phuoc0510/TabCollections/releases)
 [![Manifest](https://img.shields.io/badge/manifest-v3-green)](https://developer.chrome.com/docs/extensions/reference/manifest)
 
 ---
@@ -16,6 +16,7 @@
 - **Expandable cards** — compact group cards with collapsible content
 - **Open All** — restore an entire collection in one click
 - **Privacy mode** — blur tab titles and URLs with one toggle
+- **Edit tab name & URL** — click **⋯** → **Edit** on any tab to update its title or URL
 
 ### Drag & Drop
 - **Reorder groups** — drag cards to rearrange, positions persist automatically
@@ -88,12 +89,13 @@ git clone https://github.com/Phuoc0510/TabCollections.git
 
 | Action | How |
 |--------|-----|
-| Create collection | Click **＋ New Collection** card at the end of the grid |
-| Edit collection | Expand card → click **⋯** → **✎** |
-| Delete collection | Expand card → click **⋯** → **🗑** |
+| Create collection | Click **New Collection** card at the end of the grid |
+| Edit collection | Expand card → click **Actions** → **Edit** |
+| Delete collection | Expand card → click **Actions** → **Delete** |
 | Reorder cards | Drag card by its header |
-| Add tabs | Expand card → click **⋯** → **＋** → choose from open tabs |
-| Open all tabs | Expand card → click **⋯** → **↗** |
+| Add tabs | Expand card → click **Actions** → **Add Tab** → choose from open tabs |
+| Open all tabs | Expand card → click **Actions** → **Open All** |
+| Edit tab name & URL | Hover tab → click **⋯** → **Edit** |
 
 ### Keyboard Shortcuts
 
@@ -104,15 +106,15 @@ git clone https://github.com/Phuoc0510/TabCollections.git
 
 ### Floating Action Button (FAB)
 
-The **⚙** button at the bottom-right gives quick access to:
+The gear button at the bottom-right gives quick access to:
 
 | Button | Action |
 |--------|--------|
-| 📤 | Export collections as JSON |
-| 📥 | Import collections from JSON |
-| 🎨 | Customize background image |
-| 💻 / ☀️ / 🌙 | Toggle theme (System / Light / Dark) |
-| 👁 | Toggle privacy mode |
+| Export | Export collections as JSON |
+| Import | Import collections from JSON |
+| Customize | Customize background image |
+| Theme | Toggle theme (System / Light / Dark) |
+| Privacy | Toggle privacy mode |
 
 ---
 
@@ -125,6 +127,7 @@ TabCollection/
 ├── storage.js               # Storage layer — CRUD for groups & tabs
 ├── storage.test.js          # Unit tests for storage
 ├── constants.js             # Shared constants (icon categories, colors)
+├── icons.js                 # SVG icon definitions for UI actions
 ├── popup/                   # Extension popup UI
 │   ├── popup.html
 │   ├── popup.css
@@ -192,6 +195,16 @@ Data flows through `chrome.storage.local`. The background service worker acts as
 ---
 
 ## Changelog
+
+### v2.5.0
+- Edit tab name & URL — click **⋯** → **Edit** on any tab to modify its title or URL
+- SVG glass-effect icons replacing UI emoji (keep group icon picker as emoji)
+- Floating action popup for tab actions (Edit / Delete)
+- Solid FAB background — no glass transparency on hover
+- Accessibility improvements: `lang="en"`, `role="dialog"`, `aria-modal`, global Escape key
+- CSS variables for accent colors and borders — hardcoded values removed
+- Write queue serialization for storage operations — eliminates race conditions
+- Hover-reveal tab actions (delete, drag handle) hidden until mouse over
 
 ### v2.3.0
 - Theme picker — toggle between Light / Dark / System from the FAB
