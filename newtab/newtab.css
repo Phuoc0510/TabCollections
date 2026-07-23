@@ -379,6 +379,33 @@
   background: var(--danger-hover-bg);
 }
 
+.tab-edit {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 4px;
+  color: var(--text-muted);
+  line-height: 1;
+  opacity: 0;
+  flex-shrink: 0;
+  transition: opacity var(--transition-fast), color var(--transition-fast);
+}
+.tab-entry:hover .tab-edit {
+  opacity: 0.5;
+}
+.tab-edit:hover {
+  opacity: 1 !important;
+  color: var(--text-primary);
+}
+
+.tab-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
 .tab-drag-handle {
   cursor: grab;
   color: #aaa;
