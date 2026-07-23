@@ -159,6 +159,8 @@ $('groups-grid').addEventListener('click', async e => {
     return;
   }
 
+  if (e.target.closest('.tab-edit') || e.target.closest('.tab-actions-popup')) return;
+
   const tabEntry = e.target.closest('.tab-entry');
   if (tabEntry) {
     await chrome.tabs.update({ url: tabEntry.dataset.url });
