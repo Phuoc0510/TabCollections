@@ -172,6 +172,8 @@ async function updateTab(tabId, updates) {
     const data = await getAllData();
     if (!data.tabs[tabId]) throw new Error('Tab not found');
     data.tabs[tabId] = { ...data.tabs[tabId], ...updates };
+    const groupId = data.tabs[tabId].groupId;
+    if (data.groups[groupId]) data.groups[groupId].updatedAt = Date.now();
     await saveAllData(data);
   });
 }

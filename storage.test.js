@@ -137,11 +137,10 @@ async function main() {
 
   // Test 16: updateTab changes url
   {
-    const data1 = await getAllData();
-    const targetTab = Object.values(data1.tabs).find(t => t.title === 'New Title');
-    await updateTab(targetTab.id, { url: 'https://newurl.com' });
-    const data2 = await getAllData();
-    assert(data2.tabs[targetTab.id].url === 'https://newurl.com', 'updateTab changes url');
+    const tabEntry = await addTabToGroup({ title: 'UrlTab', url: 'https://oldurl.com' }, 'g1');
+    await updateTab(tabEntry.id, { url: 'https://newurl.com' });
+    const data = await getAllData();
+    assert(data.tabs[tabEntry.id].url === 'https://newurl.com', 'updateTab changes url');
   }
 
   // Test 17: updateTab throws for invalid tabId
