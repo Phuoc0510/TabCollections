@@ -109,6 +109,10 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
           await rebuildContextMenu();
           sendResponse({ ok: true });
           break;
+        case 'updateTab':
+          await updateTab(msg.tabId, msg.updates);
+          sendResponse({ ok: true });
+          break;
         case 'getPages':
           sendResponse(await getPages());
           break;
