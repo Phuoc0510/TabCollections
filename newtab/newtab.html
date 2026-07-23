@@ -113,6 +113,20 @@
     </div>
   </div>
 
+  <div id="tab-edit-overlay" class="modal-overlay" style="display:none" role="dialog" aria-modal="true" aria-labelledby="tab-edit-title">
+    <div id="tab-edit-modal" class="modal" style="width:400px">
+      <h2 id="tab-edit-title">Edit Tab</h2>
+      <label for="tab-edit-title-input">Title</label>
+      <input type="text" id="tab-edit-title-input" class="modal-input">
+      <label for="tab-edit-url-input" style="margin-top:10px">URL</label>
+      <input type="text" id="tab-edit-url-input" class="modal-input">
+      <div class="modal-actions">
+        <button id="tab-edit-cancel-btn" class="btn-ghost">Cancel</button>
+        <button id="tab-edit-save-btn" class="btn-primary">Save</button>
+      </div>
+    </div>
+  </div>
+
   <script src="../constants.js"></script>
   <script src="../icons.js"></script>
   <script src="newtab.js"></script>
