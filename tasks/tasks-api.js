@@ -33,7 +33,7 @@ async function tasksList(queryParams = {}) {
   }
   const qs = q.toString();
   const d = await tasksApi('tasks' + (qs ? '?' + qs : ''), 'GET');
-  return d.tasks || d || [];
+  return d.tasks || (Array.isArray(d) ? d : []);
 }
 
 async function tasksCreate(payload) {
