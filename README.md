@@ -18,6 +18,15 @@
 - **Privacy mode** — blur tab titles and URLs with one toggle
 - **Edit tab name & URL** — click **⋯** → **Edit** on any tab to update its title or URL
 
+### Tasks Board
+- **Daily tasks** — view today's tasks and overdue items synced with tasks.minhtuong.io.vn
+- **Full CRUD** — create, edit, delete, and toggle tasks inline
+- **Priority & PIC** — set priority (low/normal/high) and assign a person in charge
+- **PIC filter** — filter tasks by person in charge, persisted across sessions
+- **Checkbox toggle** — mark tasks complete with instant sync to the web backend
+- **Daily reminder** — Chrome notification at 17:35 to review the task board
+- **Board link** — one-click navigation to the full web board
+
 ### Drag & Drop
 - **Reorder groups** — drag cards to rearrange, positions persist automatically
 - **Reorder tabs** — rearrange tabs within a group using drag handles
@@ -101,10 +110,21 @@ git clone https://github.com/Phuoc0510/TabCollections.git
 
 | Shortcut | Action |
 |----------|--------|
-| `Ctrl+Shift+Y` / `Cmd+Shift+Y` | Quick Save current tab |
-| `Ctrl+Shift+S` / `Cmd+Shift+S` | Open Side Panel |
+| `Cmd+Shift+Y` | Quick Save current tab |
+| `Cmd+Shift+S` | Open Side Panel |
 
-### Floating Action Button (FAB)
+### Tasks Board
+
+| Action | How |
+|--------|-----|
+| Login | Switch to **Tasks** tab → click **Login** → web page opens → log in → auto-closes |
+| Create task | Click **+ Tạo việc** → fill title, dates, priority, PIC → **Thêm** |
+| Edit / Delete | Click a task title → edit modal → modify or delete |
+| Toggle done | Click the checkbox beside any task |
+| Filter by PIC | Use the dropdown in the toolbar to filter by person in charge |
+| Board link | Click **📋 Board** in the toolbar to open full web board |
+
+> A daily notification reminder fires at **17:35** (requires Chrome notification permission on macOS).
 
 The gear button at the bottom-right gives quick access to:
 
@@ -123,11 +143,13 @@ The gear button at the bottom-right gives quick access to:
 ```
 TabCollection/
 ├── manifest.json            # Extension manifest V3
-├── background.js            # Service worker — handles messages & context menus
+├── background.js            # Service worker — handles messages, alarms & context menus
 ├── storage.js               # Storage layer — CRUD for groups & tabs
 ├── storage.test.js          # Unit tests for storage
-├── constants.js             # Shared constants (icon categories, colors)
+├── constants.js             # Shared constants (icon categories, colors, esc helper)
 ├── icons.js                 # SVG icon definitions for UI actions
+├── tasks/                   # Tasks API integration
+│   └── tasks-api.js         # API client for tasks.minhtuong.io.vn
 ├── popup/                   # Extension popup UI
 │   ├── popup.html
 │   ├── popup.css
@@ -174,29 +196,37 @@ npm run format               # Format with Prettier
 ### Architecture
 
 ```
-┌─────────────────────────────────────────────────────┐
-│                   Background (SW)                    │
-│  ┌────────────┐  ┌────────────┐  ┌───────────────┐  │
-│  │  storage   │  │ Context    │  │ Message       │  │
-│  │  layer     │  │ Menus      │  │ Handler       │  │
-│  └────────────┘  └────────────┘  └───────────────┘  │
-└──────────┬────────────────────────────────┬──────────┘
+┌─────────────────────────────────────────────────────────────┐
+│                   Background (SW)                           │
+│  ┌────────────┐  ┌────────────┐  ┌───────────────┐         │
+│  │  storage   │  │ Context    │  │ Message       │ ┌─────┐ │
+│  │  layer     │  │ Menus      │  │ Handler       │ │Tasks│ │
+│  └────────────┘  └────────────┘  └───────────────┘ │ API │ │
+│                                          │ (tasks:* msgs) └─────┘ │
+└──────────┬────────────────────────────────┬──────────────────┘
            │ chrome.runtime.sendMessage     │
            ▼                    ▼                    ▼
 ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────────┐
 │   Popup (popup/) │  │ Side Panel       │  │ New Tab Page (newtab/)│
-│  Save tabs from  │  │  Browse & add    │  │  View, manage, drag   │
-│  current window  │  │  collections     │  │  collections & tabs   │
+│  Save tabs from  │  │  Browse & add    │  │  view, manage, drag   │
+│  current window  │  │  collections     │  │  collections & tasks  │
 └──────────────────┘  └──────────────────┘  └──────────────────────┘
 ```
 
-Data flows through `chrome.storage.local`. The background service worker acts as the single source of truth — the popup, side panel, and new tab page all send messages via `chrome.runtime.sendMessage` for all mutations.
+Data flows through `chrome.storage.local` for collections and through `chrome.runtime.sendMessage` (with background fetch) for tasks. A daily `chrome.alarms` notification fires at 17:35 for task reminders.
 
 ---
 
 ## Changelog
 
 ### v2.5.0
+- Tasks Board — view today's and overdue tasks synced with tasks.minhtuong.io.vn
+- Full CRUD for tasks — create, edit, delete, toggle inline on the new tab page
+- Priority & PIC assignment with color-coded indicators
+- PIC filter persisted across sessions
+- Daily reminder notification at 17:35 (click to open Tasks view)
+- Login gate with injected-script fallback for cookie auth
+- Priority selector with equal-width cards
 - Edit tab name & URL — click **⋯** → **Edit** on any tab to modify its title or URL
 - SVG glass-effect icons replacing UI emoji (keep group icon picker as emoji)
 - Floating action popup for tab actions (Edit / Delete)
