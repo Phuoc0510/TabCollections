@@ -219,7 +219,7 @@ Data flows through `chrome.storage.local` for collections and through `chrome.ru
 
 ## Changelog
 
-### v2.5.0
+### v2.6.0
 - Tasks Board — view today's and overdue tasks synced with tasks.minhtuong.io.vn
 - Full CRUD for tasks — create, edit, delete, toggle inline on the new tab page
 - Priority & PIC assignment with color-coded indicators
