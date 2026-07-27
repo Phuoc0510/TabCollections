@@ -37,6 +37,13 @@ chrome.runtime.onInstalled.addListener(async () => {
     await createGroup('General', '📁', '#4285f4');
   }
   rebuildContextMenu();
+
+  const now = Date.now();
+  const target = new Date();
+  target.setHours(17, 35, 0, 0);
+  let when = target.getTime();
+  if (when <= now) when += 86400000;
+  chrome.alarms.create('tasks-reminder', { when, periodInMinutes: 1440 });
 });
 
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
@@ -57,6 +64,10 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   (async () => {
     try {
+      const handle = async (fn) => {
+        try { sendResponse(await fn()); }
+        catch (e) { sendResponse({ error: e.message }); }
+      };
       switch (msg.action) {
         case 'getGroups':
           sendResponse(await getGroups());
@@ -126,30 +137,30 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
           await deletePage(msg.id);
           sendResponse({ ok: true });
           break;
-        case 'tasks:login':
-          sendResponse(await tasksLogin(msg.username, msg.password));
-          break;
-        case 'tasks:logout':
-          sendResponse(await tasksLogout());
-          break;
-        case 'tasks:me':
-          sendResponse(await tasksMe());
-          break;
-        case 'tasks:list':
-          sendResponse(await tasksList(msg.params || {}));
-          break;
-        case 'tasks:create':
-          sendResponse(await tasksCreate(msg.payload));
-          break;
-        case 'tasks:update':
-          sendResponse(await tasksUpdate(msg.id, msg.payload));
-          break;
-        case 'tasks:delete':
-          sendResponse(await tasksDelete(msg.id));
-          break;
-        case 'tasks:toggle':
-          sendResponse(await tasksToggle(msg.id, msg.done));
-          break;
+		case 'tasks:login':
+			handle(() => tasksLogin(msg.username, msg.password));
+			break;
+		case 'tasks:logout':
+			handle(() => tasksLogout());
+			break;
+		case 'tasks:me':
+			handle(() => tasksMe());
+			break;
+		case 'tasks:list':
+			handle(() => tasksList(msg.params || {}));
+			break;
+		case 'tasks:create':
+			handle(() => tasksCreate(msg.payload));
+			break;
+		case 'tasks:update':
+			handle(() => tasksUpdate(msg.id, msg.payload));
+			break;
+		case 'tasks:delete':
+			handle(() => tasksDelete(msg.id));
+			break;
+		case 'tasks:toggle':
+			handle(() => tasksToggle(msg.id, msg.done));
+			break;
         default:
           sendResponse({ error: 'Unknown action' });
       }
@@ -186,5 +197,21 @@ chrome.commands.onCommand.addListener((command) => {
       if (tab) chrome.sidePanel.open({ windowId: tab.windowId });
     });
   }
+});
+
+chrome.alarms.onAlarm.addListener((alarm) => {
+  if (alarm.name !== 'tasks-reminder') return;
+  chrome.notifications.create('tasks-reminder', {
+    type: 'basic',
+    title: '⏰ Nhắc nhở Task',
+    message: 'Đã 17h35, hãy xem xét lại bảng task hôm nay!',
+    iconUrl: chrome.runtime.getURL('icons/icon128.png'),
+    requireInteraction: true
+  });
+});
+
+chrome.notifications.onClicked.addListener((notificationId) => {
+  if (notificationId !== 'tasks-reminder') return;
+  chrome.tabs.create({ url: chrome.runtime.getURL('newtab/newtab.html?view=tasks') });
 });
 
