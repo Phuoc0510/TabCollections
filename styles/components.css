@@ -24,6 +24,12 @@
   background: var(--danger-hover-bg);
 }
 
+.btn-ok {
+  background: #22c55e;
+  color: #fff;
+  border-color: #22c55e;
+}
+
 .btn-ghost {
   background: transparent;
   border-color: transparent;
