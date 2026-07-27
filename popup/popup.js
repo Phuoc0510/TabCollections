@@ -40,13 +40,15 @@ async function handleQuickSave() {
   const qsSaveBtn = document.getElementById('qs-save-btn');
   const qsDone = document.getElementById('qs-done');
 
-  qsFavicon.src = pending.favicon || `https://www.google.com/s2/favicons?domain=${encodeURIComponent(new URL(pending.url).hostname)}&sz=16`;
+  try {
+    qsFavicon.src = pending.favicon || `https://www.google.com/s2/favicons?domain=${encodeURIComponent(new URL(pending.url).hostname)}&sz=16`;
+  } catch { qsFavicon.style.display = 'none'; }
   qsFavicon.onerror = () => { qsFavicon.style.display = 'none'; };
   qsTitle.textContent = pending.title || pending.url;
   qsUrl.textContent = pending.url;
 
   qsGroupSelect.innerHTML = groups.map(g =>
-    `<option value="${g.id}">${g.icon} ${g.name}</option>`
+    `<option value="${g.id}">${g.icon} ${esc(g.name)}</option>`
   ).join('');
   qsGroupSelect.value = groups.length > 0 ? groups[0].id : '';
   qsSaveBtn.disabled = !qsGroupSelect.value;
@@ -106,7 +108,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       <label class="tab-item">
         <input type="checkbox" value="${t.id}"${t.active ? ' checked' : ''}>
         <img src="${faviconUrl(t)}" alt="" onerror="this.style.display='none'">
-        <span class="tab-title">${t.title || t.url}</span>
+        <span class="tab-title">${esc(t.title || t.url)}</span>
       </label>
     `).join('');
   }
@@ -117,7 +119,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   function renderGroups() {
-    groupSelect.innerHTML = groups.map(g => `<option value="${g.id}">${g.icon} ${g.name}</option>`).join('') +
+    groupSelect.innerHTML = groups.map(g => `<option value="${g.id}">${g.icon} ${esc(g.name)}</option>`).join('') +
       '<option value="__new__">+ New Group...</option>';
     if (!groupSelect.value && groups.length > 0) {
       groupSelect.value = groups[0].id;

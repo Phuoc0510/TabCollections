@@ -179,26 +179,23 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 });
 
 chrome.commands.onCommand.addListener(async (command) => {
-  if (command !== 'quick-save') return;
-  try {
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-    if (!tab) return;
-    await chrome.storage.session.set({
-      pendingQuickSave: { title: tab.title, url: tab.url, favicon: tab.favIconUrl || '' }
-    });
-    await chrome.windows.create({
-      url: chrome.runtime.getURL('popup/popup.html?quick=1'),
-      type: 'popup',
-      width: 420,
-      height: 360
-    });
-  } catch (err) {
-    console.error('Quick Save failed:', err);
-  }
-});
-
-chrome.commands.onCommand.addListener((command) => {
-  if (command === 'open-side-panel') {
+  if (command === 'quick-save') {
+    try {
+      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      if (!tab) return;
+      await chrome.storage.session.set({
+        pendingQuickSave: { title: tab.title, url: tab.url, favicon: tab.favIconUrl || '' }
+      });
+      await chrome.windows.create({
+        url: chrome.runtime.getURL('popup/popup.html?quick=1'),
+        type: 'popup',
+        width: 420,
+        height: 360
+      });
+    } catch (err) {
+      console.error('Quick Save failed:', err);
+    }
+  } else if (command === 'open-side-panel') {
     chrome.tabs.query({ active: true, currentWindow: true }, ([tab]) => {
       if (tab) chrome.sidePanel.open({ windowId: tab.windowId });
     });

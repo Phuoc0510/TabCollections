@@ -17,7 +17,8 @@ function assert(condition, message) {
 }
 
 async function main() {
-  const { getAllData, saveAllData, getGroups, createGroup, updateGroup, deleteGroup, addTabToGroup, getTabsByGroup, removeTab, exportData, importData, moveTabToGroup, updateTab, getPages, createPage, updatePage, deletePage, addGroupToPage, removeGroupFromPage } = await import('./storage.js');
+  const mod = await import('./storage.js');
+  const { getAllData, saveAllData, getGroups, createGroup, updateGroup, deleteGroup, addTabToGroup, getTabsByGroup, removeTab, exportData, importData, moveTabToGroup, updateTab, getPages, createPage, updatePage, deletePage, addGroupToPage, removeGroupFromPage } = mod.default;
 
   let stored = {};
   chrome.storage.local.get = async () => stored;

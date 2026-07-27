@@ -711,7 +711,8 @@ async function saveBg(url) {
 
 async function applyBg(url) {
   if (url) {
-    document.body.style.backgroundImage = `url(${url})`;
+    const safeUrl = url.replace(/[()]/g, c => '%' + c.charCodeAt(0).toString(16));
+    document.body.style.backgroundImage = `url("${safeUrl}")`;
     document.body.style.backgroundSize = 'cover';
     document.body.style.backgroundPosition = 'center';
     document.body.style.backgroundAttachment = 'fixed';
@@ -986,7 +987,7 @@ $('bg-remove-btn').addEventListener('click', async () => {
 });
 
 // Init background on load
-loadBg().then(applyBg);
+loadBg().then(applyBg).catch(() => {});
 
 // Init privacy mode
 chrome.storage.local.get('privacyMode').then(result => {
@@ -1086,8 +1087,10 @@ tabEditUrlInput.addEventListener('keydown', e => {
   if (e.key === 'Enter') $('tab-edit-save-btn').click();
 });
 
+let searchTimeout;
 $('search-input')?.addEventListener('input', () => {
-  render();
+  clearTimeout(searchTimeout);
+  searchTimeout = setTimeout(render, 200);
 });
 
 $('groups-grid').addEventListener('click', e => {
@@ -1459,7 +1462,7 @@ function initTasksEventHandlers() {
       if (user) {
         clearInterval(loginPollTimer);
         loginPollTimer = null;
-        chrome.tabs.remove(tab.id);
+        chrome.tabs.remove(tab.id, () => chrome.runtime.lastError);
         tasksState.loggedIn = true;
         $('tasks-list').innerHTML = '';
         await loadTasks();

@@ -4,6 +4,7 @@ let writeQueue = Promise.resolve();
 
 function enqueueWrite(fn) {
   writeQueue = writeQueue.then(fn, fn);
+  writeQueue.catch(e => console.error('Write queue error:', e));
   return writeQueue;
 }
 
