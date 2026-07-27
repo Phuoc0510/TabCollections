@@ -867,7 +867,7 @@ function showHelp() {
   content.innerHTML = `
 <section class="help-section">
   <h3>📚 Getting Started</h3>
-  <p>Tab Collection lets you save, organize, and quickly access your browser tabs. All data is stored locally in your browser and never sent anywhere.</p>
+  <p>Tab Collection lets you save, organize, and quickly access your browser tabs. All data is stored locally in your browser and never sent anywhere. Switch between <b>Collections</b> (tab management) and <b>Tasks</b> (to-do board) using the tabs at the top.</p>
 </section>
 
 <section class="help-section">
@@ -891,9 +891,9 @@ function showHelp() {
     <tr><td><b>Edit</b></td><td>Click <b>Actions</b> → <b>Edit</b> to change name, icon, or color</td></tr>
     <tr><td><b>Delete</b></td><td>Click <b>Actions</b> → <b>Delete</b> to remove a collection and all its tabs</td></tr>
     <tr><td><b>Reorder</b></td><td>Drag any collection card by its header to rearrange</td></tr>
-    <tr><td><b>Add tabs</b></td><td>Click <b>Actions</b> → <b>Add Tab</b> → pick tabs from the current window (checkboxes)</td></tr>
+    <tr><td><b>Add tabs</b></td><td>Click <b>Actions</b> → <b>Add Tab</b> → pick tabs from the current window</td></tr>
     <tr><td><b>Open all</b></td><td>Click <b>Actions</b> → <b>Open All</b> to open every tab in a collection</td></tr>
-    <tr><td><b>Click a tab</b></td><td>Click any tab entry — navigates the current page to that URL</td></tr>
+    <tr><td><b>Click a tab</b></td><td>Click any tab entry to navigate the current page to that URL</td></tr>
   </table>
 </section>
 
@@ -920,6 +920,21 @@ function showHelp() {
 </section>
 
 <section class="help-section">
+  <h3>📋 Tasks Board</h3>
+  <p>Manage your daily tasks synced with <b>tasks.minhtuong.io.vn</b>.</p>
+  <table class="help-table">
+    <tr><td><b>Login</b></td><td>Open the <b>Tasks</b> tab → click <b>Login</b> → a web page opens → log in → the tab closes automatically</td></tr>
+    <tr><td><b>Create</b></td><td>Click <b>+ Tạo việc</b> → fill in title, note, dates, priority, PIC → <b>Thêm</b></td></tr>
+    <tr><td><b>Edit / Delete</b></td><td>Click a task title to open the edit modal</td></tr>
+    <tr><td><b>Checkbox</b></td><td>Check the box to mark a task as done (syncs to web instantly)</td></tr>
+    <tr><td><b>PIC filter</b></td><td>Use the dropdown to filter tasks by person in charge</td></tr>
+    <tr><td><b>Priority</b></td><td>Tasks show color-coded priority dots: 🟢 Thấp / 🔵 Vừa / 🔴 Cao</td></tr>
+    <tr><td><b>Board</b></td><td>Click <b>📋 Board</b> to open the full web board in a new tab</td></tr>
+    <tr><td><b>Daily reminder</b></td><td>Daily at 17:35, a notification reminds you to review your tasks</td></tr>
+  </table>
+</section>
+
+<section class="help-section">
   <h3>📊 Data Management</h3>
   <table class="help-table">
     <tr><td><b>Export</b></td><td>Open FAB → <b>Export</b> to download all collections as a JSON file</td></tr>
@@ -936,8 +951,8 @@ function showHelp() {
 <section class="help-section">
   <h3>⌨️ Keyboard Shortcuts</h3>
   <table class="help-table">
-    <tr><td><kbd>Ctrl+Shift+Y</kbd> / <kbd>Cmd+Shift+Y</kbd></td><td>Quick Save current tab</td></tr>
-    <tr><td><kbd>Ctrl+Shift+S</kbd> / <kbd>Cmd+Shift+S</kbd></td><td>Open Side Panel</td></tr>
+    <tr><td><kbd>Cmd+Shift+Y</kbd></td><td>Quick Save current tab</td></tr>
+    <tr><td><kbd>Cmd+Shift+S</kbd></td><td>Open Side Panel</td></tr>
   </table>
   <p style="margin-top:8px;color:var(--text-muted);font-size:12px">Customize shortcuts at <code>chrome://extensions/shortcuts</code></p>
 </section>

@@ -838,6 +838,8 @@ body.has-bg .app-header {
 .help-content {
   overflow-y: auto;
   padding-right: 4px;
+  flex: 1;
+  min-height: 0;
 }
 
 .help-section {
