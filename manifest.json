@@ -9,6 +9,9 @@
     "tabs",
     "sidePanel"
   ],
+  "host_permissions": [
+    "https://tasks.minhtuong.io.vn/*"
+  ],
   "background": {
     "service_worker": "background.js"
   },

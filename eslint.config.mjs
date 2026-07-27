@@ -38,6 +38,14 @@ export default [
         addGroupToPage: 'readonly',
         removeGroupFromPage: 'readonly',
         importScripts: 'readonly',
+        tasksLogin: 'readonly',
+        tasksLogout: 'readonly',
+        tasksMe: 'readonly',
+        tasksList: 'readonly',
+        tasksCreate: 'readonly',
+        tasksUpdate: 'readonly',
+        tasksDelete: 'readonly',
+        tasksToggle: 'readonly',
       },
     },
     rules: {
@@ -48,7 +56,7 @@ export default [
     },
   },
   {
-    files: ['constants.js', 'icons.js'],
+    files: ['constants.js', 'icons.js', 'tasks/tasks-api.js'],
     rules: {
       'no-unused-vars': 'off',
     },

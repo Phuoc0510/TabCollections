@@ -1,4 +1,5 @@
 importScripts('storage.js');
+importScripts('tasks/tasks-api.js');
 
 const MENU_PARENT_ID = 'add-to-collection';
 
@@ -124,6 +125,30 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         case 'deletePage':
           await deletePage(msg.id);
           sendResponse({ ok: true });
+          break;
+        case 'tasks:login':
+          sendResponse(await tasksLogin(msg.username, msg.password));
+          break;
+        case 'tasks:logout':
+          sendResponse(await tasksLogout());
+          break;
+        case 'tasks:me':
+          sendResponse(await tasksMe());
+          break;
+        case 'tasks:list':
+          sendResponse(await tasksList(msg.params || {}));
+          break;
+        case 'tasks:create':
+          sendResponse(await tasksCreate(msg.payload));
+          break;
+        case 'tasks:update':
+          sendResponse(await tasksUpdate(msg.id, msg.payload));
+          break;
+        case 'tasks:delete':
+          sendResponse(await tasksDelete(msg.id));
+          break;
+        case 'tasks:toggle':
+          sendResponse(await tasksToggle(msg.id, msg.done));
           break;
         default:
           sendResponse({ error: 'Unknown action' });
