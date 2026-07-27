@@ -3,6 +3,18 @@ let modalCallback = null;
 const expandedGroupIds = new Set();
 let expandedInitialized = false;
 let privacyMode = false;
+
+// ── Tasks State ──
+const tasksState = {
+  loggedIn: false,
+  items: [],
+  picFilter: 'all',
+  statusFilter: 'all',
+  editingId: null,
+  selectedPics: [],
+  loading: false
+};
+
 const TITLE_KEY = 'tabCollectorTitle';
 
 const $ = id => document.getElementById(id);
@@ -1120,13 +1132,427 @@ loadViewMode().then(mode => {
   }
 });
 
-initTitle();
-loadTheme().then(() => render());
+// ── Tasks API proxies ──
+async function tasksSend(action, extra = {}) {
+  try {
+    return await chrome.runtime.sendMessage({ action, ...extra });
+  } catch (err) {
+    if (err.message === 'SESSION_EXPIRED') return { error: 'SESSION_EXPIRED' };
+    throw err;
+  }
+}
+
+async function checkTasksLogin() {
+  try {
+    const data = await tasksSend('tasks:me');
+    if (data && data.user) {
+      tasksState.loggedIn = true;
+      return true;
+    }
+  } catch {}
+  tasksState.loggedIn = false;
+  return false;
+}
+
+async function loadTasks() {
+  tasksState.loading = true;
+  renderTasksView();
+  try {
+    const params = {};
+    if (tasksState.picFilter !== 'all') params.pic = tasksState.picFilter;
+    if (tasksState.statusFilter !== 'all') params.status = tasksState.statusFilter;
+    const items = await tasksSend('tasks:list', { params });
+    tasksState.items = Array.isArray(items) ? items : [];
+  } catch (err) {
+    if (err.message === 'SESSION_EXPIRED') {
+      tasksState.loggedIn = false;
+    }
+    tasksState.items = [];
+  }
+  tasksState.loading = false;
+  renderTasksView();
+}
+
+// ── Tasks Rendering ──
+const TASK_PRIO_COLORS = { low: '#22c55e', normal: '#3b82f6', high: '#ef4444' };
+const TASK_MEMBER_LABEL = { tuong: 'Tường', dung: 'Dung', phuoc: 'Phước', tran: 'Trân', cuong: 'Cường', hao: 'Hào' };
+const TASK_MEMBERS = ['tuong', 'dung', 'phuoc', 'tran', 'cuong', 'hao'];
+
+function getPicBadge(pic) {
+  const p = Array.isArray(pic) ? pic.filter(k => TASK_MEMBER_LABEL[k]) : [];
+  if (!p.length) return '';
+  if (p.length >= TASK_MEMBERS.length) return '<span class="task-pic-badge">Team</span>';
+  if (p.length === 1) return `<span class="task-pic-badge">${TASK_MEMBER_LABEL[p[0]]}</span>`;
+  return `<span class="task-pic-badge">${p.map(k => TASK_MEMBER_LABEL[k][0]).join('')}</span>`;
+}
+
+function getPicLabel(pic) {
+  const p = Array.isArray(pic) ? pic.filter(k => TASK_MEMBER_LABEL[k]) : [];
+  if (!p.length) return '';
+  if (p.length >= TASK_MEMBERS.length) return 'Cả team';
+  return p.map(k => TASK_MEMBER_LABEL[k]).join(', ');
+}
+
+function renderTaskItem(t) {
+  const timeStr = t.start ? t.start.slice(11, 16) : (t.due ? t.due.slice(11, 16) : '');
+  const isSticky = !t.start && !t.due;
+  const picBadge = getPicBadge(t.pic);
+  const picLabel = getPicLabel(t.pic);
+  const prioColor = t.color || TASK_PRIO_COLORS[t.priority] || TASK_PRIO_COLORS.normal;
+
+  const metaParts = [];
+  if (isSticky) metaParts.push('📌 Thường trực');
+  else if (timeStr) metaParts.push(timeStr);
+  if (t.allDay) metaParts.push('Cả ngày');
+  if (picLabel) metaParts.push(picLabel);
+
+  return `<div class="task-item${t.done ? ' done' : ''}" data-id="${t.id}">
+    <div class="task-checkbox" data-id="${t.id}" data-done="${t.done}">${t.done ? '✓' : ''}</div>
+    <div class="task-priority-dot" style="background:${prioColor}"></div>
+    <div class="task-item-body">
+      <div class="task-title">${esc(t.title)}</div>
+      <div class="task-meta">${picBadge} ${esc(metaParts.join(' · '))}</div>
+    </div>
+  </div>`;
+}
+
+function renderTasksView() {
+  const loginGate = $('tasks-login-gate');
+  const content = $('tasks-content');
+
+  if (!tasksState.loggedIn) {
+    loginGate.style.display = 'block';
+    content.style.display = 'none';
+    return;
+  }
+
+  loginGate.style.display = 'none';
+  content.style.display = 'block';
+
+  if (tasksState.loading) {
+    $('tasks-list').innerHTML = '<div class="tasks-loader">Đang tải...</div>';
+    return;
+  }
+
+  const items = tasksState.items;
+  const today = new Date().toISOString().slice(0, 10);
+
+  const overdue = items.filter(t => !t.done && t.due && t.due.slice(0, 10) < today);
+  const stickyTasks = items.filter(t => !t.done && !t.due && !t.start);
+  const doneTasks = items.filter(t => t.done);
+
+  // Combine today's tasks: those with due today or start today + sticky
+  let todayItems = items.filter(t => !t.done && (!t.due || t.due.slice(0, 10) <= today));
+  // But move overdue to their own section — filter them out
+  todayItems = todayItems.filter(t => !(t.due && t.due.slice(0, 10) < today));
+
+  const sortFn = (a, b) => {
+    const tA = (a.start || a.due || '').slice(11) || '00:00';
+    const tB = (b.start || b.due || '').slice(11) || '00:00';
+    return tA.localeCompare(tB);
+  };
+  overdue.sort(sortFn);
+  todayItems.sort(sortFn);
+
+  let html = '';
+
+  if (overdue.length) {
+    html += `<div class="tasks-section">
+      <div class="tasks-section-header">🔴 Quá hạn <span class="tasks-section-count">${overdue.length}</span></div>
+      ${overdue.map(renderTaskItem).join('')}
+    </div>`;
+  }
+
+  if (todayItems.length || stickyTasks.length) {
+    const combined = [...todayItems, ...stickyTasks];
+    html += `<div class="tasks-section">
+      <div class="tasks-section-header">⬜ Hôm nay <span class="tasks-section-count">${combined.length}</span></div>
+      ${combined.map(renderTaskItem).join('')}
+    </div>`;
+  }
+
+  if (doneTasks.length) {
+    html += `<div class="tasks-section">
+      <div class="tasks-section-header">✅ Đã xong <span class="tasks-section-count">${doneTasks.length}</span></div>
+      ${doneTasks.map(renderTaskItem).join('')}
+    </div>`;
+  }
+
+  if (!html) {
+    html = '<div class="task-list-empty">Không có công việc hôm nay 🎉</div>';
+  }
+
+  $('tasks-list').innerHTML = html;
+}
+
+// ── Task Modal ──
+function openTaskModal(task) {
+  const overlay = $('task-modal-overlay');
+  const titleEl = $('task-modal-title');
+  const saveBtn = $('task-modal-save-btn');
+  const deleteBtn = $('task-modal-delete-btn');
+  const doneBtn = $('task-modal-done-btn');
+
+  $('task-title-input').value = '';
+  $('task-note-input').value = '';
+  $('task-sticky-input').checked = false;
+  $('task-date-fields').style.display = 'block';
+  $('task-allday-input').checked = false;
+  $('task-start-input').value = '';
+  $('task-due-input').value = '';
+  $('task-modal-error').textContent = '';
+
+  document.querySelectorAll('.task-prio-option').forEach(el => el.classList.remove('active'));
+  document.querySelector('.task-prio-option[data-prio="normal"]').classList.add('active');
+  document.querySelector('.task-prio-option[data-prio="normal"] input').checked = true;
+
+  document.querySelectorAll('.task-pic-chip').forEach(el => el.classList.remove('active'));
+  document.querySelector('.task-pic-chip[data-pic="phuoc"]').classList.add('active');
+
+  tasksState.editingId = null;
+
+  if (task) {
+    titleEl.textContent = 'Sửa công việc';
+    saveBtn.textContent = 'Lưu';
+    tasksState.editingId = task.id;
+    $('task-title-input').value = task.title || '';
+    $('task-note-input').value = task.note || '';
+    $('task-sticky-input').checked = !task.start && !task.due;
+    $('task-date-fields').style.display = $('task-sticky-input').checked ? 'none' : 'block';
+    $('task-allday-input').checked = !!task.allDay;
+    if (task.start) $('task-start-input').value = task.start.slice(0, 16);
+    if (task.due) $('task-due-input').value = task.due.slice(0, 16);
+
+    document.querySelectorAll('.task-prio-option').forEach(el => el.classList.remove('active'));
+    const prio = document.querySelector(`.task-prio-option[data-prio="${task.priority || 'normal'}"]`);
+    if (prio) { prio.classList.add('active'); prio.querySelector('input').checked = true; }
+
+    document.querySelectorAll('.task-pic-chip').forEach(el => el.classList.remove('active'));
+    const pics = Array.isArray(task.pic) ? task.pic : [];
+    pics.forEach(k => {
+      const chip = document.querySelector(`.task-pic-chip[data-pic="${k}"]`);
+      if (chip) chip.classList.add('active');
+    });
+
+    deleteBtn.style.display = 'inline-block';
+    doneBtn.style.display = task.done ? 'none' : 'inline-block';
+  } else {
+    titleEl.textContent = 'Thêm công việc';
+    saveBtn.textContent = 'Thêm';
+    deleteBtn.style.display = 'none';
+    doneBtn.style.display = 'none';
+  }
+
+  overlay.style.display = 'flex';
+  $('task-title-input').focus();
+}
+
+function closeTaskModal() {
+  $('task-modal-overlay').style.display = 'none';
+  tasksState.editingId = null;
+}
+
+async function saveTask() {
+  const title = $('task-title-input').value.trim();
+  if (!title) {
+    $('task-modal-error').textContent = 'Tiêu đề không được để trống';
+    return;
+  }
+  $('task-modal-error').textContent = '';
+
+  const isSticky = $('task-sticky-input').checked;
+  const payload = { title };
+
+  const note = $('task-note-input').value.trim();
+  if (note) payload.note = note;
+
+  const activePrio = document.querySelector('.task-prio-option.active');
+  if (activePrio) payload.priority = activePrio.dataset.prio;
+
+  const activePics = [...document.querySelectorAll('.task-pic-chip.active')].map(el => el.dataset.pic);
+  if (activePics.length) payload.pic = activePics;
+
+  if (isSticky) {
+    // no dates needed
+  } else {
+    payload.allDay = $('task-allday-input').checked || false;
+    const start = $('task-start-input').value;
+    const due = $('task-due-input').value;
+    if (start) payload.start = start;
+    if (due) payload.due = due;
+  }
+
+  try {
+    if (tasksState.editingId) {
+      await tasksSend('tasks:update', { id: tasksState.editingId, payload });
+    } else {
+      await tasksSend('tasks:create', { payload });
+    }
+    closeTaskModal();
+    await loadTasks();
+  } catch (err) {
+    $('task-modal-error').textContent = 'Lỗi: ' + err.message;
+  }
+}
+
+async function deleteTask() {
+  if (!tasksState.editingId) return;
+  if (!await showConfirm('Xoá công việc này?')) return;
+  try {
+    await tasksSend('tasks:delete', { id: tasksState.editingId });
+    closeTaskModal();
+    await loadTasks();
+  } catch (err) {
+    $('task-modal-error').textContent = 'Lỗi: ' + err.message;
+  }
+}
+
+async function toggleTaskDone() {
+  if (!tasksState.editingId) return;
+  const task = tasksState.items.find(t => t.id === tasksState.editingId);
+  if (!task) return;
+  try {
+    await tasksSend('tasks:toggle', { id: tasksState.editingId, done: !task.done });
+    closeTaskModal();
+    await loadTasks();
+  } catch (err) {
+    $('task-modal-error').textContent = 'Lỗi: ' + err.message;
+  }
+}
+
+// ── Tab Switching ──
+function switchView(view) {
+  const collectionsView = $('collections-view');
+  const tasksView = $('tasks-view');
+  const collectionsSearch = $('search-input');
+  const collectionsActions = $('collections-header-actions');
+  const tasksActions = $('tasks-header-actions');
+
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.toggle('active', t.dataset.view === view));
+
+  if (view === 'tasks') {
+    collectionsView.style.display = 'none';
+    tasksView.style.display = 'block';
+    collectionsSearch.style.display = 'none';
+    if (collectionsActions) collectionsActions.style.display = 'none';
+    if (tasksActions) tasksActions.style.display = 'flex';
+    initTasksView();
+  } else {
+    collectionsView.style.display = 'block';
+    tasksView.style.display = 'none';
+    collectionsSearch.style.display = 'block';
+    if (collectionsActions) collectionsActions.style.display = 'flex';
+    if (tasksActions) tasksActions.style.display = 'none';
+  }
+}
+
+let tasksInitialized = false;
+
+async function initTasksView() {
+  if (tasksInitialized) return;
+  tasksInitialized = true;
+  await checkTasksLogin();
+  if (tasksState.loggedIn) {
+    await loadTasks();
+  } else {
+    renderTasksView();
+  }
+}
+
+// ── Event Handlers Init ──
+function initTasksEventHandlers() {
+  $('tasks-login-btn').addEventListener('click', () => {
+    chrome.tabs.create({ url: 'https://tasks.minhtuong.io.vn/' });
+  });
+
+  $('tasks-pic-filter').addEventListener('change', async e => {
+    tasksState.picFilter = e.target.value;
+    await loadTasks();
+  });
+
+  $('tasks-status-filter').addEventListener('change', async e => {
+    tasksState.statusFilter = e.target.value;
+    await loadTasks();
+  });
+
+  $('tasks-add-btn').addEventListener('click', () => openTaskModal());
+
+  $('tasks-list').addEventListener('click', async e => {
+    const checkbox = e.target.closest('.task-checkbox');
+    if (checkbox) {
+      e.stopPropagation();
+      const id = checkbox.dataset.id;
+      const done = checkbox.dataset.done === 'true';
+      try {
+        await tasksSend('tasks:toggle', { id, done: !done });
+        await loadTasks();
+      } catch (err) {
+        showStatus('Lỗi: ' + err.message, 'error');
+      }
+      return;
+    }
+
+    const item = e.target.closest('.task-item');
+    if (item) {
+      const id = item.dataset.id;
+      const task = tasksState.items.find(t => t.id === id);
+      if (task) openTaskModal(task);
+    }
+  });
+
+  $('task-modal-cancel-btn').addEventListener('click', closeTaskModal);
+  $('task-modal-overlay').addEventListener('click', e => {
+    if (e.target === $('task-modal-overlay')) closeTaskModal();
+  });
+  $('task-modal-save-btn').addEventListener('click', saveTask);
+  $('task-modal-delete-btn').addEventListener('click', deleteTask);
+  $('task-modal-done-btn').addEventListener('click', toggleTaskDone);
+
+  $('task-sticky-input').addEventListener('change', () => {
+    const sticky = $('task-sticky-input').checked;
+    $('task-date-fields').style.display = sticky ? 'none' : 'block';
+  });
+
+  document.querySelectorAll('.task-prio-option').forEach(el => {
+    el.addEventListener('click', () => {
+      document.querySelectorAll('.task-prio-option').forEach(x => x.classList.remove('active'));
+      el.classList.add('active');
+      el.querySelector('input').checked = true;
+    });
+  });
+
+  document.querySelectorAll('.task-pic-chip').forEach(el => {
+    el.addEventListener('click', () => {
+      el.classList.toggle('active');
+    });
+  });
+
+  document.querySelectorAll('.nav-tab').forEach(tab => {
+    tab.addEventListener('click', () => switchView(tab.dataset.view));
+  });
+
+  $('tasks-refresh-btn')?.addEventListener('click', async () => {
+    if (tasksState.loggedIn) await loadTasks();
+  });
+}
+
+// ── Init ──
+async function initApp() {
+  initTitle();
+  await loadTheme();
+  await render();
+  initTasksEventHandlers();
+}
+
+initApp();
 
 const STORAGE_KEY = 'tabCollector';
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area === 'local' && changes[STORAGE_KEY]) {
     if (isDragging) { pendingRender = true; return; }
-    render().catch(err => console.error('Storage change render failed:', err));
+    const activeTab = document.querySelector('.nav-tab.active');
+    if (activeTab && activeTab.dataset.view === 'collections') {
+      render().catch(err => console.error('Storage change render failed:', err));
+    }
   }
 });
