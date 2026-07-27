@@ -106,6 +106,10 @@
   margin-top: 20px;
 }
 
+.spacer {
+  flex: 1;
+}
+
 /* Status bar */
 .status-bar {
   position: fixed;
