@@ -3,6 +3,8 @@ importScripts('tasks/tasks-api.js');
 
 const MENU_PARENT_ID = 'add-to-collection';
 
+scheduleTasksReminder();
+
 async function rebuildContextMenu() {
   await chrome.contextMenus.removeAll();
 
@@ -38,13 +40,17 @@ chrome.runtime.onInstalled.addListener(async () => {
   }
   rebuildContextMenu();
 
+  scheduleTasksReminder();
+});
+
+function scheduleTasksReminder() {
   const now = Date.now();
   const target = new Date();
   target.setHours(17, 35, 0, 0);
   let when = target.getTime();
   if (when <= now) when += 86400000;
   chrome.alarms.create('tasks-reminder', { when, periodInMinutes: 1440 });
-});
+}
 
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   if (info.parentMenuItemId !== MENU_PARENT_ID) return;
