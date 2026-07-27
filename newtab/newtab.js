@@ -1241,10 +1241,8 @@ function renderTasksView() {
   const stickyTasks = items.filter(t => !t.done && !t.due && !t.start);
   const doneTasks = items.filter(t => t.done);
 
-  // Combine today's tasks: those with due today or start today + sticky
-  let todayItems = items.filter(t => !t.done && (!t.due || t.due.slice(0, 10) <= today));
-  // But move overdue to their own section — filter them out
-  todayItems = todayItems.filter(t => !(t.due && t.due.slice(0, 10) < today));
+  // Today's tasks: due today (exclude sticky + overdue)
+  const todayItems = items.filter(t => !t.done && t.due && t.due.slice(0, 10) === today);
 
   const sortFn = (a, b) => {
     const tA = (a.start || a.due || '').slice(11) || '00:00';
@@ -1446,11 +1444,7 @@ function switchView(view) {
   }
 }
 
-let tasksInitialized = false;
-
 async function initTasksView() {
-  if (tasksInitialized) return;
-  tasksInitialized = true;
   await checkTasksLogin();
   if (tasksState.loggedIn) {
     await loadTasks();
