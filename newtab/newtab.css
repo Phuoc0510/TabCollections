@@ -1122,15 +1122,17 @@ select.tasks-filter {
   font-size: 14px;
 }
 
-/* Top row is the day at a glance (today | overdue); undated work runs full width below. */
+/* Top row is the day at a glance (today | overdue); undated work runs full width below.
+   Cards stretch to a common height so the two top ones always read as a matched pair,
+   and every card keeps the same shape whether it holds one row or twenty. */
 .tasks-columns {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 16px;
-  align-items: start;
+  align-items: stretch;
 }
 
-.tasks-row-full {
+.tasks-section-wide {
   grid-column: 1 / -1;
 }
 
@@ -1261,6 +1263,7 @@ select.tasks-filter {
 
 .tasks-section {
   display: flex;
+  min-height: 280px;
   background: var(--glass-card-bg);
   border-radius: var(--radius-lg);
   border: 1px solid var(--border-color);

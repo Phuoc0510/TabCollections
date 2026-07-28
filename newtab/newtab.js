@@ -1379,7 +1379,7 @@ function renderTasksView() {
   const isFiltered = f.search.trim() || f.priority !== 'all' ||
     f.status !== 'all' || f.type !== 'all';
 
-  const renderSection = (s) => {
+  const renderSection = (s, wide) => {
     const list = buckets[s.id];
     const count = list.length ? `<span class="tasks-section-count">${list.length}</span>` : '';
     const addBtn = s.id === 'today'
@@ -1391,7 +1391,7 @@ function renderTasksView() {
           ? 'Chưa có task nào <button class="btn-primary tasks-empty-btn" id="tasks-empty-create-btn">+ Tạo việc</button>'
           : 'Không có task nào'}</div>`;
 
-    return `<div class="tasks-section tasks-section-${s.id}">
+    return `<div class="tasks-section tasks-section-${s.id}${wide ? ' tasks-section-wide' : ''}">
       <div class="task-bar ${s.bar}"></div>
       <div class="tasks-section-inner">
         <div class="tasks-section-header"><span>${s.icon} ${esc(s.label)} ${count}</span>${addBtn}</div>
@@ -1400,20 +1400,18 @@ function renderTasksView() {
     </div>`;
   };
 
-  const section = (id) => {
+  const section = (id, wide) => {
     const s = visible.find((x) => x.id === id);
-    return s ? renderSection(s) : '';
+    return s ? renderSection(s, wide) : '';
   };
 
-  // Top row is the day at a glance: today on the left, overdue on the right.
-  // Everything that is not tied to a specific day runs full width underneath.
+  // Top row is the day at a glance: today on the left, overdue on the right, both the
+  // same height. Everything not tied to a specific day runs full width underneath.
   const columns =
     section('today') +
     section('overdue') +
-    `<div class="tasks-row-full">${section('sticky')}</div>` +
-    (visible.some((s) => s.id === 'upcoming')
-      ? `<div class="tasks-row-full">${section('upcoming')}</div>`
-      : '');
+    section('sticky', true) +
+    section('upcoming', true);
 
   const banner = !hasAny && isFiltered
     ? '<div class="tasks-filter-note">Không có task nào khớp bộ lọc. ' +
