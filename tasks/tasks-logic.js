@@ -171,6 +171,28 @@ function applyTaskFilters(items, filters) {
   });
 }
 
+// Every value a stored filter is allowed to hold. Anything else came from an older build
+// or a member who has since left, and would leave its <select> showing blank while still
+// being sent to the API.
+const TASK_FILTER_OPTIONS = {
+  pic: ['all', ...TASK_MEMBERS],
+  range: ['today', 'week', 'all'],
+  status: ['all', 'todo', 'done'],
+  priority: ['all', 'low', 'normal', 'high'],
+  type: ['all', 'task', 'release'],
+};
+
+/** Merges what was persisted over the defaults, dropping anything unrecognised. */
+function sanitizeTaskFilters(saved, defaults) {
+  const out = { ...defaults };
+  const src = saved && typeof saved === 'object' ? saved : {};
+  for (const [key, allowed] of Object.entries(TASK_FILTER_OPTIONS)) {
+    if (allowed.includes(src[key])) out[key] = src[key];
+  }
+  if (typeof src.search === 'string') out.search = src.search.slice(0, 200);
+  return out;
+}
+
 const TASK_GROUP_RELEASE = '__release';
 const TASK_GROUP_TEAM = '__team';
 const TASK_GROUP_NONE = '__none';
@@ -272,6 +294,8 @@ if (typeof module !== 'undefined') {
     picGroupKey,
     picGroupLabel,
     groupTasksByPic,
+    TASK_FILTER_OPTIONS,
+    sanitizeTaskFilters,
     vnDayKey,
     vnToday,
     vnNowInputValue,

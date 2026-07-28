@@ -18,7 +18,7 @@ const DEFAULT_TASK_FILTERS = {
 
 async function loadTaskFilters() {
   const r = await chrome.storage.local.get(TASKS_FILTERS_KEY);
-  return { ...DEFAULT_TASK_FILTERS, ...(r[TASKS_FILTERS_KEY] || {}) };
+  return sanitizeTaskFilters(r[TASKS_FILTERS_KEY], DEFAULT_TASK_FILTERS);
 }
 
 function saveTaskFilters(filters) {
@@ -1567,7 +1567,16 @@ async function toggleTaskDone() {
 }
 
 // ── Tab Switching ──
+const ACTIVE_VIEW_KEY = 'tasksActiveView';
+
+/** Which tab to open on. Some people live in Tasks, some in Collections. */
+async function loadActiveView() {
+  const r = await chrome.storage.local.get(ACTIVE_VIEW_KEY);
+  return r[ACTIVE_VIEW_KEY] === 'tasks' ? 'tasks' : 'collections';
+}
+
 function switchView(view) {
+  chrome.storage.local.set({ [ACTIVE_VIEW_KEY]: view });
   const collectionsView = $('collections-view');
   const tasksView = $('tasks-view');
   const collectionsSearch = $('search-input');
@@ -1814,10 +1823,14 @@ async function initApp() {
   await loadTheme();
   await render();
   initTasksEventHandlers();
-  const params = new URLSearchParams(location.search);
-  if (params.get('view') === 'tasks') {
-    switchView('tasks');
-  }
+
+  // An explicit ?view= wins (the reminder notification uses it); otherwise reopen on
+  // whichever tab was last used, so a new tab lands where the person left off.
+  const urlView = new URLSearchParams(location.search).get('view');
+  const view = (urlView === 'tasks' || urlView === 'collections')
+    ? urlView
+    : await loadActiveView();
+  if (view === 'tasks') switchView('tasks');
 }
 
 initApp();

@@ -56,6 +56,8 @@ export default [
         picGroupKey: 'readonly',
         picGroupLabel: 'readonly',
         groupTasksByPic: 'readonly',
+        TASK_FILTER_OPTIONS: 'readonly',
+        sanitizeTaskFilters: 'readonly',
         vnDayKey: 'readonly',
         vnToday: 'readonly',
         vnNowInputValue: 'readonly',

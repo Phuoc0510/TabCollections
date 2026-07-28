@@ -18,7 +18,7 @@ async function main() {
     vnDayKey, vnToday, vnNowInputValue, vnShiftDay, safeColor, taskSpan, classifyTask,
     bucketTasks, applyTaskFilters, picBadgeText, rangeToApiParams, upcomingLimit,
     buildBoardDeepLink, TASK_MEMBERS, isRelease, picGroupKey, picGroupLabel, groupTasksByPic,
-    toDateTimeInput,
+    toDateTimeInput, sanitizeTaskFilters,
   } = mod.default;
 
   // ── Vietnam timezone ──────────────────────────────────────────────────────
@@ -152,6 +152,31 @@ async function main() {
   eq(grouped[0].items.map(t => t.id), ['g3', 'g5'], 'incoming order is preserved inside a group');
   assert(grouped.reduce((n, g) => n + g.items.length, 0) === 7,
     'grouping never duplicates or drops a row');
+
+  // ── persisted filters ─────────────────────────────────────────────────────
+  const DEF = { pic: 'all', range: 'today', status: 'todo', priority: 'all', type: 'all', search: '' };
+
+  eq(sanitizeTaskFilters(null, DEF), DEF, 'nothing stored falls back to the defaults');
+  eq(sanitizeTaskFilters(undefined, DEF), DEF, 'undefined falls back to the defaults');
+  eq(sanitizeTaskFilters('rác', DEF), DEF, 'a non-object falls back to the defaults');
+
+  eq(sanitizeTaskFilters({ pic: 'phuoc', status: 'done', search: 'beta' }, DEF),
+    { ...DEF, pic: 'phuoc', status: 'done', search: 'beta' },
+    'stored choices are restored');
+
+  // A member who has left, or a value from an older build, would otherwise leave its
+  // <select> blank while still being sent up as a query parameter.
+  eq(sanitizeTaskFilters({ pic: 'nguoi-da-nghi' }, DEF).pic, 'all', 'unknown member is dropped');
+  eq(sanitizeTaskFilters({ range: 'thang' }, DEF).range, 'today', 'unknown range is dropped');
+  eq(sanitizeTaskFilters({ status: 'xong-roi' }, DEF).status, 'todo', 'unknown status is dropped');
+  eq(sanitizeTaskFilters({ priority: 'khan' }, DEF).priority, 'all', 'unknown priority is dropped');
+  eq(sanitizeTaskFilters({ type: 'bug' }, DEF).type, 'all', 'unknown type is dropped');
+  eq(sanitizeTaskFilters({ search: 12345 }, DEF).search, '', 'a non-string search is dropped');
+  eq(sanitizeTaskFilters({ search: 'x'.repeat(500) }, DEF).search.length, 200, 'search is capped');
+
+  // One bad key must not discard the rest.
+  eq(sanitizeTaskFilters({ pic: 'sai', status: 'done' }, DEF),
+    { ...DEF, status: 'done' }, 'a bad key does not take the good ones down with it');
 
   // ── picBadgeText ──────────────────────────────────────────────────────────
   eq(picBadgeText([]), '', 'no PIC gives no badge');

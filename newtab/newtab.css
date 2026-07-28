@@ -593,6 +593,12 @@ body.has-bg .app-header {
   }
 }
 
+/* Keep the sticky tint over a background image - the rules above force every section
+   back to the plain card colour. */
+body.has-bg .tasks-section-sticky {
+  background: var(--task-section-sticky-bg) !important;
+}
+
 /* ── Cross-group tab drag ── */
 .group-card.drag-target {
   outline: 2px solid var(--accent);
@@ -1128,7 +1134,7 @@ select.tasks-filter {
 .tasks-columns {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  gap: 24px;
   align-items: stretch;
 }
 
@@ -1271,6 +1277,12 @@ select.tasks-filter {
   transition: box-shadow var(--transition-normal);
 }
 
+/* Sticky work is not tied to today, so it gets its own tint to stop it reading as a
+   third dated column. Kept faint enough that the rows on top of it stay legible. */
+.tasks-section-sticky {
+  background: var(--task-section-sticky-bg);
+}
+
 .task-bar {
   width: 4px;
   flex-shrink: 0;
@@ -1278,7 +1290,7 @@ select.tasks-filter {
 
 .task-bar-overdue  { background: #ef4444; }
 .task-bar-today    { background: #3b82f6; }
-.task-bar-sticky   { background: #a855f7; }
+.task-bar-sticky   { background: #22c55e; }
 .task-bar-upcoming { background: #94a3b8; }
 
 .tasks-section-count {

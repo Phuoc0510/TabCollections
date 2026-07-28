@@ -35,6 +35,7 @@
   --task-group-header-bg: rgba(15, 23, 42, 0.09);
   --task-group-release-bg: rgba(245, 158, 11, 0.14);
   --task-group-divider: rgba(15, 23, 42, 0.06);
+  --task-section-sticky-bg: rgba(34, 197, 94, 0.10);
   --task-modal-bg: #ffffff;
   --task-modal-field-bg: #f8fafc;
   --transition-fast: 150ms;
@@ -70,7 +71,8 @@
     --task-group-header-bg: rgba(255, 255, 255, 0.09);
     --task-group-release-bg: rgba(245, 158, 11, 0.18);
     --task-group-divider: rgba(255, 255, 255, 0.06);
-    --task-modal-bg: #131b1a;
+    --task-section-sticky-bg: rgba(34, 197, 94, 0.13);
+  --task-modal-bg: #131b1a;
     --task-modal-field-bg: rgba(255, 255, 255, 0.05);
     --success-bg: #1e3a2f;
     --success-text: #81c995;
@@ -99,6 +101,7 @@
   --task-group-header-bg: rgba(255, 255, 255, 0.09);
   --task-group-release-bg: rgba(245, 158, 11, 0.18);
   --task-group-divider: rgba(255, 255, 255, 0.06);
+  --task-section-sticky-bg: rgba(34, 197, 94, 0.13);
   --task-modal-bg: #131b1a;
   --task-modal-field-bg: rgba(255, 255, 255, 0.05);
   --success-bg: #1e3a2f;
