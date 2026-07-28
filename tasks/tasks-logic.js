@@ -23,6 +23,13 @@ const TASK_MEMBER_LABEL = {
 
 const TASK_PRIO_COLORS = { low: '#22c55e', normal: '#3b82f6', high: '#ef4444' };
 
+// Releases belong to a team rather than a person, carry no priority, and are amber.
+const TASK_RELEASE_COLOR = '#f59e0b';
+
+function isRelease(t) {
+  return !!t && t.kind === 'release';
+}
+
 // The web app pins every date to Vietnam time (GMT+7), never to the machine timezone.
 const TASK_VN_OFFSET_MS = 7 * 3600 * 1000;
 const TASK_DAY_MS = 86400000;
@@ -45,6 +52,18 @@ function vnNowInputValue(nowMs) {
   const pad = (n) => String(n).padStart(2, '0');
   return `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}` +
     `T${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}`;
+}
+
+/**
+ * Value for a <input type="datetime-local"> from whatever the API stored.
+ * All-day rows are kept as a bare "YYYY-MM-DD", which the input silently rejects, so the
+ * field renders blank and the dates of every all-day task look empty. Pad it to midnight.
+ */
+function toDateTimeInput(value) {
+  const s = String(value || '');
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s + 'T00:00';
+  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(s)) return s.slice(0, 16);
+  return '';
 }
 
 /** Add/subtract days from a "YYYY-MM-DD" key. */
@@ -118,25 +137,81 @@ function bucketTasks(items, today, upcomingUntil) {
 }
 
 /**
- * Browser-side filters. `pic` and the date range are already applied server-side.
- * status: all | todo | done - priority: all | low | normal | high - search: title + note.
+ * Browser-side filters. The date range is already applied server-side.
+ * type: all | task | release - status: all | todo | done
+ * priority: all | low | normal | high - search: title + note.
  */
 function applyTaskFilters(items, filters) {
   const f = filters || {};
+  const type = f.type || 'all';
   const status = f.status || 'all';
   const priority = f.priority || 'all';
+  const pic = f.pic || 'all';
   const term = String(f.search || '').trim().toLowerCase();
 
   return (items || []).filter((t) => {
+    const release = isRelease(t);
+
+    if (type === 'task' && release) return false;
+    if (type === 'release' && !release) return false;
+
+    // Releases have no PIC and no priority, so either filter excludes them by definition.
+    // The server does not narrow releases by pic, so it has to happen here.
+    if (release && pic !== 'all') return false;
+    if (release && priority !== 'all') return false;
+
     if (status === 'todo' && t.done) return false;
     if (status === 'done' && !t.done) return false;
-    if (priority !== 'all' && (t.priority || 'normal') !== priority) return false;
+    if (!release && priority !== 'all' && (t.priority || 'normal') !== priority) return false;
     if (term) {
       const hay = `${t.title || ''} ${t.note || ''}`.toLowerCase();
       if (!hay.includes(term)) return false;
     }
     return true;
   });
+}
+
+const TASK_GROUP_RELEASE = '__release';
+const TASK_GROUP_TEAM = '__team';
+const TASK_GROUP_NONE = '__none';
+
+/** Which group a row belongs to. Multi-PIC tasks form their own group, never duplicated. */
+function picGroupKey(t) {
+  if (isRelease(t)) return TASK_GROUP_RELEASE;
+  const keys = Array.isArray(t.pic) ? t.pic.filter((k) => TASK_MEMBER_LABEL[k]) : [];
+  if (!keys.length) return TASK_GROUP_NONE;
+  if (keys.length >= TASK_MEMBERS.length) return TASK_GROUP_TEAM;
+  return TASK_MEMBERS.filter((m) => keys.includes(m)).join('+');
+}
+
+function picGroupLabel(key) {
+  if (key === TASK_GROUP_RELEASE) return 'Release';
+  if (key === TASK_GROUP_TEAM) return 'Cả team';
+  if (key === TASK_GROUP_NONE) return 'Chưa gán';
+  return key.split('+').map((k) => TASK_MEMBER_LABEL[k] || k).join(', ');
+}
+
+/** Single members in roster order, then multi-PIC groups, then team / unassigned / release. */
+function picGroupRank(key) {
+  if (key === TASK_GROUP_RELEASE) return 4000;
+  if (key === TASK_GROUP_NONE) return 3000;
+  if (key === TASK_GROUP_TEAM) return 2000;
+  const members = key.split('+');
+  if (members.length === 1) return TASK_MEMBERS.indexOf(members[0]);
+  return 1000 + TASK_MEMBERS.indexOf(members[0]);
+}
+
+/** Groups an already-sorted list, preserving the incoming order inside each group. */
+function groupTasksByPic(items) {
+  const map = new Map();
+  for (const t of items || []) {
+    const key = picGroupKey(t);
+    if (!map.has(key)) map.set(key, []);
+    map.get(key).push(t);
+  }
+  return [...map.entries()]
+    .map(([key, list]) => ({ key, label: picGroupLabel(key), items: list }))
+    .sort((a, b) => picGroupRank(a.key) - picGroupRank(b.key));
 }
 
 /** Compact PIC badge: empty / single name / initials / "Cả team". */
@@ -181,6 +256,7 @@ function buildBoardDeepLink(base, filters) {
   q.set('date', f.today || 'today');
   if (f.pic && f.pic !== 'all') q.set('pic', f.pic);
   if (f.status && f.status !== 'all') q.set('status', f.status);
+  if (f.type && f.type !== 'all') q.set('type', f.type);
   return `${base || TASKS_WEB_BASE}?${q.toString()}`;
 }
 
@@ -191,9 +267,15 @@ if (typeof module !== 'undefined') {
     TASK_MEMBERS,
     TASK_MEMBER_LABEL,
     TASK_PRIO_COLORS,
+    TASK_RELEASE_COLOR,
+    isRelease,
+    picGroupKey,
+    picGroupLabel,
+    groupTasksByPic,
     vnDayKey,
     vnToday,
     vnNowInputValue,
+    toDateTimeInput,
     vnShiftDay,
     safeColor,
     taskSpan,

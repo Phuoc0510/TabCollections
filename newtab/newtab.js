@@ -12,6 +12,7 @@ const DEFAULT_TASK_FILTERS = {
   range: 'today',
   status: 'todo',
   priority: 'all',
+  type: 'all',
   search: ''
 };
 
@@ -1226,10 +1227,13 @@ async function loadTasks({ force = false } = {}) {
   try {
     const params = rangeToApiParams(filters.range, vnToday());
     if (filters.pic !== 'all') params.pic = filters.pic;
-    const items = await tasksSend('tasks:list', { params });
+    const res = await tasksSend('tasks:list', { params });
     if (token !== tasksState.loadToken) return; // a newer load already started
 
-    tasksState.items = Array.isArray(items) ? items : [];
+    // Releases come back alongside tasks and share the same columns.
+    const tasks = (res && res.tasks) || [];
+    const releases = ((res && res.releases) || []).map((r) => ({ ...r, kind: 'release' }));
+    tasksState.items = [...tasks, ...releases];
     tasksState.loggedIn = true;
     tasksState.error = null;
     chrome.storage.local.set({ [LOGIN_CACHE_KEY]: { ok: true, at: Date.now() } });
@@ -1256,11 +1260,6 @@ async function loadTasks({ force = false } = {}) {
 // ── Tasks Rendering ──
 // TASK_PRIO_COLORS / TASK_MEMBER_LABEL and the date helpers live in tasks/tasks-logic.js.
 
-function getPicBadge(pic) {
-  const text = picBadgeText(pic);
-  return text ? `<span class="task-pic-badge">${esc(text)}</span>` : '';
-}
-
 /** "2026-07-28T09:00" -> "09:00"; multi-day tasks also show the day range. */
 function taskTimeLabel(t, today) {
   const span = taskSpan(t);
@@ -1284,18 +1283,43 @@ function taskTimeLabel(t, today) {
 }
 
 function renderTaskItem(t, today) {
-  const prioColor = safeColor(t.color, TASK_PRIO_COLORS[t.priority] || TASK_PRIO_COLORS.normal);
+  const release = isRelease(t);
+  const fallback = release
+    ? TASK_RELEASE_COLOR
+    : (TASK_PRIO_COLORS[t.priority] || TASK_PRIO_COLORS.normal);
+  const prioColor = safeColor(t.color, fallback);
   const meta = taskTimeLabel(t, today);
 
-  return `<div class="task-item${t.done ? ' done' : ''}" data-id="${esc(t.id)}">
-    <input type="checkbox" class="task-checkbox" data-id="${esc(t.id)}"${t.done ? ' checked' : ''}
-           aria-label="Đánh dấu hoàn thành">
+  // Releases live under their own endpoints and are admin-only, so they stay read-only
+  // here: no checkbox, and clicking one opens the full board instead of the task modal.
+  const lead = release
+    ? '<span class="task-release-icon" aria-hidden="true">🚀</span>'
+    : `<input type="checkbox" class="task-checkbox" data-id="${esc(t.id)}"${t.done ? ' checked' : ''}
+              aria-label="Đánh dấu hoàn thành">`;
+
+  // No PIC badge on the row: the group header above it already names the person.
+  return `<div class="task-item${t.done ? ' done' : ''}${release ? ' release' : ''}"
+       data-id="${esc(t.id)}"${release ? ' data-release="1"' : ''}
+       title="${esc(release ? 'Release - mở board để sửa' : t.title)}">
+    ${lead}
     <div class="task-priority-dot" style="background:${esc(prioColor)}"></div>
     <div class="task-item-body">
       <div class="task-title">${esc(t.title)}</div>
-      <div class="task-meta">${getPicBadge(t.pic)} ${esc(meta)}</div>
+      <div class="task-meta">${esc(meta)}</div>
     </div>
   </div>`;
+}
+
+/** Rows inside a column, split into one block per person. */
+function renderTaskGroups(items, today) {
+  return groupTasksByPic(items).map((g) => `
+    <div class="task-group task-group-${esc(g.key === '__release' ? 'release' : 'member')}">
+      <div class="task-group-header">
+        <span class="task-group-name">${esc(g.label)}</span>
+        <span class="task-group-count">${g.items.length}</span>
+      </div>
+      ${g.items.map((t) => renderTaskItem(t, today)).join('')}
+    </div>`).join('');
 }
 
 function renderTasksSkeleton() {
@@ -1351,30 +1375,45 @@ function renderTasksView() {
   );
 
   const hasAny = visible.some((s) => buckets[s.id].length);
-  const isFiltered = tasksState.filters.search.trim() ||
-    tasksState.filters.priority !== 'all' ||
-    tasksState.filters.status !== 'all';
+  const f = tasksState.filters;
+  const isFiltered = f.search.trim() || f.priority !== 'all' ||
+    f.status !== 'all' || f.type !== 'all';
 
-  const columns = visible.map((s) => {
+  const renderSection = (s) => {
     const list = buckets[s.id];
     const count = list.length ? `<span class="tasks-section-count">${list.length}</span>` : '';
     const addBtn = s.id === 'today'
       ? '<button class="btn-primary tasks-section-add-btn" id="tasks-add-btn">+ Tạo việc</button>'
       : '';
     const body = list.length
-      ? list.map((t) => renderTaskItem(t, today)).join('')
+      ? renderTaskGroups(list, today)
       : `<div class="task-list-empty">${s.id === 'today' && !isFiltered
           ? 'Chưa có task nào <button class="btn-primary tasks-empty-btn" id="tasks-empty-create-btn">+ Tạo việc</button>'
           : 'Không có task nào'}</div>`;
 
-    return `<div class="tasks-section">
+    return `<div class="tasks-section tasks-section-${s.id}">
       <div class="task-bar ${s.bar}"></div>
       <div class="tasks-section-inner">
         <div class="tasks-section-header"><span>${s.icon} ${esc(s.label)} ${count}</span>${addBtn}</div>
         ${body}
       </div>
     </div>`;
-  }).join('');
+  };
+
+  const section = (id) => {
+    const s = visible.find((x) => x.id === id);
+    return s ? renderSection(s) : '';
+  };
+
+  // Top row is the day at a glance: today on the left, overdue on the right.
+  // Everything that is not tied to a specific day runs full width underneath.
+  const columns =
+    section('today') +
+    section('overdue') +
+    `<div class="tasks-row-full">${section('sticky')}</div>` +
+    (visible.some((s) => s.id === 'upcoming')
+      ? `<div class="tasks-row-full">${section('upcoming')}</div>`
+      : '');
 
   const banner = !hasAny && isFiltered
     ? '<div class="tasks-filter-note">Không có task nào khớp bộ lọc. ' +
@@ -1421,8 +1460,8 @@ function openTaskModal(task) {
     $('task-sticky-input').checked = !task.start && !task.due;
     $('task-date-fields').style.display = $('task-sticky-input').checked ? 'none' : 'block';
     $('task-allday-input').checked = !!task.allDay;
-    if (task.start) $('task-start-input').value = task.start.slice(0, 16);
-    if (task.due) $('task-due-input').value = task.due.slice(0, 16);
+    if (task.start) $('task-start-input').value = toDateTimeInput(task.start);
+    if (task.due) $('task-due-input').value = toDateTimeInput(task.due);
 
     document.querySelectorAll('.task-prio-option').forEach(el => el.classList.remove('active'));
     const prio = document.querySelector(`.task-prio-option[data-prio="${task.priority || 'normal'}"]`);
@@ -1569,6 +1608,7 @@ function syncFilterInputs() {
   const f = tasksState.filters;
   $('tasks-pic-filter').value = f.pic;
   $('tasks-range-filter').value = f.range;
+  $('tasks-type-filter').value = f.type;
   $('tasks-status-filter').value = f.status;
   $('tasks-prio-filter').value = f.priority;
   $('tasks-search').value = f.search;
@@ -1585,6 +1625,7 @@ function updateTasksTitle() {
     f.priority !== DEFAULT_TASK_FILTERS.priority ||
     f.range !== DEFAULT_TASK_FILTERS.range ||
     f.pic !== DEFAULT_TASK_FILTERS.pic ||
+    f.type !== DEFAULT_TASK_FILTERS.type ||
     f.search.trim() !== '';
   $('tasks-reset-filters').style.display = dirty ? 'inline-flex' : 'none';
 }
@@ -1641,6 +1682,9 @@ function initTasksEventHandlers() {
 
   $('tasks-range-filter').addEventListener('change', e =>
     setTaskFilter({ range: e.target.value }, { refetch: true }));
+
+  $('tasks-type-filter').addEventListener('change', e =>
+    setTaskFilter({ type: e.target.value }, { refetch: false }));
 
   $('tasks-status-filter').addEventListener('change', e =>
     setTaskFilter({ status: e.target.value }, { refetch: false }));
@@ -1703,10 +1747,18 @@ function initTasksEventHandlers() {
     }
 
     const item = e.target.closest('.task-item');
-    if (item) {
-      const task = tasksState.items.find(t => t.id === item.dataset.id);
-      if (task) openTaskModal(task);
+    if (!item) return;
+
+    if (item.dataset.release) {
+      chrome.tabs.create({
+        url: buildBoardDeepLink(TASKS_WEB_BASE,
+          { ...tasksState.filters, type: 'release', today: vnToday() })
+      });
+      return;
     }
+
+    const task = tasksState.items.find(t => t.id === item.dataset.id);
+    if (task) openTaskModal(task);
   });
 
   $('task-modal-cancel-btn').addEventListener('click', closeTaskModal);

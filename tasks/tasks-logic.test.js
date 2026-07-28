@@ -17,7 +17,8 @@ async function main() {
   const {
     vnDayKey, vnToday, vnNowInputValue, vnShiftDay, safeColor, taskSpan, classifyTask,
     bucketTasks, applyTaskFilters, picBadgeText, rangeToApiParams, upcomingLimit,
-    buildBoardDeepLink, TASK_MEMBERS,
+    buildBoardDeepLink, TASK_MEMBERS, isRelease, picGroupKey, picGroupLabel, groupTasksByPic,
+    toDateTimeInput,
   } = mod.default;
 
   // ── Vietnam timezone ──────────────────────────────────────────────────────
@@ -36,6 +37,15 @@ async function main() {
   eq(vnNowInputValue(Date.UTC(2026, 6, 28, 2, 5)), '2026-07-28T09:05', 'vnNowInputValue uses VN time');
   eq(vnShiftDay('2026-07-28', 7), '2026-08-04', 'vnShiftDay crosses month boundaries');
   eq(vnShiftDay('2026-01-01', -1), '2025-12-31', 'vnShiftDay crosses year boundaries');
+
+  // ── datetime-local values ─────────────────────────────────────────────────
+  // All-day rows are stored as a bare date; the input rejects that and renders blank,
+  // which made every all-day task look like it had no dates at all.
+  eq(toDateTimeInput('2026-07-28'), '2026-07-28T00:00', 'a bare date is padded to midnight');
+  eq(toDateTimeInput('2026-07-28T09:30'), '2026-07-28T09:30', 'a full value passes through');
+  eq(toDateTimeInput('2026-07-28T09:30:15'), '2026-07-28T09:30', 'seconds are trimmed');
+  eq(toDateTimeInput(''), '', 'empty stays empty');
+  eq(toDateTimeInput(null), '', 'null stays empty');
 
   // ── safeColor ─────────────────────────────────────────────────────────────
   eq(safeColor('#ef4444', '#000'), '#ef4444', 'safeColor keeps valid hex');
@@ -97,6 +107,51 @@ async function main() {
   eq(applyTaskFilters(mixed, { search: 'HỌP' }).map(t => t.id), ['2'], 'search is case-insensitive');
   eq(applyTaskFilters(mixed, { status: 'todo', priority: 'low' }).map(t => t.id), ['3'],
     'filters combine');
+
+  // ── releases ──────────────────────────────────────────────────────────────
+  const rel = { id: 'r1', kind: 'release', title: 'Release 3.2', start: '2026-07-28', done: false };
+  const task = { id: 'k1', title: 'Việc thường', priority: 'high', pic: ['phuoc'], done: false };
+  assert(isRelease(rel) && !isRelease(task), 'isRelease tells the two apart');
+
+  const both = [task, rel];
+  eq(applyTaskFilters(both, { type: 'all' }).map(t => t.id), ['k1', 'r1'], 'type all keeps both');
+  eq(applyTaskFilters(both, { type: 'task' }).map(t => t.id), ['k1'], 'type task drops releases');
+  eq(applyTaskFilters(both, { type: 'release' }).map(t => t.id), ['r1'], 'type release drops tasks');
+
+  // A release belongs to a team, not a person, and carries no priority. Either filter
+  // would otherwise let it slip through as if it matched.
+  eq(applyTaskFilters(both, { pic: 'phuoc' }).map(t => t.id), ['k1'],
+    'a PIC filter excludes releases');
+  eq(applyTaskFilters(both, { priority: 'high' }).map(t => t.id), ['k1'],
+    'a priority filter excludes releases');
+  eq(applyTaskFilters(both, { status: 'todo' }).map(t => t.id), ['k1', 'r1'],
+    'status still applies to releases');
+
+  // ── grouping by person ────────────────────────────────────────────────────
+  eq(picGroupKey({ pic: ['phuoc'] }), 'phuoc', 'single PIC groups under that member');
+  eq(picGroupKey({ pic: ['dung', 'tuong'] }), 'tuong+dung', 'multi PIC key follows roster order');
+  eq(picGroupKey({ pic: [] }), '__none', 'no PIC groups under unassigned');
+  eq(picGroupKey({ pic: TASK_MEMBERS }), '__team', 'everyone groups under team');
+  eq(picGroupKey(rel), '__release', 'releases get their own group');
+
+  eq(picGroupLabel('tuong+dung'), 'Tường, Dung', 'multi PIC label spells out both names');
+  eq(picGroupLabel('__none'), 'Chưa gán', 'unassigned label');
+  eq(picGroupLabel('__release'), 'Release', 'release label');
+
+  const grouped = groupTasksByPic([
+    { id: 'g1', title: 'a', pic: ['hao'] },
+    { id: 'g2', title: 'b', pic: [] },
+    { id: 'g3', title: 'c', pic: ['tuong'] },
+    { id: 'g4', title: 'd', kind: 'release' },
+    { id: 'g5', title: 'e', pic: ['tuong'] },
+    { id: 'g6', title: 'f', pic: TASK_MEMBERS },
+    { id: 'g7', title: 'g', pic: ['dung', 'tuong'] },
+  ]);
+  eq(grouped.map(g => g.key), ['tuong', 'hao', 'tuong+dung', '__team', '__none', '__release'],
+    'groups order: members by roster, then multi, team, unassigned, release');
+  eq(grouped[0].items.map(t => t.id), ['g3', 'g5'], 'incoming order is preserved inside a group');
+  assert(grouped.reduce((n, g) => n + g.items.length, 0) === 7,
+    'grouping never duplicates or drops a row');
 
   // ── picBadgeText ──────────────────────────────────────────────────────────
   eq(picBadgeText([]), '', 'no PIC gives no badge');
