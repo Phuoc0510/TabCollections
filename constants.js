@@ -1,9 +1,11 @@
 /* exported esc, faviconUrl, ICONS, COLORS */
 
+const HTML_ESCAPES = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+
+// Escapes quotes too, so interpolating into an attribute (data-id="...", style="...")
+// cannot break out of it. The old textContent/innerHTML trick left " and ' untouched.
 function esc(s) {
-  const d = document.createElement('div');
-  d.textContent = s;
-  return d.innerHTML;
+  return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => HTML_ESCAPES[c]);
 }
 
 function faviconUrl(t) {

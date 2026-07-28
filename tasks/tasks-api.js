@@ -1,4 +1,4 @@
-const TASKS_API_BASE = 'https://tasks.minhtuong.io.vn/api/';
+// TASKS_API_BASE comes from tasks/tasks-logic.js, which must be loaded first.
 
 async function tasksApi(path, method = 'GET', body) {
   const opts = { method, credentials: 'include', headers: {} };

@@ -50,8 +50,8 @@
       <div id="tasks-content" style="display:none">
         <div id="tasks-toolbar" class="glass-card">
           <div class="tasks-toolbar-left">
-            <span id="tasks-date-title">Task hôm nay của</span>
-            <select id="tasks-pic-filter" class="tasks-filter">
+            <span id="tasks-date-title">Task hôm nay</span>
+            <select id="tasks-pic-filter" class="tasks-filter" aria-label="Lọc theo người phụ trách">
               <option value="all">👥 Tất cả</option>
               <option value="tuong">Tường</option>
               <option value="dung">Dung</option>
@@ -60,12 +60,32 @@
               <option value="cuong">Cường</option>
               <option value="hao">Hào</option>
             </select>
-            <button id="tasks-refresh-btn" class="btn-ghost" title="Refresh">⟳</button>
+            <select id="tasks-range-filter" class="tasks-filter" aria-label="Phạm vi thời gian">
+              <option value="today">📅 Hôm nay</option>
+              <option value="week">📆 7 ngày tới</option>
+              <option value="all">🗓️ Tất cả</option>
+            </select>
+            <select id="tasks-status-filter" class="tasks-filter" aria-label="Lọc theo trạng thái">
+              <option value="todo">⬜ Chưa xong</option>
+              <option value="done">✅ Đã xong</option>
+              <option value="all">Mọi trạng thái</option>
+            </select>
+            <select id="tasks-prio-filter" class="tasks-filter" aria-label="Lọc theo mức ưu tiên">
+              <option value="all">Mọi mức ưu tiên</option>
+              <option value="high">🔴 Cao</option>
+              <option value="normal">🔵 Vừa</option>
+              <option value="low">🟢 Thấp</option>
+            </select>
+            <input type="search" id="tasks-search" class="tasks-filter tasks-search"
+                   placeholder="Tìm theo tiêu đề, ghi chú..." aria-label="Tìm task">
+            <button id="tasks-reset-filters" class="btn-ghost" title="Xoá bộ lọc" style="display:none">✕ Bộ lọc</button>
+            <button id="tasks-refresh-btn" class="btn-ghost" title="Tải lại">⟳</button>
           </div>
           <div class="tasks-toolbar-right">
-            <span id="tasks-board-link">Nhấn vào đây để xem board task của thầy Tường nha mọi người !!!</span>
+            <span id="tasks-board-link" title="Mở board đầy đủ với đúng bộ lọc đang xem">Mở board đầy đủ ↗</span>
           </div>
         </div>
+        <div id="tasks-error" class="tasks-error" style="display:none"></div>
         <div id="tasks-list"></div>
       </div>
     </div>
@@ -229,6 +249,7 @@
 
   <script src="../constants.js"></script>
   <script src="../icons.js"></script>
+  <script src="../tasks/tasks-logic.js"></script>
   <script src="newtab.js"></script>
 </body>
 </html>

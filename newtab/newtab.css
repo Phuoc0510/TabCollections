@@ -995,6 +995,8 @@ body.has-bg .app-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
   padding: 8px 14px;
   margin-bottom: 12px;
   border-radius: var(--radius-lg);
@@ -1044,12 +1046,62 @@ body.has-bg .app-header {
   border-color: var(--accent);
 }
 
+.tasks-search {
+  min-width: 200px;
+  cursor: text;
+}
+
+/* ── Tasks Error ── */
+.tasks-error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  margin-bottom: 12px;
+  border-radius: var(--radius-lg);
+  border: 1px solid #ef4444;
+  background: rgba(239, 68, 68, 0.12);
+  color: var(--text-primary);
+  font-size: 14px;
+}
+
+.tasks-filter-note {
+  padding: 10px 16px;
+  margin-bottom: 12px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  background: var(--glass-card-bg);
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+/* ── Tasks Loading Skeleton ── */
+.task-skeleton-row {
+  height: 26px;
+  margin: 8px 14px;
+  border-radius: 6px;
+  background: linear-gradient(90deg,
+    var(--hover-bg) 25%, var(--glass-bg) 37%, var(--hover-bg) 63%);
+  background-size: 400% 100%;
+  animation: task-skeleton 1.2s ease-in-out infinite;
+}
+
+@keyframes task-skeleton {
+  0% { background-position: 100% 50%; }
+  100% { background-position: 0 50%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .task-skeleton-row { animation: none; }
+}
+
 /* ── Task List ── */
 .task-list-empty {
   text-align: center;
-  padding: 60px 20px;
+  padding: 28px 20px;
   color: var(--text-muted);
-  font-size: 15px;
+  font-size: 14px;
 }
 
 .tasks-columns {
@@ -1136,8 +1188,23 @@ body.has-bg .app-header {
   flex-shrink: 0;
 }
 
-.task-bar-overdue { background: #ef4444; }
-.task-bar-today   { background: #3b82f6; }
+.task-bar-overdue  { background: #ef4444; }
+.task-bar-today    { background: #3b82f6; }
+.task-bar-sticky   { background: #a855f7; }
+.task-bar-upcoming { background: #94a3b8; }
+
+.tasks-section-count {
+  display: inline-block;
+  min-width: 18px;
+  padding: 1px 6px;
+  margin-left: 4px;
+  border-radius: 999px;
+  background: var(--hover-bg);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 700;
+  text-align: center;
+}
 
 .tasks-section-inner {
   flex: 1;

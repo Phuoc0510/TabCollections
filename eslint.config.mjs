@@ -46,6 +46,24 @@ export default [
         tasksUpdate: 'readonly',
         tasksDelete: 'readonly',
         tasksToggle: 'readonly',
+        TASKS_WEB_BASE: 'readonly',
+        TASKS_API_BASE: 'readonly',
+        TASK_MEMBERS: 'readonly',
+        TASK_MEMBER_LABEL: 'readonly',
+        TASK_PRIO_COLORS: 'readonly',
+        vnDayKey: 'readonly',
+        vnToday: 'readonly',
+        vnNowInputValue: 'readonly',
+        vnShiftDay: 'readonly',
+        safeColor: 'readonly',
+        taskSpan: 'readonly',
+        classifyTask: 'readonly',
+        bucketTasks: 'readonly',
+        applyTaskFilters: 'readonly',
+        picBadgeText: 'readonly',
+        rangeToApiParams: 'readonly',
+        upcomingLimit: 'readonly',
+        buildBoardDeepLink: 'readonly',
       },
     },
     rules: {
@@ -56,13 +74,13 @@ export default [
     },
   },
   {
-    files: ['constants.js', 'icons.js', 'tasks/tasks-api.js'],
+    files: ['constants.js', 'icons.js', 'tasks/tasks-api.js', 'tasks/tasks-logic.js'],
     rules: {
       'no-unused-vars': 'off',
     },
   },
   {
-    files: ['storage.test.js'],
+    files: ['storage.test.js', 'tasks/tasks-logic.test.js'],
     languageOptions: {
       globals: {
         ...globals.node,
