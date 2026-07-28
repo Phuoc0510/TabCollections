@@ -5,24 +5,41 @@ let expandedInitialized = false;
 let privacyMode = false;
 
 // ── Tasks State ──
-const TASKS_PIC_KEY = 'tasksPicFilter';
+const TASKS_FILTERS_KEY = 'tasksFilters';
 
-async function loadTasksPicFilter() {
-  const r = await chrome.storage.local.get(TASKS_PIC_KEY);
-  return r[TASKS_PIC_KEY] || 'all';
+const DEFAULT_TASK_FILTERS = {
+  pic: 'all',
+  range: 'today',
+  status: 'todo',
+  priority: 'all',
+  type: 'all',
+  search: ''
+};
+
+async function loadTaskFilters() {
+  const r = await chrome.storage.local.get(TASKS_FILTERS_KEY);
+  return sanitizeTaskFilters(r[TASKS_FILTERS_KEY], DEFAULT_TASK_FILTERS);
+}
+
+function saveTaskFilters(filters) {
+  return chrome.storage.local.set({ [TASKS_FILTERS_KEY]: filters });
 }
 
 const tasksState = {
   loggedIn: false,
   items: [],
-  picFilter: 'all',
+  filters: { ...DEFAULT_TASK_FILTERS },
   editingId: null,
-  loading: false
+  loading: false,
+  error: null,
+  loadToken: 0
 };
 
 const TASK_SECTIONS = [
-  { id: 'overdue', label: 'Quá hạn', icon: '🔴' },
-  { id: 'today', label: 'Task hôm nay', icon: '⬜' },
+  { id: 'overdue', label: 'Quá hạn', icon: '🔴', bar: 'task-bar-overdue' },
+  { id: 'today', label: 'Hôm nay', icon: '⬜', bar: 'task-bar-today' },
+  { id: 'sticky', label: 'Thường trực', icon: '📌', bar: 'task-bar-sticky' },
+  { id: 'upcoming', label: 'Sắp tới', icon: '🗓️', bar: 'task-bar-upcoming' },
 ];
 
 const TITLE_KEY = 'tabCollectorTitle';
@@ -1168,74 +1185,150 @@ async function tasksSend(action, extra = {}) {
 }
 
 const LOGIN_CACHE_KEY = 'tasksLoginCache';
+const TASKS_CACHE_KEY = 'tasksListCache';
+const TASKS_CACHE_TTL = 60000;
 
-async function checkAuthViaTab(tabId) {
-  const fn = () => fetch('https://tasks.minhtuong.io.vn/api/me', { credentials: 'include' })
-    .then(r => r.ok ? r.json() : Promise.reject())
-    .then(d => d.user || null)
-    .catch(() => null);
+/** Cheap auth probe. Shares the session cookie with every other tasks:* call. */
+async function checkTasksAuth() {
   try {
-    const results = await chrome.scripting.executeScript({
-      target: { tabId },
-      world: 'MAIN',
-      func: fn,
-    });
-    return results?.[0]?.result || null;
+    const res = await tasksSend('tasks:me');
+    return res && res.user ? res.user : null;
   } catch { return null; }
 }
 
-async function loadTasks() {
+function cacheKeyFor(filters) {
+  return `${filters.pic}|${filters.range}`;
+}
+
+/**
+ * Loads from the API. `force` skips the short-lived cache that keeps switching between
+ * Collections and Tasks from refetching the whole board every time.
+ */
+async function loadTasks({ force = false } = {}) {
+  const token = ++tasksState.loadToken;
+  const filters = tasksState.filters;
+  const key = cacheKeyFor(filters);
+
+  if (!force) {
+    const cached = (await chrome.storage.session.get(TASKS_CACHE_KEY))[TASKS_CACHE_KEY];
+    if (cached && cached.key === key && Date.now() - cached.at < TASKS_CACHE_TTL) {
+      tasksState.items = cached.items;
+      tasksState.error = null;
+      tasksState.loading = false;
+      renderTasksView();
+      return;
+    }
+  }
+
   tasksState.loading = true;
+  tasksState.error = null;
   renderTasksView();
+
   try {
-    const params = {};
-    if (tasksState.picFilter !== 'all') params.pic = tasksState.picFilter;
-    const items = await tasksSend('tasks:list', { params });
-    tasksState.items = Array.isArray(items) ? items : [];
+    const params = rangeToApiParams(filters.range, vnToday());
+    if (filters.pic !== 'all') params.pic = filters.pic;
+    const res = await tasksSend('tasks:list', { params });
+    if (token !== tasksState.loadToken) return; // a newer load already started
+
+    // Releases come back alongside tasks and share the same columns.
+    const tasks = (res && res.tasks) || [];
+    const releases = ((res && res.releases) || []).map((r) => ({ ...r, kind: 'release' }));
+    tasksState.items = [...tasks, ...releases];
     tasksState.loggedIn = true;
+    tasksState.error = null;
     chrome.storage.local.set({ [LOGIN_CACHE_KEY]: { ok: true, at: Date.now() } });
+    chrome.storage.session.set({
+      [TASKS_CACHE_KEY]: { key, items: tasksState.items, at: Date.now() }
+    });
   } catch (err) {
+    if (token !== tasksState.loadToken) return;
+    tasksState.items = [];
     if (err.message === 'SESSION_EXPIRED') {
       tasksState.loggedIn = false;
+      tasksState.error = null;
       chrome.storage.local.set({ [LOGIN_CACHE_KEY]: { ok: false, at: Date.now() } });
+      chrome.storage.session.remove(TASKS_CACHE_KEY);
+    } else {
+      // Previously any non-401 error rendered as "no tasks", which reads as an empty day.
+      tasksState.error = err.message || 'Không kết nối được tới máy chủ';
     }
-    tasksState.items = [];
   }
   tasksState.loading = false;
   renderTasksView();
 }
 
 // ── Tasks Rendering ──
-const TASK_PRIO_COLORS = { low: '#22c55e', normal: '#3b82f6', high: '#ef4444' };
-const TASK_MEMBER_LABEL = { tuong: 'Tường', dung: 'Dung', phuoc: 'Phước', tran: 'Trân', cuong: 'Cường', hao: 'Hào' };
-const TASK_MEMBERS = ['tuong', 'dung', 'phuoc', 'tran', 'cuong', 'hao'];
+// TASK_PRIO_COLORS / TASK_MEMBER_LABEL and the date helpers live in tasks/tasks-logic.js.
 
-function getPicBadge(pic) {
-  const p = Array.isArray(pic) ? pic.filter(k => TASK_MEMBER_LABEL[k]) : [];
-  if (!p.length) return '';
-  if (p.length >= TASK_MEMBERS.length) return '<span class="task-pic-badge">Team</span>';
-  if (p.length === 1) return `<span class="task-pic-badge">${TASK_MEMBER_LABEL[p[0]]}</span>`;
-  return `<span class="task-pic-badge">${p.map(k => TASK_MEMBER_LABEL[k][0]).join('')}</span>`;
+/** "2026-07-28T09:00" -> "09:00"; multi-day tasks also show the day range. */
+function taskTimeLabel(t, today) {
+  const span = taskSpan(t);
+  if (!span) return '📌 Thường trực';
+
+  const dayLabel = (key) => `${key.slice(8, 10)}/${key.slice(5, 7)}`;
+  const parts = [];
+  if (span.from !== span.to) {
+    parts.push(`${dayLabel(span.from)} → ${dayLabel(span.to)}`);
+  } else if (span.from !== today) {
+    parts.push(dayLabel(span.from));
+  }
+
+  if (!t.allDay) {
+    const time = (t.start || t.due || '').slice(11, 16);
+    if (time) parts.push(time);
+  } else {
+    parts.push('Cả ngày');
+  }
+  return parts.join(' · ');
 }
 
-function renderTaskItem(t) {
-  const timeStr = t.start ? t.start.slice(11, 16) : (t.due ? t.due.slice(11, 16) : '');
-  const isSticky = !t.start && !t.due;
-  const picBadge = getPicBadge(t.pic);
-  const prioColor = t.color || TASK_PRIO_COLORS[t.priority] || TASK_PRIO_COLORS.normal;
+function renderTaskItem(t, today) {
+  const release = isRelease(t);
+  const fallback = release
+    ? TASK_RELEASE_COLOR
+    : (TASK_PRIO_COLORS[t.priority] || TASK_PRIO_COLORS.normal);
+  const prioColor = safeColor(t.color, fallback);
+  const meta = taskTimeLabel(t, today);
 
-  const metaParts = [];
-  if (isSticky) metaParts.push('📌 Thường trực');
-  else if (timeStr) metaParts.push(timeStr);
-  if (t.allDay) metaParts.push('Cả ngày');
+  // Releases live under their own endpoints and are admin-only, so they stay read-only
+  // here: no checkbox, and clicking one opens the full board instead of the task modal.
+  const lead = release
+    ? '<span class="task-release-icon" aria-hidden="true">🚀</span>'
+    : `<input type="checkbox" class="task-checkbox" data-id="${esc(t.id)}"${t.done ? ' checked' : ''}
+              aria-label="Đánh dấu hoàn thành">`;
 
-  return `<div class="task-item${t.done ? ' done' : ''}" data-id="${esc(t.id)}">
-    <input type="checkbox" class="task-checkbox" data-id="${esc(t.id)}"${t.done ? ' checked' : ''}>
+  // No PIC badge on the row: the group header above it already names the person.
+  return `<div class="task-item${t.done ? ' done' : ''}${release ? ' release' : ''}"
+       data-id="${esc(t.id)}"${release ? ' data-release="1"' : ''}
+       title="${esc(release ? 'Release - mở board để sửa' : t.title)}">
+    ${lead}
     <div class="task-priority-dot" style="background:${esc(prioColor)}"></div>
     <div class="task-item-body">
       <div class="task-title">${esc(t.title)}</div>
-      <div class="task-meta">${picBadge} ${esc(metaParts.join(' · '))}</div>
+      <div class="task-meta">${esc(meta)}</div>
     </div>
+  </div>`;
+}
+
+/** Rows inside a column, split into one block per person. */
+function renderTaskGroups(items, today) {
+  return groupTasksByPic(items).map((g) => `
+    <div class="task-group task-group-${esc(g.key === '__release' ? 'release' : 'member')}">
+      <div class="task-group-header">
+        <span class="task-group-name">${esc(g.label)}</span>
+        <span class="task-group-count">${g.items.length}</span>
+      </div>
+      ${g.items.map((t) => renderTaskItem(t, today)).join('')}
+    </div>`).join('');
+}
+
+function renderTasksSkeleton() {
+  const row = '<div class="task-skeleton-row"></div>';
+  return `<div class="tasks-columns">
+    <div class="tasks-section"><div class="task-bar task-bar-today"></div>
+      <div class="tasks-section-inner">${row.repeat(4)}</div></div>
+    <div class="tasks-section"><div class="task-bar task-bar-overdue"></div>
+      <div class="tasks-section-inner">${row.repeat(2)}</div></div>
   </div>`;
 }
 
@@ -1252,45 +1345,80 @@ function renderTasksView() {
   loginGate.style.display = 'none';
   content.style.display = 'block';
 
-  if (tasksState.loading) return;
-
-  const items = tasksState.items;
-  const today = new Date().toISOString().slice(0, 10);
-
-  const overdue = items.filter(t => !t.done && (t.start || t.due) && (t.start || t.due).slice(0, 10) < today);
-  const todayItems = items.filter(t => (t.start || t.due || '').slice(0, 10) === today);
-
-  const sortFn = (a, b) => {
-    const tA = (a.start || a.due || '').slice(11) || '00:00';
-    const tB = (b.start || b.due || '').slice(11) || '00:00';
-    return tA.localeCompare(tB);
-  };
-  overdue.sort(sortFn);
-  todayItems.sort(sortFn);
-
-  function renderColumn(id, items, bar, label) {
-    const itemsHtml = items.length ? items.map(renderTaskItem).join('') :
-      id === 'today' ? `<div class="task-list-empty">Chưa có task nào <button class="btn-primary tasks-empty-btn" id="tasks-empty-create-btn">+ Tạo việc</button></div>` :
-      '<div class="task-list-empty">Không có task nào</div>';
-    return `<div class="tasks-section">
-      <div class="task-bar ${bar}"></div>
-      <div class="tasks-section-inner">
-        <div class="tasks-section-header">${TASK_SECTIONS.find(s => s.id === id).icon} ${label}</div>
-        ${itemsHtml}
-      </div>
-    </div>`;
+  const errorBox = $('tasks-error');
+  if (tasksState.error) {
+    errorBox.style.display = 'flex';
+    errorBox.innerHTML =
+      `<span>⚠️ ${esc(tasksState.error)}</span>` +
+      '<button id="tasks-retry-btn" class="btn-primary tasks-empty-btn">Thử lại</button>';
+  } else {
+    errorBox.style.display = 'none';
+    errorBox.innerHTML = '';
   }
 
-  $('tasks-list').innerHTML = `<div class="tasks-columns">
-    ${renderColumn('today', todayItems, 'task-bar-today', 'Hôm nay <button class="btn-primary tasks-section-add-btn" id="tasks-add-btn">+ Tạo việc</button>')}
-    ${renderColumn('overdue', overdue, 'task-bar-overdue', 'Quá hạn')}
-  </div>`;
-}
+  if (tasksState.loading) {
+    $('tasks-list').innerHTML = renderTasksSkeleton();
+    return;
+  }
+  if (tasksState.error) {
+    $('tasks-list').innerHTML = '';
+    return;
+  }
 
-function nowLocalISO() {
-  const d = new Date();
-  const pad = n => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  const today = vnToday();
+  const filtered = applyTaskFilters(tasksState.items, tasksState.filters);
+  const buckets = bucketTasks(filtered, today, upcomingLimit(tasksState.filters.range, today));
+
+  // "Sắp tới" only makes sense once the range reaches past today.
+  const visible = TASK_SECTIONS.filter(
+    (s) => s.id !== 'upcoming' || tasksState.filters.range !== 'today'
+  );
+
+  const hasAny = visible.some((s) => buckets[s.id].length);
+  const f = tasksState.filters;
+  const isFiltered = f.search.trim() || f.priority !== 'all' ||
+    f.status !== 'all' || f.type !== 'all';
+
+  const renderSection = (s, wide) => {
+    const list = buckets[s.id];
+    const count = list.length ? `<span class="tasks-section-count">${list.length}</span>` : '';
+    const addBtn = s.id === 'today'
+      ? '<button class="btn-primary tasks-section-add-btn" id="tasks-add-btn">+ Tạo việc</button>'
+      : '';
+    const body = list.length
+      ? renderTaskGroups(list, today)
+      : `<div class="task-list-empty">${s.id === 'today' && !isFiltered
+          ? 'Chưa có task nào <button class="btn-primary tasks-empty-btn" id="tasks-empty-create-btn">+ Tạo việc</button>'
+          : 'Không có task nào'}</div>`;
+
+    return `<div class="tasks-section tasks-section-${s.id}${wide ? ' tasks-section-wide' : ''}">
+      <div class="task-bar ${s.bar}"></div>
+      <div class="tasks-section-inner">
+        <div class="tasks-section-header"><span>${s.icon} ${esc(s.label)} ${count}</span>${addBtn}</div>
+        ${body}
+      </div>
+    </div>`;
+  };
+
+  const section = (id, wide) => {
+    const s = visible.find((x) => x.id === id);
+    return s ? renderSection(s, wide) : '';
+  };
+
+  // Top row is the day at a glance: today on the left, overdue on the right, both the
+  // same height. Everything not tied to a specific day runs full width underneath.
+  const columns =
+    section('today') +
+    section('overdue') +
+    section('sticky', true) +
+    section('upcoming', true);
+
+  const banner = !hasAny && isFiltered
+    ? '<div class="tasks-filter-note">Không có task nào khớp bộ lọc. ' +
+      '<button class="btn-ghost tasks-empty-btn" id="tasks-clear-filters-inline">Xoá bộ lọc</button></div>'
+    : '';
+
+  $('tasks-list').innerHTML = banner + `<div class="tasks-columns">${columns}</div>`;
 }
 
 // ── Task Modal ──
@@ -1306,8 +1434,8 @@ function openTaskModal(task) {
   $('task-sticky-input').checked = false;
   $('task-date-fields').style.display = 'block';
   $('task-allday-input').checked = false;
-  $('task-start-input').value = nowLocalISO();
-  $('task-due-input').value = nowLocalISO();
+  $('task-start-input').value = vnNowInputValue();
+  $('task-due-input').value = vnNowInputValue();
   $('task-modal-error').textContent = '';
 
   document.querySelectorAll('.task-prio-option').forEach(el => el.classList.remove('active'));
@@ -1315,7 +1443,7 @@ function openTaskModal(task) {
   document.querySelector('.task-prio-option[data-prio="normal"] input').checked = true;
 
   document.querySelectorAll('.task-pic-chip').forEach(el => el.classList.remove('active'));
-  const defaultPic = tasksState.picFilter !== 'all' ? tasksState.picFilter : 'phuoc';
+  const defaultPic = tasksState.filters.pic !== 'all' ? tasksState.filters.pic : 'phuoc';
   const defaultChip = document.querySelector(`.task-pic-chip[data-pic="${defaultPic}"]`);
   if (defaultChip) defaultChip.classList.add('active');
 
@@ -1330,8 +1458,8 @@ function openTaskModal(task) {
     $('task-sticky-input').checked = !task.start && !task.due;
     $('task-date-fields').style.display = $('task-sticky-input').checked ? 'none' : 'block';
     $('task-allday-input').checked = !!task.allDay;
-    if (task.start) $('task-start-input').value = task.start.slice(0, 16);
-    if (task.due) $('task-due-input').value = task.due.slice(0, 16);
+    if (task.start) $('task-start-input').value = toDateTimeInput(task.start);
+    if (task.due) $('task-due-input').value = toDateTimeInput(task.due);
 
     document.querySelectorAll('.task-prio-option').forEach(el => el.classList.remove('active'));
     const prio = document.querySelector(`.task-prio-option[data-prio="${task.priority || 'normal'}"]`);
@@ -1339,6 +1467,9 @@ function openTaskModal(task) {
 
     document.querySelectorAll('.task-pic-chip').forEach(el => el.classList.remove('active'));
     const pics = Array.isArray(task.pic) ? task.pic : [];
+    if (pics.length >= TASK_MEMBERS.length) {
+      document.querySelector('.task-pic-chip[data-pic="__team"]').classList.add('active');
+    }
     pics.forEach(k => {
       const chip = document.querySelector(`.task-pic-chip[data-pic="${k}"]`);
       if (chip) chip.classList.add('active');
@@ -1379,8 +1510,13 @@ async function saveTask() {
   const activePrio = document.querySelector('.task-prio-option.active');
   if (activePrio) payload.priority = activePrio.dataset.prio;
 
+  // The "Cả team" chip carries a sentinel value the API does not know; expand it here,
+  // otherwise the server silently drops it and the task ends up with no PIC at all.
   const activePics = [...document.querySelectorAll('.task-pic-chip.active')].map(el => el.dataset.pic);
-  if (activePics.length) payload.pic = activePics;
+  const pics = activePics.includes('__team')
+    ? [...TASK_MEMBERS]
+    : activePics.filter(p => TASK_MEMBERS.includes(p));
+  if (pics.length) payload.pic = pics;
 
   if (isSticky) {
     // no dates needed
@@ -1399,7 +1535,7 @@ async function saveTask() {
       await tasksSend('tasks:create', { payload });
     }
     closeTaskModal();
-    await loadTasks();
+    await loadTasks({ force: true });
   } catch (err) {
     $('task-modal-error').textContent = 'Lỗi: ' + err.message;
   }
@@ -1411,7 +1547,7 @@ async function deleteTask() {
   try {
     await tasksSend('tasks:delete', { id: tasksState.editingId });
     closeTaskModal();
-    await loadTasks();
+    await loadTasks({ force: true });
   } catch (err) {
     $('task-modal-error').textContent = 'Lỗi: ' + err.message;
   }
@@ -1424,14 +1560,23 @@ async function toggleTaskDone() {
   try {
     await tasksSend('tasks:toggle', { id: tasksState.editingId, done: !task.done });
     closeTaskModal();
-    await loadTasks();
+    await loadTasks({ force: true });
   } catch (err) {
     $('task-modal-error').textContent = 'Lỗi: ' + err.message;
   }
 }
 
 // ── Tab Switching ──
+const ACTIVE_VIEW_KEY = 'tasksActiveView';
+
+/** Which tab to open on. Some people live in Tasks, some in Collections. */
+async function loadActiveView() {
+  const r = await chrome.storage.local.get(ACTIVE_VIEW_KEY);
+  return r[ACTIVE_VIEW_KEY] === 'tasks' ? 'tasks' : 'collections';
+}
+
 function switchView(view) {
+  chrome.storage.local.set({ [ACTIVE_VIEW_KEY]: view });
   const collectionsView = $('collections-view');
   const tasksView = $('tasks-view');
   const collectionsSearch = $('search-input');
@@ -1457,8 +1602,8 @@ function switchView(view) {
 }
 
 async function initTasksView() {
-  tasksState.picFilter = await loadTasksPicFilter();
-  $('tasks-pic-filter').value = tasksState.picFilter;
+  tasksState.filters = await loadTaskFilters();
+  syncFilterInputs();
   const cache = (await chrome.storage.local.get(LOGIN_CACHE_KEY))[LOGIN_CACHE_KEY];
   if (cache && cache.ok && Date.now() - cache.at < 3600000) {
     tasksState.loggedIn = true;
@@ -1466,66 +1611,161 @@ async function initTasksView() {
   await loadTasks();
 }
 
+function syncFilterInputs() {
+  const f = tasksState.filters;
+  $('tasks-pic-filter').value = f.pic;
+  $('tasks-range-filter').value = f.range;
+  $('tasks-type-filter').value = f.type;
+  $('tasks-status-filter').value = f.status;
+  $('tasks-prio-filter').value = f.priority;
+  $('tasks-search').value = f.search;
+  updateTasksTitle();
+}
+
+function updateTasksTitle() {
+  const f = tasksState.filters;
+  const scope = f.range === 'week' ? 'Task 7 ngày tới' : f.range === 'all' ? 'Tất cả task' : 'Task hôm nay';
+  const who = f.pic === 'all' ? '' : ' của ' + (TASK_MEMBER_LABEL[f.pic] || f.pic);
+  $('tasks-date-title').textContent = scope + who;
+
+  const dirty = f.status !== DEFAULT_TASK_FILTERS.status ||
+    f.priority !== DEFAULT_TASK_FILTERS.priority ||
+    f.range !== DEFAULT_TASK_FILTERS.range ||
+    f.pic !== DEFAULT_TASK_FILTERS.pic ||
+    f.type !== DEFAULT_TASK_FILTERS.type ||
+    f.search.trim() !== '';
+  $('tasks-reset-filters').style.display = dirty ? 'inline-flex' : 'none';
+}
+
+/** `refetch` is only needed for filters the server applies (pic, range). */
+async function setTaskFilter(patch, { refetch }) {
+  Object.assign(tasksState.filters, patch);
+  await saveTaskFilters(tasksState.filters);
+  updateTasksTitle();
+  if (refetch) await loadTasks();
+  else renderTasksView();
+}
+
 // ── Event Handlers Init ──
 function initTasksEventHandlers() {
   let loginPollTimer = null;
+  let loginPollStopAt = 0;
+
+  function stopLoginPoll() {
+    if (loginPollTimer) clearInterval(loginPollTimer);
+    loginPollTimer = null;
+  }
 
   $('tasks-login-btn').addEventListener('click', async () => {
-    const tab = await chrome.tabs.create({ url: 'https://tasks.minhtuong.io.vn/' });
+    stopLoginPoll(); // a second click must not leave the first interval running forever
+    const tab = await chrome.tabs.create({ url: TASKS_WEB_BASE });
+    loginPollStopAt = Date.now() + 300000; // give up after 5 minutes
+
     loginPollTimer = setInterval(async () => {
-      const user = await checkAuthViaTab(tab.id);
-      if (user) {
-        clearInterval(loginPollTimer);
-        loginPollTimer = null;
-        chrome.tabs.remove(tab.id, () => chrome.runtime.lastError);
-        tasksState.loggedIn = true;
-        $('tasks-list').innerHTML = '';
-        await loadTasks();
-      }
+      if (Date.now() > loginPollStopAt) { stopLoginPoll(); return; }
+
+      // Stop as soon as the user closes the login tab.
+      const stillOpen = await chrome.tabs.get(tab.id).catch(() => null);
+      if (!stillOpen) { stopLoginPoll(); return; }
+
+      const user = await checkTasksAuth();
+      if (!user) return;
+
+      stopLoginPoll();
+      chrome.tabs.remove(tab.id, () => chrome.runtime.lastError);
+      tasksState.loggedIn = true;
+      await loadTasks({ force: true });
     }, 2000);
   });
 
-  function updateTasksTitle() {
-    $('tasks-date-title').textContent = 'Task hôm nay của';
-  }
-
   $('tasks-board-link').addEventListener('click', () => {
-    chrome.tabs.create({ url: 'https://tasks.minhtuong.io.vn/' });
+    chrome.tabs.create({
+      url: buildBoardDeepLink(TASKS_WEB_BASE, { ...tasksState.filters, today: vnToday() })
+    });
   });
 
-  $('tasks-pic-filter').addEventListener('change', async e => {
-    tasksState.picFilter = e.target.value;
-    updateTasksTitle();
-    await chrome.storage.local.set({ [TASKS_PIC_KEY]: e.target.value });
-    await loadTasks();
+  $('tasks-pic-filter').addEventListener('change', e =>
+    setTaskFilter({ pic: e.target.value }, { refetch: true }));
+
+  $('tasks-range-filter').addEventListener('change', e =>
+    setTaskFilter({ range: e.target.value }, { refetch: true }));
+
+  $('tasks-type-filter').addEventListener('change', e =>
+    setTaskFilter({ type: e.target.value }, { refetch: false }));
+
+  $('tasks-status-filter').addEventListener('change', e =>
+    setTaskFilter({ status: e.target.value }, { refetch: false }));
+
+  $('tasks-prio-filter').addEventListener('change', e =>
+    setTaskFilter({ priority: e.target.value }, { refetch: false }));
+
+  let searchTimer = null;
+  $('tasks-search').addEventListener('input', e => {
+    const value = e.target.value;
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => setTaskFilter({ search: value }, { refetch: false }), 200);
+  });
+
+  async function resetTaskFilters() {
+    const needsRefetch = tasksState.filters.pic !== DEFAULT_TASK_FILTERS.pic ||
+      tasksState.filters.range !== DEFAULT_TASK_FILTERS.range;
+    tasksState.filters = { ...DEFAULT_TASK_FILTERS };
+    await saveTaskFilters(tasksState.filters);
+    syncFilterInputs();
+    if (needsRefetch) await loadTasks();
+    else renderTasksView();
+  }
+
+  $('tasks-reset-filters').addEventListener('click', resetTaskFilters);
+
+  $('tasks-error').addEventListener('click', e => {
+    if (e.target.id === 'tasks-retry-btn') loadTasks({ force: true });
   });
 
   $('tasks-list').addEventListener('change', async e => {
-    if (e.target.matches('.task-checkbox')) {
-      const id = e.target.dataset.id;
-      const done = e.target.checked;
-      try {
-        await tasksSend('tasks:toggle', { id, done });
-        await loadTasks();
-      } catch (err) {
-        showStatus('Lỗi: ' + err.message, 'error');
-        e.target.checked = !done;
-      }
+    if (!e.target.matches('.task-checkbox')) return;
+    const id = e.target.dataset.id;
+    const done = e.target.checked;
+    const task = tasksState.items.find(t => t.id === id);
+    if (!task) return;
+
+    // Optimistic: flip locally and re-render, instead of refetching the whole board
+    // for a one-bit change. Roll back if the server rejects it.
+    const previous = task.done;
+    task.done = done;
+    renderTasksView();
+    try {
+      await tasksSend('tasks:toggle', { id, done });
+      chrome.storage.session.remove(TASKS_CACHE_KEY);
+    } catch (err) {
+      task.done = previous;
+      renderTasksView();
+      showStatus('Lỗi: ' + err.message, 'error');
     }
   });
 
   $('tasks-list').addEventListener('click', async e => {
     if (e.target.matches('.task-checkbox')) return;
 
-    const item = e.target.closest('.task-item');
-    if (item) {
-      const id = item.dataset.id;
-      const task = tasksState.items.find(t => t.id === id);
-      if (task) openTaskModal(task);
+    if (e.target.id === 'tasks-clear-filters-inline') { await resetTaskFilters(); return; }
+    if (e.target.id === 'tasks-empty-create-btn' || e.target.id === 'tasks-add-btn') {
+      openTaskModal();
       return;
     }
 
-    if (e.target.id === 'tasks-empty-create-btn' || e.target.id === 'tasks-add-btn') openTaskModal();
+    const item = e.target.closest('.task-item');
+    if (!item) return;
+
+    if (item.dataset.release) {
+      chrome.tabs.create({
+        url: buildBoardDeepLink(TASKS_WEB_BASE,
+          { ...tasksState.filters, type: 'release', today: vnToday() })
+      });
+      return;
+    }
+
+    const task = tasksState.items.find(t => t.id === item.dataset.id);
+    if (task) openTaskModal(task);
   });
 
   $('task-modal-cancel-btn').addEventListener('click', closeTaskModal);
@@ -1551,7 +1791,20 @@ function initTasksEventHandlers() {
 
   document.querySelectorAll('.task-pic-chip').forEach(el => {
     el.addEventListener('click', () => {
+      const chips = [...document.querySelectorAll('.task-pic-chip')];
+      const teamChip = chips.find(c => c.dataset.pic === '__team');
+      const memberChips = chips.filter(c => c.dataset.pic !== '__team');
+
+      if (el.dataset.pic === '__team') {
+        const on = !el.classList.contains('active');
+        el.classList.toggle('active', on);
+        memberChips.forEach(c => c.classList.toggle('active', on));
+        return;
+      }
+
       el.classList.toggle('active');
+      // Keep "Cả team" in sync so it never claims a selection that is not whole-team.
+      teamChip.classList.toggle('active', memberChips.every(c => c.classList.contains('active')));
     });
   });
 
@@ -1560,7 +1813,7 @@ function initTasksEventHandlers() {
   });
 
   $('tasks-refresh-btn')?.addEventListener('click', async () => {
-    if (tasksState.loggedIn) await loadTasks();
+    if (tasksState.loggedIn) await loadTasks({ force: true });
   });
 }
 
@@ -1570,10 +1823,14 @@ async function initApp() {
   await loadTheme();
   await render();
   initTasksEventHandlers();
-  const params = new URLSearchParams(location.search);
-  if (params.get('view') === 'tasks') {
-    switchView('tasks');
-  }
+
+  // An explicit ?view= wins (the reminder notification uses it); otherwise reopen on
+  // whichever tab was last used, so a new tab lands where the person left off.
+  const urlView = new URLSearchParams(location.search).get('view');
+  const view = (urlView === 'tasks' || urlView === 'collections')
+    ? urlView
+    : await loadActiveView();
+  if (view === 'tasks') switchView('tasks');
 }
 
 initApp();

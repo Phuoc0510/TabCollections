@@ -4,7 +4,7 @@
   "private": true,
   "description": "A Chrome/Brave extension for collecting tabs into organized groups",
   "scripts": {
-    "test": "node storage.test.js",
+    "test": "node storage.test.js && node tasks/tasks-logic.test.js",
     "lint": "eslint .",
     "format": "prettier --write ."
   },

@@ -593,6 +593,12 @@ body.has-bg .app-header {
   }
 }
 
+/* Keep the sticky tint over a background image - the rules above force every section
+   back to the plain card colour. */
+body.has-bg .tasks-section-sticky {
+  background: var(--task-section-sticky-bg) !important;
+}
+
 /* ── Cross-group tab drag ── */
 .group-card.drag-target {
   outline: 2px solid var(--accent);
@@ -995,6 +1001,8 @@ body.has-bg .app-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
   padding: 8px 14px;
   margin-bottom: 12px;
   border-radius: var(--radius-lg);
@@ -1029,7 +1037,7 @@ body.has-bg .app-header {
 }
 
 .tasks-filter {
-  padding: 6px 12px;
+  padding: 8px 14px;
   border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);
   background: var(--glass-bg);
@@ -1039,24 +1047,154 @@ body.has-bg .app-header {
   cursor: pointer;
 }
 
+/* Native selects crowd the caret against the border; give it room to breathe. */
+select.tasks-filter {
+  padding-right: 34px;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='none' stroke='%238888aa' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round' d='M1 1.5 6 6.5l5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+}
+
+#tasks-refresh-btn {
+  font-size: 20px;
+  line-height: 1;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-color);
+}
+
 .tasks-filter:focus {
   outline: none;
   border-color: var(--accent);
 }
 
+.tasks-search {
+  min-width: 200px;
+  cursor: text;
+}
+
+/* ── Tasks Error ── */
+.tasks-error {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  margin-bottom: 12px;
+  border-radius: var(--radius-lg);
+  border: 1px solid #ef4444;
+  background: rgba(239, 68, 68, 0.12);
+  color: var(--text-primary);
+  font-size: 14px;
+}
+
+.tasks-filter-note {
+  padding: 10px 16px;
+  margin-bottom: 12px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-color);
+  background: var(--glass-card-bg);
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+/* ── Tasks Loading Skeleton ── */
+.task-skeleton-row {
+  height: 26px;
+  margin: 8px 14px;
+  border-radius: 6px;
+  background: linear-gradient(90deg,
+    var(--hover-bg) 25%, var(--glass-bg) 37%, var(--hover-bg) 63%);
+  background-size: 400% 100%;
+  animation: task-skeleton 1.2s ease-in-out infinite;
+}
+
+@keyframes task-skeleton {
+  0% { background-position: 100% 50%; }
+  100% { background-position: 0 50%; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .task-skeleton-row { animation: none; }
+}
+
 /* ── Task List ── */
 .task-list-empty {
   text-align: center;
-  padding: 60px 20px;
+  padding: 28px 20px;
   color: var(--text-muted);
-  font-size: 15px;
+  font-size: 14px;
 }
 
+/* Top row is the day at a glance (today | overdue); undated work runs full width below.
+   Cards stretch to a common height so the two top ones always read as a matched pair,
+   and every card keeps the same shape whether it holds one row or twenty. */
 .tasks-columns {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  align-items: start;
+  gap: 24px;
+  align-items: stretch;
+}
+
+.tasks-section-wide {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 900px) {
+  .tasks-columns { grid-template-columns: 1fr; }
+}
+
+/* ── Task groups (by person) ── */
+.task-group {
+  margin: 8px;
+  border-radius: var(--radius-md);
+  background: var(--task-group-bg);
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+}
+
+.task-group-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: var(--task-group-header-bg);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.task-group-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  letter-spacing: 0.3px;
+}
+
+.task-group-count {
+  min-width: 18px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: var(--accent-selected-bg);
+  color: var(--accent);
+  font-size: 11px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.task-group-release .task-group-header {
+  background: var(--task-group-release-bg);
+}
+
+.task-group-release .task-group-name { color: #b45309; }
+
+.task-group-release .task-group-count {
+  background: rgba(245, 158, 11, 0.18);
+  color: #b45309;
+}
+
+.task-group .task-item:not(:last-child) {
+  border-bottom: 1px solid var(--task-group-divider);
 }
 
 .tasks-section-header {
@@ -1073,10 +1211,10 @@ body.has-bg .app-header {
 }
 
 .tasks-section-add-btn {
-  font-size: 11px;
-  padding: 3px 10px;
+  font-size: 13px;
+  padding: 7px 16px;
   font-weight: 700;
-  border-radius: 6px;
+  border-radius: var(--radius-sm);
   border: none;
   background: var(--accent);
   color: #fff;
@@ -1084,12 +1222,19 @@ body.has-bg .app-header {
   font-family: inherit;
   text-transform: none;
   letter-spacing: normal;
+  transition: background var(--transition-fast);
+}
+
+.tasks-section-add-btn:hover {
+  background: var(--accent-hover);
 }
 
 .tasks-empty-btn {
   margin-left: 8px;
-  padding: 4px 12px;
+  padding: 7px 16px;
   font-size: 13px;
+  font-weight: 700;
+  border-radius: var(--radius-sm);
 }
 
 .task-pills {
@@ -1124,6 +1269,7 @@ body.has-bg .app-header {
 
 .tasks-section {
   display: flex;
+  min-height: 280px;
   background: var(--glass-card-bg);
   border-radius: var(--radius-lg);
   border: 1px solid var(--border-color);
@@ -1131,13 +1277,34 @@ body.has-bg .app-header {
   transition: box-shadow var(--transition-normal);
 }
 
+/* Sticky work is not tied to today, so it gets its own tint to stop it reading as a
+   third dated column. Kept faint enough that the rows on top of it stay legible. */
+.tasks-section-sticky {
+  background: var(--task-section-sticky-bg);
+}
+
 .task-bar {
   width: 4px;
   flex-shrink: 0;
 }
 
-.task-bar-overdue { background: #ef4444; }
-.task-bar-today   { background: #3b82f6; }
+.task-bar-overdue  { background: #ef4444; }
+.task-bar-today    { background: #3b82f6; }
+.task-bar-sticky   { background: #22c55e; }
+.task-bar-upcoming { background: #94a3b8; }
+
+.tasks-section-count {
+  display: inline-block;
+  min-width: 18px;
+  padding: 1px 6px;
+  margin-left: 4px;
+  border-radius: 999px;
+  background: var(--hover-bg);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-weight: 700;
+  text-align: center;
+}
 
 .tasks-section-inner {
   flex: 1;
@@ -1211,27 +1378,118 @@ body.has-bg .app-header {
   vertical-align: middle;
 }
 
+.task-release-tag {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 800;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: rgba(245, 158, 11, 0.18);
+  color: #b45309;
+  vertical-align: middle;
+}
+
+/* Releases are read-only here, so the checkbox slot carries an icon instead. */
+.task-release-icon {
+  width: 16px;
+  flex-shrink: 0;
+  font-size: 12px;
+  text-align: center;
+}
+
 /* ── Task Modal ── */
+/* Scoped to this dialog so the Collections modals keep their existing look.
+   The shared glass surface washed the fields out against the dimmed page, so this one
+   sits on a solid panel: readable contrast without turning the palette up loud. */
+#task-modal-overlay {
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+
 #task-modal-overlay .modal {
   max-height: 92vh;
   display: flex;
   flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+  background: var(--task-modal-bg);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: 1px solid var(--border-color);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
+}
+
+#task-modal-overlay .modal h2 {
+  margin: 0;
+  padding: 18px 20px 14px;
+  font-size: 17px;
+  border-bottom: 1px solid var(--border-color);
+  color: var(--text-primary);
 }
 
 #task-modal-body {
   overflow-y: auto;
-  padding: 16px 18px;
+  padding: 18px 20px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
 }
 
 #task-modal-body label {
-  font-size: 12.5px;
+  font-size: 11px;
   font-weight: 700;
   color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
   display: block;
-  margin-bottom: 4px;
+  margin-bottom: 6px;
+}
+
+#task-modal-overlay .modal-input,
+#task-modal-overlay .modal-textarea {
+  background: var(--task-modal-field-bg);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+}
+
+#task-modal-overlay .modal-input:focus,
+#task-modal-overlay .modal-textarea:focus {
+  outline: none;
+  background: var(--task-modal-bg);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-light-hover);
+}
+
+#task-modal-overlay .modal-actions {
+  margin: 0;
+  padding: 14px 20px;
+  border-top: 1px solid var(--border-color);
+  background: var(--task-modal-field-bg);
+}
+
+/* Solid green + solid red side by side read as an alarm; keep them quiet until hover. */
+#task-modal-overlay .btn-ok {
+  background: transparent;
+  color: #15803d;
+  border: 1px solid #86efac;
+}
+
+#task-modal-overlay .btn-ok:hover {
+  background: #dcfce7;
+  border-color: #22c55e;
+}
+
+#task-modal-overlay .btn-danger {
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+}
+
+#task-modal-overlay .btn-danger:hover {
+  border-color: var(--danger);
+  color: var(--danger);
+  background: var(--danger-hover-bg);
 }
 
 .modal-textarea {

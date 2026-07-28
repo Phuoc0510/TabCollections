@@ -1,4 +1,4 @@
-const TASKS_API_BASE = 'https://tasks.minhtuong.io.vn/api/';
+// TASKS_API_BASE comes from tasks/tasks-logic.js, which must be loaded first.
 
 async function tasksApi(path, method = 'GET', body) {
   const opts = { method, credentials: 'include', headers: {} };
@@ -33,7 +33,9 @@ async function tasksList(queryParams = {}) {
   }
   const qs = q.toString();
   const d = await tasksApi('tasks' + (qs ? '?' + qs : ''), 'GET');
-  return d.tasks || (Array.isArray(d) ? d : []);
+  // The endpoint answers with { tasks, releases }; older shapes returned a bare array.
+  if (Array.isArray(d)) return { tasks: d, releases: [] };
+  return { tasks: d.tasks || [], releases: d.releases || [] };
 }
 
 async function tasksCreate(payload) {

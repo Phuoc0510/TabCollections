@@ -9,8 +9,7 @@
     "storage",
     "contextMenus",
     "tabs",
-    "sidePanel",
-    "scripting"
+    "sidePanel"
   ],
   "host_permissions": [
     "https://tasks.minhtuong.io.vn/*"

@@ -1,9 +1,11 @@
 importScripts('storage.js');
+importScripts('tasks/tasks-logic.js');
 importScripts('tasks/tasks-api.js');
 
 const MENU_PARENT_ID = 'add-to-collection';
-
-scheduleTasksReminder();
+const TASKS_ALARM = 'tasks-reminder';
+const TASKS_REMINDER_HOUR = 17;
+const TASKS_REMINDER_MINUTE = 35;
 
 async function rebuildContextMenu() {
   await chrome.contextMenus.removeAll();
@@ -40,16 +42,22 @@ chrome.runtime.onInstalled.addListener(async () => {
   }
   rebuildContextMenu();
 
-  scheduleTasksReminder();
+  ensureTasksReminder();
 });
 
-function scheduleTasksReminder() {
+chrome.runtime.onStartup.addListener(ensureTasksReminder);
+
+// The service worker restarts constantly under MV3, so only create the alarm when it is
+// actually missing. Recreating it on every wake-up would keep pushing the next fire time back.
+async function ensureTasksReminder() {
+  const existing = await chrome.alarms.get(TASKS_ALARM);
+  if (existing) return;
   const now = Date.now();
   const target = new Date();
-  target.setHours(17, 35, 0, 0);
+  target.setHours(TASKS_REMINDER_HOUR, TASKS_REMINDER_MINUTE, 0, 0);
   let when = target.getTime();
   if (when <= now) when += 86400000;
-  chrome.alarms.create('tasks-reminder', { when, periodInMinutes: 1440 });
+  chrome.alarms.create(TASKS_ALARM, { when, periodInMinutes: 1440 });
 }
 
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
@@ -143,30 +151,30 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
           await deletePage(msg.id);
           sendResponse({ ok: true });
           break;
-		case 'tasks:login':
-			handle(() => tasksLogin(msg.username, msg.password));
-			break;
-		case 'tasks:logout':
-			handle(() => tasksLogout());
-			break;
-		case 'tasks:me':
-			handle(() => tasksMe());
-			break;
-		case 'tasks:list':
-			handle(() => tasksList(msg.params || {}));
-			break;
-		case 'tasks:create':
-			handle(() => tasksCreate(msg.payload));
-			break;
-		case 'tasks:update':
-			handle(() => tasksUpdate(msg.id, msg.payload));
-			break;
-		case 'tasks:delete':
-			handle(() => tasksDelete(msg.id));
-			break;
-		case 'tasks:toggle':
-			handle(() => tasksToggle(msg.id, msg.done));
-			break;
+        case 'tasks:login':
+          await handle(() => tasksLogin(msg.username, msg.password));
+          break;
+        case 'tasks:logout':
+          await handle(() => tasksLogout());
+          break;
+        case 'tasks:me':
+          await handle(() => tasksMe());
+          break;
+        case 'tasks:list':
+          await handle(() => tasksList(msg.params || {}));
+          break;
+        case 'tasks:create':
+          await handle(() => tasksCreate(msg.payload));
+          break;
+        case 'tasks:update':
+          await handle(() => tasksUpdate(msg.id, msg.payload));
+          break;
+        case 'tasks:delete':
+          await handle(() => tasksDelete(msg.id));
+          break;
+        case 'tasks:toggle':
+          await handle(() => tasksToggle(msg.id, msg.done));
+          break;
         default:
           sendResponse({ error: 'Unknown action' });
       }
@@ -203,8 +211,8 @@ chrome.commands.onCommand.addListener(async (command) => {
 });
 
 chrome.alarms.onAlarm.addListener((alarm) => {
-  if (alarm.name !== 'tasks-reminder') return;
-  chrome.notifications.create('tasks-reminder', {
+  if (alarm.name !== TASKS_ALARM) return;
+  chrome.notifications.create(TASKS_ALARM, {
     type: 'basic',
     title: '⏰ Nhắc nhở Task',
     message: 'Đã 17h35, hãy xem xét lại bảng task hôm nay!',
@@ -213,8 +221,18 @@ chrome.alarms.onAlarm.addListener((alarm) => {
   });
 });
 
-chrome.notifications.onClicked.addListener((notificationId) => {
-  if (notificationId !== 'tasks-reminder') return;
-  chrome.tabs.create({ url: chrome.runtime.getURL('newtab/newtab.html?view=tasks') });
+chrome.notifications.onClicked.addListener(async (notificationId) => {
+  if (notificationId !== TASKS_ALARM) return;
+  chrome.notifications.clear(TASKS_ALARM);
+
+  // Reuse an already open tasks tab instead of piling up a new one per click.
+  const url = chrome.runtime.getURL('newtab/newtab.html');
+  const [existing] = await chrome.tabs.query({ url: url + '*' });
+  if (existing) {
+    await chrome.tabs.update(existing.id, { active: true, url: url + '?view=tasks' });
+    await chrome.windows.update(existing.windowId, { focused: true });
+    return;
+  }
+  chrome.tabs.create({ url: url + '?view=tasks' });
 });
 
