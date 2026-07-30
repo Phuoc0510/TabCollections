@@ -32,6 +32,19 @@
     --success-text: #166534;
     --error-bg: #fef2f2;
     --error-text: #991b1b;
+    --accent-light: rgba(255, 107, 107, 0.08);
+    --accent-light-hover: rgba(255, 107, 107, 0.12);
+    --accent-selected-bg: #ffe0e0;
+    --danger-hover-bg: #fef2f2;
+    --glass-border: #000000;
+    --glass-shadow: 3px 3px 0 #000000;
+    --task-group-divider: rgba(0, 0, 0, 0.10);
+    --task-group-release-bg: rgba(255, 215, 0, 0.20);
+    --task-section-sticky-bg: rgba(255, 215, 0, 0.12);
+    --task-modal-field-bg: #fafafa;
+    --team-chip-bg: #f3e8ff;
+    --team-chip-color: #6d28d9;
+    --team-chip-border: #7c3aed;
 }
 
 [data-ui-theme="neubrutalism"] .btn-primary {

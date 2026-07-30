@@ -32,4 +32,17 @@
     --success-text: #1b5e20;
     --error-bg: #fce4ec;
     --error-text: #b71c1c;
+    --accent-light: rgba(0, 113, 227, 0.08);
+    --accent-light-hover: rgba(0, 113, 227, 0.12);
+    --accent-selected-bg: #d6edff;
+    --danger-hover-bg: #fce8e6;
+    --glass-border: rgba(255, 255, 255, 0.5);
+    --glass-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    --task-group-divider: rgba(0, 0, 0, 0.06);
+    --task-group-release-bg: rgba(245, 158, 11, 0.14);
+    --task-section-sticky-bg: rgba(52, 199, 89, 0.10);
+    --task-modal-field-bg: rgba(255, 255, 255, 0.7);
+    --team-chip-bg: #f3e8ff;
+    --team-chip-color: #6d28d9;
+    --team-chip-border: #7c3aed;
 }
