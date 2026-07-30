@@ -1064,18 +1064,21 @@ function showThemePicker() {
     });
   });
 
-  grid.addEventListener('click', function onClick(e) {
-    const card = e.target.closest('.theme-card');
-    if (!card) return;
-    const theme = card.dataset.theme;
-    grid.querySelectorAll('.theme-card').forEach(c => c.classList.remove('active'));
-    card.classList.add('active');
-    document.documentElement.setAttribute('data-ui-theme', theme);
-    chrome.storage.local.set({ [UI_THEME_KEY]: theme });
-  });
-
   overlay.style.display = 'flex';
 }
+
+function onThemeCardClick(e) {
+  const card = e.target.closest('.theme-card');
+  if (!card) return;
+  const grid = $('theme-grid');
+  const theme = card.dataset.theme;
+  grid.querySelectorAll('.theme-card').forEach(c => c.classList.remove('active'));
+  card.classList.add('active');
+  document.documentElement.setAttribute('data-ui-theme', theme);
+  chrome.storage.local.set({ [UI_THEME_KEY]: theme });
+}
+
+$('theme-grid').addEventListener('click', onThemeCardClick);
 
 $('theme-close-btn').addEventListener('click', () => { $('theme-overlay').style.display = 'none'; });
 $('theme-overlay').addEventListener('click', e => {
