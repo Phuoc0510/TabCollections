@@ -1,5 +1,4 @@
-@layer themes {
-  [data-ui-theme="dark-premium"] {
+:root[data-ui-theme="dark-premium"] {
     --bg-primary: #0d1117;
     --bg-secondary: #161b22;
     --text-primary: #e6edf3;
@@ -33,5 +32,4 @@
     --success-text: #7ee787;
     --error-bg: #3d1a1a;
     --error-text: #f85149;
-  }
 }

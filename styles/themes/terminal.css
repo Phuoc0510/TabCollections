@@ -1,5 +1,5 @@
-@layer themes {
-  [data-ui-theme="terminal"] {
+
+:root[data-ui-theme="terminal"] {
     --bg-primary: #0a0a0a;
     --bg-secondary: #111111;
     --text-primary: #00ff41;
@@ -33,7 +33,6 @@
     --success-text: #00ff41;
     --error-bg: #1a0a0a;
     --error-text: #ff3355;
-  }
 }
 
 [data-ui-theme="terminal"] .search-input {

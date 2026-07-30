@@ -1,5 +1,4 @@
-@layer themes {
-  [data-ui-theme="glass"] {
+:root[data-ui-theme="glass"] {
     --bg-primary: #f5f7fa;
     --bg-secondary: #ffffff;
     --text-primary: #1a1a2e;

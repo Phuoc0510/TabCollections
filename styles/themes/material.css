@@ -1,5 +1,4 @@
-@layer themes {
-  [data-ui-theme="material"] {
+:root[data-ui-theme="material"] {
     --bg-primary: #fef7ff;
     --bg-secondary: #f3edf7;
     --text-primary: #1c1b1f;
@@ -33,5 +32,4 @@
     --success-text: #1b5e20;
     --error-bg: #fce4ec;
     --error-text: #b71c1c;
-  }
 }

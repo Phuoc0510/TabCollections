@@ -1,5 +1,5 @@
-@layer themes {
-  [data-ui-theme="neubrutalism"] {
+
+:root[data-ui-theme="neubrutalism"] {
     --bg-primary: #fafafa;
     --bg-secondary: #f0f0f0;
     --text-primary: #000000;
@@ -33,7 +33,6 @@
     --success-text: #166534;
     --error-bg: #fef2f2;
     --error-text: #991b1b;
-  }
 }
 
 [data-ui-theme="neubrutalism"] .btn-primary {

@@ -1,5 +1,4 @@
-@layer themes {
-  [data-ui-theme="minimal"] {
+:root[data-ui-theme="minimal"] {
     --bg-primary: #ffffff;
     --bg-secondary: #f8f8f8;
     --text-primary: #111111;
