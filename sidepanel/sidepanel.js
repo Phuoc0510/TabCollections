@@ -1,5 +1,11 @@
 let groups = [];
 
+const THEME_KEY = 'uiTheme';
+chrome.storage.local.get(THEME_KEY).then(result => {
+  const theme = result[THEME_KEY] || 'glass';
+  document.documentElement.setAttribute('data-ui-theme', theme);
+});
+
 async function applyTheme() {
   const result = await chrome.storage.local.get('themeMode');
   const theme = result.themeMode || 'system';

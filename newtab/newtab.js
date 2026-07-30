@@ -46,6 +46,9 @@ const TITLE_KEY = 'tabCollectorTitle';
 
 const $ = id => document.getElementById(id);
 
+const UI_THEME_KEY = 'uiTheme';
+const DEFAULT_UI_THEME = 'glass';
+
 function showStatus(msg, type) {
   const bar = $('status-bar');
   bar.textContent = msg;
@@ -1030,6 +1033,12 @@ chrome.storage.local.get('privacyMode').then(result => {
     const iconEl = document.querySelector('#fab-privacy .btn-icon');
     if (iconEl) iconEl.innerHTML = icon('eyeOff');
   }
+});
+
+// Init UI theme
+chrome.storage.local.get(UI_THEME_KEY).then(result => {
+  const theme = result[UI_THEME_KEY] || DEFAULT_UI_THEME;
+  document.documentElement.setAttribute('data-ui-theme', theme);
 });
 
 $('fab-privacy').addEventListener('click', () => { closeFab(); togglePrivacy(); });

@@ -1,6 +1,12 @@
 let pendingNewIcon = '📁';
 let pendingNewColor = '#4285f4';
 
+const THEME_KEY = 'uiTheme';
+chrome.storage.local.get(THEME_KEY).then(result => {
+  const theme = result[THEME_KEY] || 'glass';
+  document.documentElement.setAttribute('data-ui-theme', theme);
+});
+
 function showStatus(msg, type) {
   let el = document.getElementById('popup-status');
   if (!el) {
