@@ -15,23 +15,11 @@
 }
 
 .glass-strong {
-  background: rgba(255, 255, 255, 0.8);
+  background: var(--glass-strong-bg);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .glass-strong {
-    background: rgba(20, 30, 35, 0.8);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-  }
-}
-
-:root[data-theme="dark"] .glass-strong {
-  background: rgba(20, 30, 35, 0.8);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--glass-card-border);
+  box-shadow: var(--glass-card-shadow);
 }
 
 .glass-hover {
@@ -40,11 +28,5 @@
 
 .glass-hover:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
-}
-
-@media (prefers-color-scheme: dark) {
-  .glass-hover:hover {
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
-  }
+  box-shadow: var(--glass-card-shadow);
 }

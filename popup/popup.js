@@ -17,8 +17,14 @@ function showStatus(msg, type) {
   }
   el.textContent = msg;
   el.style.display = 'block';
-  el.style.background = type === 'error' ? '#fce8e6' : '#e6f4ea';
-  el.style.color = type === 'error' ? '#c5221f' : '#1e7e34';
+  const s = getComputedStyle(document.documentElement);
+  if (type === 'error') {
+    el.style.background = s.getPropertyValue('--error-bg').trim() || '#fce8e6';
+    el.style.color = s.getPropertyValue('--error-text').trim() || '#c5221f';
+  } else {
+    el.style.background = s.getPropertyValue('--success-bg').trim() || '#e6f4ea';
+    el.style.color = s.getPropertyValue('--success-text').trim() || '#1e7e34';
+  }
   setTimeout(() => { el.style.display = 'none'; }, 4000);
 }
 

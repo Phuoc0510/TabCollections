@@ -92,7 +92,7 @@
 
 .search-input:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.12);
+  box-shadow: 0 0 0 3px var(--accent-light-hover);
 }
 
 .search-input::placeholder {
@@ -425,7 +425,7 @@
 
 .tab-drag-handle {
   cursor: grab;
-  color: #aaa;
+  color: var(--text-muted);
   font-size: 14px;
   padding: 0 2px;
   flex-shrink: 0;
@@ -440,7 +440,7 @@
 }
 
 .tab-drag-handle:hover {
-  color: #666;
+  color: var(--text-secondary);
 }
 
 .tab-drag-handle:active {
@@ -502,7 +502,7 @@
 
 .bg-tab.active {
   background: var(--accent);
-  color: #fff;
+  color: var(--btn-primary-color);
   border-color: var(--accent);
 }
 
@@ -544,7 +544,7 @@
 
 .bg-drop-zone.drag-over {
   border-color: var(--accent);
-  background: rgba(66, 133, 244, 0.08);
+  background: var(--accent-light);
   color: var(--accent);
 }
 
@@ -703,7 +703,7 @@ body.has-bg .tasks-section-sticky {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  box-shadow: var(--btn-primary-shadow);
   transition: transform 0.1s;
 }
 
@@ -741,7 +741,7 @@ body.has-bg .tasks-section-sticky {
 
 .fab-item.active {
   color: var(--accent);
-  background: rgba(66, 133, 244, 0.1);
+  background: var(--hover-bg);
   border-color: var(--accent);
 }
 
@@ -756,7 +756,7 @@ body.has-bg .tasks-section-sticky {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  box-shadow: var(--btn-primary-shadow);
   transition: transform 0.2s;
 }
 
@@ -987,7 +987,7 @@ body.has-bg .tasks-section-sticky {
   border-radius: var(--radius-md);
   border: none;
   background: var(--accent);
-  color: #fff;
+  color: var(--btn-primary-color);
   cursor: pointer;
   font-family: inherit;
 }
@@ -1103,8 +1103,8 @@ select.tasks-filter:focus {
   padding: 12px 16px;
   margin-bottom: 12px;
   border-radius: var(--radius-lg);
-  border: 1px solid #ef4444;
-  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid var(--danger);
+  background: var(--error-bg);
   color: var(--text-primary);
   font-size: 14px;
 }
@@ -1205,11 +1205,11 @@ select.tasks-filter:focus {
   background: var(--task-group-release-bg);
 }
 
-.task-group-release .task-group-name { color: #b45309; }
+.task-group-release .task-group-name { color: var(--accent); }
 
 .task-group-release .task-group-count {
-  background: rgba(245, 158, 11, 0.18);
-  color: #b45309;
+  background: var(--task-group-release-bg);
+  color: var(--accent);
 }
 
 .task-group .task-item:not(:last-child) {
@@ -1236,7 +1236,7 @@ select.tasks-filter:focus {
   border-radius: var(--radius-sm);
   border: none;
   background: var(--accent);
-  color: #fff;
+  color: var(--btn-primary-color);
   cursor: pointer;
   font-family: inherit;
   text-transform: none;
@@ -1282,7 +1282,7 @@ select.tasks-filter:focus {
 
 .task-pill.active {
   background: var(--accent);
-  color: #fff;
+  color: var(--btn-primary-color);
   border-color: var(--accent);
 }
 
@@ -1307,10 +1307,10 @@ select.tasks-filter:focus {
   flex-shrink: 0;
 }
 
-.task-bar-overdue  { background: #ef4444; }
-.task-bar-today    { background: #3b82f6; }
-.task-bar-sticky   { background: #22c55e; }
-.task-bar-upcoming { background: #94a3b8; }
+.task-bar-overdue  { background: var(--danger); }
+.task-bar-today    { background: var(--accent); }
+.task-bar-sticky   { background: var(--success-text); }
+.task-bar-upcoming { background: var(--text-muted); }
 
 .tasks-section-count {
   display: inline-block;
@@ -1403,8 +1403,8 @@ select.tasks-filter:focus {
   font-weight: 800;
   padding: 1px 5px;
   border-radius: 4px;
-  background: rgba(245, 158, 11, 0.18);
-  color: #b45309;
+  background: var(--task-group-release-bg);
+  color: var(--accent);
   vertical-align: middle;
 }
 
@@ -1421,7 +1421,7 @@ select.tasks-filter:focus {
    The shared glass surface washed the fields out against the dimmed page, so this one
    sits on a solid panel: readable contrast without turning the palette up loud. */
 #task-modal-overlay {
-  background: rgba(15, 23, 42, 0.55);
+  background: var(--overlay-bg);
   backdrop-filter: blur(3px);
   -webkit-backdrop-filter: blur(3px);
 }
@@ -1436,7 +1436,7 @@ select.tasks-filter:focus {
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
   border: 1px solid var(--border-color);
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
+  box-shadow: var(--btn-primary-shadow);
 }
 
 #task-modal-overlay .modal h2 {
@@ -1491,13 +1491,13 @@ select.tasks-filter:focus {
 /* Solid green + solid red side by side read as an alarm; keep them quiet until hover. */
 #task-modal-overlay .btn-ok {
   background: transparent;
-  color: #15803d;
-  border: 1px solid #86efac;
+  color: var(--success-text, #15803d);
+  border: 1px solid var(--success-text, #86efac);
 }
 
 #task-modal-overlay .btn-ok:hover {
-  background: #dcfce7;
-  border-color: #22c55e;
+  background: var(--success-bg, #dcfce7);
+  border-color: var(--success-text);
 }
 
 #task-modal-overlay .btn-danger {
@@ -1528,7 +1528,7 @@ select.tasks-filter:focus {
 .modal-textarea:focus {
   outline: none;
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.12);
+  box-shadow: 0 0 0 3px var(--accent-light-hover);
 }
 
 .task-modal-row {
@@ -1567,7 +1567,7 @@ select.tasks-filter:focus {
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: #fff;
+  background: var(--bg-primary);
   top: 3px;
   left: 3px;
   transition: transform var(--transition-fast);
@@ -1617,21 +1617,21 @@ select.tasks-filter:focus {
 .task-prio-option input { display: none; }
 
 #task-modal-body .task-prio-option.active[data-prio="low"] {
-  border-color: #22c55e;
-  background: #dcfce7;
-  color: #15803d;
+  border-color: var(--success-text);
+  background: var(--success-bg);
+  color: var(--success-text);
 }
 
 #task-modal-body .task-prio-option.active[data-prio="normal"] {
-  border-color: #3b82f6;
-  background: #dbeafe;
-  color: #1d4ed8;
+  border-color: var(--accent);
+  background: var(--accent-selected-bg);
+  color: var(--accent);
 }
 
 #task-modal-body .task-prio-option.active[data-prio="high"] {
-  border-color: #ef4444;
-  background: #fee2e2;
-  color: #b91c1c;
+  border-color: var(--danger);
+  background: var(--error-bg);
+  color: var(--danger);
 }
 
 .task-pic-group {
@@ -1665,9 +1665,9 @@ select.tasks-filter:focus {
 }
 
 .task-pic-chip.team.active {
-  border-color: #7c3aed;
-  background: #f3e8ff;
-  color: #6d28d9;
+  border-color: var(--team-chip-border);
+  background: var(--team-chip-bg);
+  color: var(--team-chip-color);
 }
 
 #task-modal-actions button {
@@ -1677,7 +1677,7 @@ select.tasks-filter:focus {
 }
 
 .task-modal-error {
-  color: #ef4444;
+  color: var(--danger);
   font-size: 13px;
   font-weight: 600;
   min-height: 18px;

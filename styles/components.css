@@ -1,7 +1,7 @@
 /* Buttons */
 .btn-primary {
   background: var(--accent);
-  color: #fff;
+  color: var(--btn-primary-color);
   border-color: var(--accent);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
@@ -10,7 +10,7 @@
 .btn-primary:disabled {
   background: rgba(204, 204, 204, 0.6);
   border-color: transparent;
-  color: #fff;
+  color: var(--btn-primary-color);
   cursor: not-allowed;
 }
 
@@ -25,9 +25,9 @@
 }
 
 .btn-ok {
-  background: #22c55e;
-  color: #fff;
-  border-color: #22c55e;
+  background: var(--success-text);
+  color: var(--btn-primary-color);
+  border-color: var(--success-text);
 }
 
 .btn-ghost {
@@ -62,7 +62,7 @@
   border-radius: var(--radius-xl);
   padding: 24px;
   width: 360px;
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--btn-primary-shadow);
   animation: modalIn 250ms ease;
 }
 
@@ -127,7 +127,7 @@
   display: none;
   font-size: 14px;
   animation: slideDown 300ms ease;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  box-shadow: var(--btn-primary-shadow);
 }
 
 .status-bar.success {
@@ -236,5 +236,5 @@
 
 .pick-color.selected {
   border-color: var(--accent);
-  box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--accent);
+  box-shadow: 0 0 0 2px var(--bg-primary), 0 0 0 4px var(--accent);
 }
