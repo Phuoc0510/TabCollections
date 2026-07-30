@@ -951,8 +951,9 @@ body.has-bg .tasks-section-sticky {
 }
 
 .nav-tab.active {
-  background: var(--bg-primary);
-  color: var(--text-primary);
+  background: var(--accent-light);
+  color: var(--accent);
+  font-weight: 700;
   box-shadow: var(--btn-primary-shadow);
 }
 
