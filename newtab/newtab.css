@@ -558,6 +558,7 @@
 /* ── Background image overrides ── */
 body.has-bg .app-header,
 body.has-bg .group-card,
+body.has-bg .task-group,
 body.has-bg .tasks-section,
 body.has-bg .status-bar {
   backdrop-filter: blur(20px);
@@ -1168,9 +1169,12 @@ select.tasks-filter:focus {
 /* ── Task groups (by person) ── */
 .task-group {
   margin: 8px;
-  border-radius: var(--radius-md);
-  background: var(--task-group-bg);
-  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  background: var(--glass-card-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-card-border);
+  box-shadow: var(--glass-card-shadow);
   overflow: hidden;
 }
 
@@ -1178,16 +1182,15 @@ select.tasks-filter:focus {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 6px 12px;
-  background: var(--task-group-header-bg);
-  border-bottom: 1px solid var(--border-color);
+  padding: 8px 14px;
+  background: transparent;
+  border-bottom: 1px solid var(--glass-card-border);
 }
 
 .task-group-name {
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--text-secondary);
-  letter-spacing: 0.3px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
 }
 
 .task-group-count {
@@ -1202,7 +1205,7 @@ select.tasks-filter:focus {
 }
 
 .task-group-release .task-group-header {
-  background: var(--task-group-release-bg);
+  background: transparent;
 }
 
 .task-group-release .task-group-name { color: var(--accent); }
@@ -1289,9 +1292,9 @@ select.tasks-filter:focus {
 .tasks-section {
   display: flex;
   min-height: 280px;
-  background: var(--glass-card-bg);
+  background: transparent;
   border-radius: var(--radius-lg);
-  border: 1px solid var(--border-color);
+  border: 1px solid transparent;
   overflow: hidden;
   transition: box-shadow var(--transition-normal);
 }
