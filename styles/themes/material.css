@@ -1,0 +1,37 @@
+@layer themes {
+  [data-ui-theme="material"] {
+    --bg-primary: #fef7ff;
+    --bg-secondary: #f3edf7;
+    --text-primary: #1c1b1f;
+    --text-secondary: #49454f;
+    --text-muted: #7a7680;
+    --accent: #6750a4;
+    --accent-hover: #7c66b8;
+    --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --radius-sm: 12px;
+    --radius-md: 16px;
+    --radius-lg: 28px;
+    --radius-xl: 28px;
+    --glass-bg: transparent;
+    --glass-blur: 0;
+    --glass-card-bg: #ffffff;
+    --glass-card-border: transparent;
+    --glass-card-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.08);
+    --glass-strong-bg: #ffffff;
+    --border-color: #eaddff;
+    --border-color-hover: #d0bcff;
+    --hover-bg: rgba(103, 80, 164, 0.08);
+    --overlay-bg: rgba(0, 0, 0, 0.32);
+    --task-group-bg: #faf9ff;
+    --task-group-header-bg: #f0eff8;
+    --task-modal-bg: #ffffff;
+    --btn-primary-bg: #6750a4;
+    --btn-primary-color: #ffffff;
+    --btn-primary-shadow: 0 1px 3px rgba(103, 80, 164, 0.3);
+    --danger: #b3261e;
+    --success-bg: #e8f5e9;
+    --success-text: #1b5e20;
+    --error-bg: #fce4ec;
+    --error-text: #b71c1c;
+  }
+}
