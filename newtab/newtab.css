@@ -14,6 +14,9 @@
   gap: 16px;
   border-radius: var(--radius-xl);
   padding: 16px 20px;
+  background: var(--bg-primary);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 .app-title {
@@ -559,10 +562,14 @@
 
 /* ── Background image overrides ── */
 body.has-bg .app-header,
+body.has-bg .status-bar {
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
 body.has-bg .group-card,
 body.has-bg .task-group,
-body.has-bg .tasks-section,
-body.has-bg .status-bar {
+body.has-bg .tasks-section {
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
 }
@@ -570,6 +577,8 @@ body.has-bg .status-bar {
 body.has-bg .app-header {
   border-radius: var(--radius-xl);
   padding: 16px 20px;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
 body.has-bg .app {
@@ -582,7 +591,7 @@ body.has-bg .tasks-section {
 }
 
 body.has-bg .app-header {
-  background: var(--glass-bg) !important;
+  background: var(--bg-primary) !important;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -592,7 +601,7 @@ body.has-bg .app-header {
   }
 
   body.has-bg .app-header {
-    background: var(--glass-bg) !important;
+    background: var(--bg-primary) !important;
   }
 }
 
