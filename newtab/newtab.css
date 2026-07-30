@@ -594,10 +594,9 @@ body.has-bg .app-header {
   }
 }
 
-/* Keep the sticky tint over a background image - the rules above force every section
-   back to the plain card colour. */
+/* Sticky section uses same glass card background as other sections. */
 body.has-bg .tasks-section-sticky {
-  background: var(--task-section-sticky-bg) !important;
+  background: var(--glass-card-bg) !important;
 }
 
 /* ── Cross-group tab drag ── */
@@ -1303,9 +1302,9 @@ select.tasks-filter:focus {
 /* Sticky work is not tied to today, so it gets its own tint to stop it reading as a
    third dated column. Kept faint enough that the rows on top of it stay legible. */
 .tasks-section-sticky {
-  background: var(--task-section-sticky-bg);
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
+  background: var(--glass-card-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
 .task-bar {
