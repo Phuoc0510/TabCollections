@@ -798,6 +798,22 @@ function showBgModal() {
   });
 
   overlay.style.display = 'flex';
+
+  // Render UI Theme grid inside the same modal
+  const themeGrid = $('theme-grid');
+  themeGrid.innerHTML = THEMES.map(t => `
+    <div class="theme-card" data-theme="${t.id}">
+      <div class="theme-preview">${t.icon}</div>
+      <div class="theme-card-name">${t.name}</div>
+      <div class="theme-card-desc">${t.desc}</div>
+    </div>
+  `).join('');
+  chrome.storage.local.get(UI_THEME_KEY).then(result => {
+    const current = result[UI_THEME_KEY] || DEFAULT_UI_THEME;
+    themeGrid.querySelectorAll('.theme-card').forEach(card => {
+      if (card.dataset.theme === current) card.classList.add('active');
+    });
+  });
 }
 
 const dropZone = $('bg-drop-zone');
@@ -1045,28 +1061,6 @@ chrome.storage.local.get('privacyMode').then(result => {
   }
 });
 
-function showThemePicker() {
-  const overlay = $('theme-overlay');
-  const grid = $('theme-grid');
-
-  grid.innerHTML = THEMES.map(t => `
-    <div class="theme-card" data-theme="${t.id}">
-      <div class="theme-preview">${t.icon}</div>
-      <div class="theme-card-name">${t.name}</div>
-      <div class="theme-card-desc">${t.desc}</div>
-    </div>
-  `).join('');
-
-  chrome.storage.local.get(UI_THEME_KEY).then(result => {
-    const current = result[UI_THEME_KEY] || DEFAULT_UI_THEME;
-    grid.querySelectorAll('.theme-card').forEach(card => {
-      if (card.dataset.theme === current) card.classList.add('active');
-    });
-  });
-
-  overlay.style.display = 'flex';
-}
-
 function onThemeCardClick(e) {
   const card = e.target.closest('.theme-card');
   if (!card) return;
@@ -1079,13 +1073,6 @@ function onThemeCardClick(e) {
 }
 
 $('theme-grid').addEventListener('click', onThemeCardClick);
-
-$('theme-close-btn').addEventListener('click', () => { $('theme-overlay').style.display = 'none'; });
-$('theme-overlay').addEventListener('click', e => {
-  if (e.target === $('theme-overlay')) $('theme-overlay').style.display = 'none';
-});
-
-$('fab-ui-theme').addEventListener('click', () => { closeFab(); showThemePicker(); });
 
 // Init UI theme
 chrome.storage.local.get(UI_THEME_KEY).then(result => {

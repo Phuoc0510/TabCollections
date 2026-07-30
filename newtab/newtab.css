@@ -619,7 +619,7 @@ body.has-bg .tasks-section-sticky {
 }
 
 /* ── Modal responsive widths ── */
-#bg-modal-overlay .modal { width: min(90vw, 500px); }
+#bg-modal-overlay .modal { width: min(90vw, 560px); }
 #tab-picker-overlay .modal { width: min(90vw, 420px); }
 #help-overlay .modal { width: min(90vw, 640px); }
 
