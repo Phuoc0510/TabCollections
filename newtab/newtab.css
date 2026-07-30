@@ -6,6 +6,8 @@
 }
 
 .app-header {
+  position: relative;
+  z-index: 1000;
   display: flex;
   align-items: center;
   margin-bottom: 32px;
@@ -1119,9 +1121,11 @@ select.tasks-filter:focus {
 }
 .select-panel {
   display: none;
-  position: fixed;
-  z-index: 9999;
-  min-width: 100px;
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 10000;
+  min-width: 100%;
   max-height: 200px;
   overflow-y: auto;
   border: 1px solid var(--border-color);
