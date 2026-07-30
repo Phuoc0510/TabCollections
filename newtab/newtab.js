@@ -1745,13 +1745,20 @@ function initCustomSelect(selectEl) {
     document.querySelectorAll('.select-wrap.open').forEach(w => {
       if (w !== wrap) w.classList.remove('open');
     });
-    wrap.classList.toggle('open');
+    const opening = !wrap.classList.contains('open');
+    wrap.classList.toggle('open', opening);
+    if (opening) {
+      const r = trigger.getBoundingClientRect();
+      panel.style.top = (r.bottom + 4) + 'px';
+      panel.style.left = r.left + 'px';
+      panel.style.minWidth = r.width + 'px';
+    }
   });
 
   selectEl.parentNode.insertBefore(wrap, selectEl);
   wrap.appendChild(selectEl);
   wrap.appendChild(trigger);
-  wrap.appendChild(panel);
+  document.body.appendChild(panel);
   syncCustomSelect(selectEl);
 }
 
