@@ -1304,6 +1304,8 @@ select.tasks-filter:focus {
    third dated column. Kept faint enough that the rows on top of it stay legible. */
 .tasks-section-sticky {
   background: var(--task-section-sticky-bg);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 .task-bar {
