@@ -1169,12 +1169,9 @@ select.tasks-filter:focus {
 /* ── Task groups (by person) ── */
 .task-group {
   margin: 8px;
-  border-radius: var(--radius-lg);
-  background: var(--glass-card-bg);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--glass-card-border);
-  box-shadow: var(--glass-card-shadow);
+  border-radius: var(--radius-md);
+  background: var(--task-group-bg);
+  border: 1px solid var(--border-color);
   overflow: hidden;
 }
 
@@ -1182,15 +1179,16 @@ select.tasks-filter:focus {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 14px;
-  background: transparent;
-  border-bottom: 1px solid var(--glass-card-border);
+  padding: 6px 12px;
+  background: var(--task-group-header-bg);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .task-group-name {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  letter-spacing: 0.3px;
 }
 
 .task-group-count {
@@ -1205,7 +1203,7 @@ select.tasks-filter:focus {
 }
 
 .task-group-release .task-group-header {
-  background: transparent;
+  background: var(--task-group-release-bg);
 }
 
 .task-group-release .task-group-name { color: var(--accent); }
@@ -1292,9 +1290,12 @@ select.tasks-filter:focus {
 .tasks-section {
   display: flex;
   min-height: 280px;
-  background: var(--glass-bg);
+  background: var(--glass-card-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border-radius: var(--radius-lg);
-  border: 1px solid var(--border-color);
+  border: 1px solid var(--glass-card-border);
+  box-shadow: var(--glass-card-shadow);
   overflow: hidden;
   transition: box-shadow var(--transition-normal);
 }
@@ -1388,6 +1389,10 @@ select.tasks-filter:focus {
   border-radius: 50%;
   flex-shrink: 0;
 }
+.prio-low { background: var(--success-text); }
+.prio-normal { background: var(--accent); }
+.prio-high { background: var(--danger); }
+.prio-release { background: var(--accent); }
 
 .task-pic-badge {
   display: inline-block;

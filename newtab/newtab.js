@@ -1358,12 +1358,15 @@ function renderTaskItem(t, today) {
     : `<input type="checkbox" class="task-checkbox" data-id="${esc(t.id)}"${t.done ? ' checked' : ''}
               aria-label="Đánh dấu hoàn thành">`;
 
+  const prioClass = t.color ? '' : release ? ' prio-release' : ` prio-${t.priority || 'normal'}`;
+  const prioStyle = t.color ? `style="background:${esc(prioColor)}"` : '';
+
   // No PIC badge on the row: the group header above it already names the person.
   return `<div class="task-item${t.done ? ' done' : ''}${release ? ' release' : ''}"
        data-id="${esc(t.id)}"${release ? ' data-release="1"' : ''}
        title="${esc(release ? 'Release - mở board để sửa' : t.title)}">
     ${lead}
-    <div class="task-priority-dot" style="background:${esc(prioColor)}"></div>
+    <div class="task-priority-dot${prioClass}" ${prioStyle}></div>
     <div class="task-item-body">
       <div class="task-title">${esc(t.title)}</div>
       <div class="task-meta">${esc(meta)}</div>
