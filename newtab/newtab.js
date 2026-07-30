@@ -49,6 +49,16 @@ const $ = id => document.getElementById(id);
 const UI_THEME_KEY = 'uiTheme';
 const DEFAULT_UI_THEME = 'glass';
 
+const THEMES = [
+  { id: 'glass',         name: 'Glass',         icon: '🥛',  desc: 'Mờ ảo, trong suốt, hiệu ứng glass' },
+  { id: 'minimal',       name: 'Minimal',       icon: '⬜',  desc: 'Tối giản, flat, white space' },
+  { id: 'material',      name: 'Material You',  icon: '🎨',  desc: 'Material Design 3, dynamic colors' },
+  { id: 'neubrutalism',  name: 'Neubrutalism',  icon: '🧊',  desc: 'Bold borders, shadow mạnh, tương phản' },
+  { id: 'dark-premium',  name: 'Dark Premium',  icon: '🌙',  desc: 'Tối sang trọng, GitHub-style' },
+  { id: 'macos',         name: 'macOS',         icon: '🖥️',  desc: 'Frosted glass tinh tế, Apple-style' },
+  { id: 'terminal',      name: 'Terminal',      icon: '💻',  desc: 'Monospace, hacker vibe' },
+];
+
 function showStatus(msg, type) {
   const bar = $('status-bar');
   bar.textContent = msg;
@@ -1034,6 +1044,45 @@ chrome.storage.local.get('privacyMode').then(result => {
     if (iconEl) iconEl.innerHTML = icon('eyeOff');
   }
 });
+
+function showThemePicker() {
+  const overlay = $('theme-overlay');
+  const grid = $('theme-grid');
+
+  grid.innerHTML = THEMES.map(t => `
+    <div class="theme-card" data-theme="${t.id}">
+      <div class="theme-preview">${t.icon}</div>
+      <div class="theme-card-name">${t.name}</div>
+      <div class="theme-card-desc">${t.desc}</div>
+    </div>
+  `).join('');
+
+  chrome.storage.local.get(UI_THEME_KEY).then(result => {
+    const current = result[UI_THEME_KEY] || DEFAULT_UI_THEME;
+    grid.querySelectorAll('.theme-card').forEach(card => {
+      if (card.dataset.theme === current) card.classList.add('active');
+    });
+  });
+
+  grid.addEventListener('click', function onClick(e) {
+    const card = e.target.closest('.theme-card');
+    if (!card) return;
+    const theme = card.dataset.theme;
+    grid.querySelectorAll('.theme-card').forEach(c => c.classList.remove('active'));
+    card.classList.add('active');
+    document.documentElement.setAttribute('data-ui-theme', theme);
+    chrome.storage.local.set({ [UI_THEME_KEY]: theme });
+  });
+
+  overlay.style.display = 'flex';
+}
+
+$('theme-close-btn').addEventListener('click', () => { $('theme-overlay').style.display = 'none'; });
+$('theme-overlay').addEventListener('click', e => {
+  if (e.target === $('theme-overlay')) $('theme-overlay').style.display = 'none';
+});
+
+$('fab-ui-theme').addEventListener('click', () => { closeFab(); showThemePicker(); });
 
 // Init UI theme
 chrome.storage.local.get(UI_THEME_KEY).then(result => {
