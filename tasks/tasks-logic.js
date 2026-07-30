@@ -125,6 +125,7 @@ function bucketTasks(items, today, upcomingUntil) {
   for (const t of items || []) {
     const kind = classifyTask(t, today);
     if (kind === 'upcoming' && upcomingUntil && taskSpan(t).from > upcomingUntil) continue;
+    if (kind === 'overdue' && t.done) continue;
     out[kind].push(t);
   }
   const byDateTime = (a, b) => taskSortKey(a).localeCompare(taskSortKey(b));

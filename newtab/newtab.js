@@ -1558,12 +1558,63 @@ async function toggleTaskDone() {
   const task = tasksState.items.find(t => t.id === tasksState.editingId);
   if (!task) return;
   try {
-    await tasksSend('tasks:toggle', { id: tasksState.editingId, done: !task.done });
+    const completing = !task.done;
+    await tasksSend('tasks:toggle', { id: tasksState.editingId, done: completing });
     closeTaskModal();
+    if (completing) fireConfetti();
     await loadTasks({ force: true });
   } catch (err) {
     $('task-modal-error').textContent = 'Lỗi: ' + err.message;
   }
+}
+
+// ── Confetti ──
+function fireConfetti() {
+  const colors = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6', '#8b5cf6', '#ec4899'];
+  const count = 120;
+  const canvas = document.createElement('canvas');
+  canvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999';
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  document.body.appendChild(canvas);
+  const ctx = canvas.getContext('2d');
+  const particles = Array.from({ length: count }, () => ({
+    x: Math.random() * canvas.width,
+    y: canvas.height + 20,
+    w: rand(6, 10),
+    h: rand(4, 6),
+    vy: rand(-18, -8),
+    vx: rand(-6, 6),
+    rot: Math.random() * 360,
+    rv: rand(-8, 8),
+    color: colors[Math.floor(Math.random() * colors.length)],
+    life: 1,
+  }));
+  function rand(a, b) { return a + Math.random() * (b - a); }
+  let frame;
+  function tick() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    let alive = false;
+    for (const p of particles) {
+      if (p.life <= 0) continue;
+      alive = true;
+      p.x += p.vx;
+      p.vy += 0.35;
+      p.y += p.vy;
+      p.rot += p.rv;
+      p.life -= 0.008;
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot * Math.PI / 180);
+      ctx.globalAlpha = Math.max(0, p.life);
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+      ctx.restore();
+    }
+    if (alive) frame = requestAnimationFrame(tick);
+    else { cancelAnimationFrame(frame); canvas.remove(); }
+  }
+  tick();
 }
 
 // ── Tab Switching ──
@@ -1625,8 +1676,7 @@ function syncFilterInputs() {
 function updateTasksTitle() {
   const f = tasksState.filters;
   const scope = f.range === 'week' ? 'Task 7 ngày tới' : f.range === 'all' ? 'Tất cả task' : 'Task hôm nay';
-  const who = f.pic === 'all' ? '' : ' của ' + (TASK_MEMBER_LABEL[f.pic] || f.pic);
-  $('tasks-date-title').textContent = scope + who;
+  $('tasks-search').placeholder = scope + ' — Tìm tiêu đề, ghi chú...';
 
   const dirty = f.status !== DEFAULT_TASK_FILTERS.status ||
     f.priority !== DEFAULT_TASK_FILTERS.priority ||
@@ -1733,6 +1783,7 @@ function initTasksEventHandlers() {
     // for a one-bit change. Roll back if the server rejects it.
     const previous = task.done;
     task.done = done;
+    if (done) fireConfetti();
     renderTasksView();
     try {
       await tasksSend('tasks:toggle', { id, done });

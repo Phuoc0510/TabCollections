@@ -15,12 +15,14 @@
     gap: 12px;
   }
 
-  .header-actions {
+  .header-actions,
+  .tasks-header-actions {
     width: 100%;
     flex-wrap: wrap;
   }
 
-  .header-actions button {
+  .header-actions button,
+  .tasks-header-actions .tasks-icon-btn {
     flex: 1;
     min-width: 0;
     text-align: center;
