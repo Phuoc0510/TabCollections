@@ -1292,9 +1292,9 @@ select.tasks-filter:focus {
 .tasks-section {
   display: flex;
   min-height: 280px;
-  background: transparent;
+  background: var(--glass-bg);
   border-radius: var(--radius-lg);
-  border: 1px solid transparent;
+  border: 1px solid var(--border-color);
   overflow: hidden;
   transition: box-shadow var(--transition-normal);
 }
