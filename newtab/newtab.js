@@ -1716,9 +1716,68 @@ function switchView(view) {
   }
 }
 
+function initCustomSelect(selectEl) {
+  const wrap = document.createElement('div');
+  wrap.className = 'select-wrap';
+  const trigger = document.createElement('button');
+  trigger.type = 'button';
+  trigger.className = 'select-trigger';
+  const panel = document.createElement('div');
+  panel.className = 'select-panel';
+
+  Array.from(selectEl.options).forEach(opt => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'select-option';
+    btn.textContent = opt.textContent;
+    btn.dataset.value = opt.value;
+    btn.addEventListener('click', () => {
+      selectEl.value = opt.value;
+      selectEl.dispatchEvent(new Event('change', { bubbles: true }));
+      syncCustomSelect(selectEl);
+      wrap.classList.remove('open');
+    });
+    panel.appendChild(btn);
+  });
+
+  trigger.addEventListener('click', e => {
+    e.stopPropagation();
+    document.querySelectorAll('.select-wrap.open').forEach(w => {
+      if (w !== wrap) w.classList.remove('open');
+    });
+    wrap.classList.toggle('open');
+  });
+
+  selectEl.parentNode.insertBefore(wrap, selectEl);
+  wrap.appendChild(selectEl);
+  wrap.appendChild(trigger);
+  wrap.appendChild(panel);
+  syncCustomSelect(selectEl);
+}
+
+function syncCustomSelect(selectEl) {
+  const wrap = selectEl.closest('.select-wrap');
+  if (!wrap) return;
+  const trigger = wrap.querySelector('.select-trigger');
+  const selected = selectEl.options[selectEl.selectedIndex];
+  trigger.textContent = selected ? selected.textContent : '';
+  wrap.querySelectorAll('.select-option').forEach(btn => {
+    btn.classList.toggle('selected', btn.dataset.value === selectEl.value);
+  });
+}
+
+document.addEventListener('click', () => {
+  document.querySelectorAll('.select-wrap.open').forEach(w => w.classList.remove('open'));
+});
+
 async function initTasksView() {
   tasksState.filters = await loadTaskFilters();
   syncFilterInputs();
+  ['tasks-pic-filter', 'tasks-range-filter', 'tasks-type-filter',
+   'tasks-status-filter', 'tasks-prio-filter'].forEach(id => {
+    const sel = $(id);
+    if (sel && !sel.closest('.select-wrap')) initCustomSelect(sel);
+  });
   const cache = (await chrome.storage.local.get(LOGIN_CACHE_KEY))[LOGIN_CACHE_KEY];
   if (cache && cache.ok && Date.now() - cache.at < 3600000) {
     tasksState.loggedIn = true;
@@ -1734,6 +1793,8 @@ function syncFilterInputs() {
   $('tasks-status-filter').value = f.status;
   $('tasks-prio-filter').value = f.priority;
   $('tasks-search').value = f.search;
+  ['tasks-pic-filter', 'tasks-range-filter', 'tasks-type-filter',
+   'tasks-status-filter', 'tasks-prio-filter'].forEach(id => syncCustomSelect($(id)));
   updateTasksTitle();
 }
 

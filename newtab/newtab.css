@@ -1066,6 +1066,96 @@ select.tasks-filter:focus {
   border-color: var(--accent);
 }
 
+/* ── Custom select (replaces native <select> popup) ── */
+.select-wrap {
+  position: relative;
+  flex-shrink: 0;
+}
+.select-wrap select.tasks-filter {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  width: 0;
+  height: 0;
+}
+.select-trigger {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  padding: 6px 28px 6px 8px;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: var(--glass-bg);
+  color: var(--text-primary);
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  max-width: 105px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+  user-select: none;
+}
+.select-trigger::after {
+  content: '';
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 5px solid var(--text-muted);
+  pointer-events: none;
+}
+.select-trigger:hover,
+.select-wrap.open .select-trigger {
+  border-color: var(--accent);
+}
+.select-wrap.open .select-trigger {
+  background: var(--accent-light);
+}
+.select-panel {
+  display: none;
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  z-index: 100;
+  min-width: 100%;
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  background: var(--bg-primary);
+  box-shadow: var(--glass-shadow);
+}
+.select-wrap.open .select-panel {
+  display: block;
+}
+.select-option {
+  display: block;
+  width: 100%;
+  padding: 6px 10px;
+  border: none;
+  background: none;
+  color: var(--text-primary);
+  font-size: 12px;
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.select-option:hover {
+  background: var(--hover-bg);
+}
+.select-option.selected {
+  background: var(--accent-light);
+  color: var(--accent);
+  font-weight: 600;
+}
+
 .tasks-icon-btn {
   flex-shrink: 0;
   display: inline-flex;
