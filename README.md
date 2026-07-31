@@ -2,7 +2,7 @@
 
 > A Chrome/Brave extension for collecting, organizing, and managing browser tabs — right from your new tab page.
 
-[![Version](https://img.shields.io/badge/version-2.5.0-blue)](https://github.com/Phuoc0510/TabCollections/releases)
+[![Version](https://img.shields.io/badge/version-2.7.0-blue)](https://github.com/Phuoc0510/TabCollections/releases)
 [![Manifest](https://img.shields.io/badge/manifest-v3-green)](https://developer.chrome.com/docs/extensions/reference/manifest)
 
 ---
@@ -48,11 +48,13 @@
 - **Auto-close** — opens links in a new tab and closes the panel
 
 ### Theme
-- **Light / Dark / System** — choose your preference via the floating action button
-- **Improved dark mode** — optimized contrast and glass transparency for readability
+- **7 UI themes** — Glass, Minimal, Material You, Neubrutalism, Dark Premium, macOS, and Terminal
+- **Instant switching** — change the whole UI look without reloading
+- **Theme-aware CSS** — every component (header, cards, tasks, modals, dropdowns) adapts via CSS custom properties
 
 ### Customization
 - **Background images** — presets, paste URL, or drop an image file
+- **UI themes** — pick a theme right inside the Customize modal, next to the background controls
 - **350+ icons** across 12 categories with live search
 - **10 accent colors** per collection
 - **Editable title** — click the page title to rename
@@ -132,8 +134,7 @@ The gear button at the bottom-right gives quick access to:
 |--------|--------|
 | Export | Export collections as JSON |
 | Import | Import collections from JSON |
-| Customize | Customize background image |
-| Theme | Toggle theme (System / Light / Dark) |
+| Customize | Customize background image & UI theme |
 | Privacy | Toggle privacy mode |
 
 ---
@@ -218,6 +219,17 @@ Data flows through `chrome.storage.local` for collections and through `chrome.ru
 ---
 
 ## Changelog
+
+### v2.7.0
+- **7 UI themes** — Glass, Minimal, Material You, Neubrutalism, Dark Premium, macOS, Terminal
+- **Theme engine** on new tab, popup, and side panel — instant switching via `data-ui-theme` CSS variables
+- **Theme picker merged into Customize** — choose a UI theme next to the background controls in one modal
+- **Custom themed filter dropdowns** — native `<select>` popups replaced with theme-aware dropdowns (PIC, range, type, status, priority)
+- **Header background made opaque** — solid card background instead of glass transparency
+- **Active nav tab highlighted** — accent color, tinted background, bolder weight
+- Sticky section (Thường trực) unified with the other task sections — same glass card background
+- Active tab (Collections / Tasks) more prominent with accent-colored highlight
+- All 100 tests passing
 
 ### v2.6.0
 - Tasks Board — view today's and overdue tasks synced with tasks.minhtuong.io.vn
