@@ -55,7 +55,7 @@
 - **Auto-close** — opens links in a new tab and closes the panel
 
 ### Theme
-- **7 UI themes** — Glass, Minimal, Material You, Neubrutalism, Dark Premium, macOS, and Terminal
+- **10 UI themes** — Glass, Minimal, Material You, Neubrutalism, Dark Premium, macOS, Terminal, Nord, Graphite, and Paper (the last three are solid themes with light and dark variants)
 - **Instant switching** — change the whole UI look without reloading
 - **Theme-aware CSS** — every component (header, cards, tasks, modals, dropdowns) adapts via CSS custom properties
 
@@ -238,6 +238,7 @@ Data flows through `chrome.storage.local` for collections and through `chrome.ru
 - **Narrow windows** — sidebar becomes a slide-out drawer
 - **Tasks view hidden** behind `TASKS_ENABLED`; the 17:35 reminder is off
 - Popup and side panel follow the light/dark setting and match the new tab look
+- **New themes** — Nord, Graphite and Paper: solid (no glass), each with light and dark variants that follow **Sáng / Tối**
 
 ### v2.7.0
 - **7 UI themes** — Glass, Minimal, Material You, Neubrutalism, Dark Premium, macOS, Terminal

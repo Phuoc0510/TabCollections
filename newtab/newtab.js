@@ -62,6 +62,9 @@ const THEMES = [
   { id: 'dark-premium',  name: 'Dark Premium',  icon: '🌙',  desc: 'Tối sang trọng, GitHub-style' },
   { id: 'macos',         name: 'macOS',         icon: '🖥️',  desc: 'Frosted glass tinh tế, Apple-style' },
   { id: 'terminal',      name: 'Terminal',      icon: '💻',  desc: 'Monospace, hacker vibe' },
+  { id: 'nord',          name: 'Nord',          icon: '❄️',  desc: 'Xanh băng dịu mắt, có bản Sáng/Tối' },
+  { id: 'graphite',      name: 'Graphite',      icon: '◼️',  desc: 'Xám trung tính, viền mảnh, có bản Sáng/Tối' },
+  { id: 'paper',         name: 'Paper',         icon: '📜',  desc: 'Giấy ấm, chữ có chân, có bản Sáng/Tối' },
 ];
 
 function showStatus(msg, type) {
