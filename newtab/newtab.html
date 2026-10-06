@@ -44,7 +44,10 @@
         <kbd id="search-kbd" class="search-kbd"></kbd>
       </label>
       <div class="header-actions" id="collections-header-actions">
-        <button id="view-toggle-btn" class="btn-ghost" title="Switch to List"><span class="btn-icon" id="view-toggle-icon" data-icon="grid"></span><span class="btn-label">Grid view</span></button>
+        <div class="view-seg" role="group" aria-label="Kiểu hiển thị">
+          <button id="view-tiles-btn" class="view-seg-btn" title="Dạng ô" aria-pressed="true"><span class="btn-icon" data-icon="grid"></span></button>
+          <button id="view-rows-btn" class="view-seg-btn" title="Dạng dòng" aria-pressed="false"><span class="btn-icon" data-icon="list"></span></button>
+        </div>
       </div>
       <div id="tasks-header-actions" class="tasks-header-actions" style="display:none">
         <div class="tasks-search-wrap">

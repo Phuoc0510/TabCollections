@@ -1170,28 +1170,33 @@ async function loadViewMode() {
   return result[VIEW_KEY] || 'grid';
 }
 
-async function toggleView() {
-  const current = document.getElementById('groups-view').classList.contains('view-list') ? 'list' : 'grid';
-  const next = current === 'grid' ? 'list' : 'grid';
-  document.getElementById('groups-view').classList.toggle('view-list', next === 'list');
-  const btn = document.getElementById('view-toggle-btn');
-  btn.querySelector('.btn-icon').textContent = next === 'grid' ? '▦' : '☰';
-  btn.title = next === 'grid' ? 'Switch to List' : 'Switch to Grid';
-  btn.querySelector('.btn-label').textContent = next === 'grid' ? 'Grid view' : 'List view';
-  await chrome.storage.local.set({ [VIEW_KEY]: next });
+// 'grid' = tiles, 'list' = rows with URLs. Stored values stay the same as before the redesign.
+function applyViewMode(mode) {
+  $('groups-view').classList.toggle('view-list', mode === 'list');
+  $('view-tiles-btn').setAttribute('aria-pressed', String(mode !== 'list'));
+  $('view-rows-btn').setAttribute('aria-pressed', String(mode === 'list'));
 }
 
-$('view-toggle-btn').addEventListener('click', toggleView);
+async function setViewMode(mode) {
+  applyViewMode(mode);
+  await chrome.storage.local.set({ [VIEW_KEY]: mode });
+}
 
-// Init view mode on load
-loadViewMode().then(mode => {
-  if (mode === 'list') {
-    document.getElementById('groups-view').classList.add('view-list');
-    const btn = document.getElementById('view-toggle-btn');
-    btn.querySelector('.btn-icon').textContent = '☰';
-    btn.title = 'Switch to Grid';
-    btn.querySelector('.btn-label').textContent = 'List view';
-  }
+$('view-tiles-btn').addEventListener('click', () => setViewMode('grid'));
+$('view-rows-btn').addEventListener('click', () => setViewMode('list'));
+loadViewMode().then(applyViewMode);
+
+// ── Header: date + search shortcut ──
+$('today-label').textContent = new Date().toLocaleDateString('vi-VN', { weekday: 'long', day: 'numeric', month: 'long' });
+$('search-kbd').textContent = /Mac|iPhone|iPad/.test(navigator.platform) ? '⌘K' : 'Ctrl K';
+
+document.addEventListener('keydown', e => {
+  if (!isSearchShortcut(e)) return;
+  const modalOpen = [...document.querySelectorAll('.modal-overlay')].some(o => o.style.display && o.style.display !== 'none');
+  if (modalOpen) return;
+  e.preventDefault();
+  $('search-input').focus();
+  $('search-input').select();
 });
 
 // ── Tasks API proxies ──
