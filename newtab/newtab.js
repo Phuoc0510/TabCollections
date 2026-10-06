@@ -86,27 +86,6 @@ async function loadAll() {
   }
 }
 
-function renderTabEntry(t) {
-  const title = t.title || (() => { try { return new URL(t.url).hostname; } catch { return 'Untitled'; } })();
-  const displayUrl = t.url.length > 60 ? t.url.slice(0, 57) + '...' : t.url;
-  const imgSrc = faviconUrl(t);
-  return `<div class="tab-entry" data-id="${t.id}" data-url="${esc(t.url)}" draggable="true">
-    <span class="tab-drag-handle" draggable="true">${icon('dragHandle')}</span>
-    ${imgSrc ? `<img src="${imgSrc}" alt="" onerror="this.style.display='none'">` : ''}
-    <div class="tab-info">
-      <div class="tab-title">${esc(title)}</div>
-      <div class="tab-url">${esc(displayUrl)}</div>
-    </div>
-    <div class="tab-actions-wrapper">
-      <button class="tab-actions-toggle" data-id="${t.id}" title="Actions">${icon('moreH')}</button>
-      <div class="tab-actions-popup">
-        <button class="tab-edit" data-id="${t.id}">${icon('edit')} Edit</button>
-        <button class="tab-delete" data-id="${t.id}">${icon('trash')} Delete</button>
-      </div>
-    </div>
-  </div>`;
-}
-
 async function render() {
   try {
     await loadAll();

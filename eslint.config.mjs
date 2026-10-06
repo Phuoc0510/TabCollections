@@ -17,6 +17,12 @@ export default [
         ICON_CATEGORIES: 'readonly',
         ICONS: 'readonly',
         COLORS: 'readonly',
+        TASKS_ENABLED: 'readonly',
+        renderTabEntry: 'readonly',
+        renderGroupSection: 'readonly',
+        renderSidebarItems: 'readonly',
+        resolveInitialView: 'readonly',
+        isSearchShortcut: 'readonly',
         getGroups: 'readonly',
         getTabsByGroup: 'readonly',
         createGroup: 'readonly',
@@ -82,7 +88,7 @@ export default [
     },
   },
   {
-    files: ['constants.js', 'icons.js', 'tasks/tasks-api.js', 'tasks/tasks-logic.js'],
+    files: ['constants.js', 'icons.js', 'tasks/tasks-api.js', 'tasks/tasks-logic.js', 'newtab/newtab-view.js'],
     rules: {
       'no-unused-vars': 'off',
     },
