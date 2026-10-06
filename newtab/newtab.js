@@ -1656,7 +1656,10 @@ async function loadActiveView() {
   return r[ACTIVE_VIEW_KEY] === 'tasks' ? 'tasks' : 'collections';
 }
 
+let currentView = 'collections';
+
 function switchView(view) {
+  currentView = view;
   chrome.storage.local.set({ [ACTIVE_VIEW_KEY]: view });
   const collectionsView = $('collections-view');
   const tasksView = $('tasks-view');
@@ -1964,14 +1967,18 @@ async function initApp() {
   initTitle();
   await loadTheme();
   await render();
-  initTasksEventHandlers();
 
+  if (!TASKS_ENABLED) {
+    // Hidden, not removed: the markup and code stay so flipping the flag brings Tasks back.
+    document.querySelectorAll('.nav-tabs').forEach(el => { el.style.display = 'none'; });
+    return;
+  }
+
+  initTasksEventHandlers();
   // An explicit ?view= wins (the reminder notification uses it); otherwise reopen on
   // whichever tab was last used, so a new tab lands where the person left off.
   const urlView = new URLSearchParams(location.search).get('view');
-  const view = (urlView === 'tasks' || urlView === 'collections')
-    ? urlView
-    : await loadActiveView();
+  const view = resolveInitialView(urlView, await loadActiveView(), TASKS_ENABLED);
   if (view === 'tasks') switchView('tasks');
 }
 
@@ -1981,8 +1988,7 @@ const STORAGE_KEY = 'tabCollector';
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area === 'local' && changes[STORAGE_KEY]) {
     if (isDragging) { pendingRender = true; return; }
-    const activeTab = document.querySelector('.nav-tab.active');
-    if (activeTab && activeTab.dataset.view === 'collections') {
+    if (currentView === 'collections') {
       render().catch(err => console.error('Storage change render failed:', err));
     }
   }
