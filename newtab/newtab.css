@@ -699,112 +699,49 @@ body.has-bg .group-card {
   transition: filter 0.2s;
 }
 
-/* ── FAB ── */
-.fab {
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
-  z-index: 100;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 8px;
-}
-
-.fab-menu {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(8px);
-  transition: opacity 0.15s, visibility 0.15s, transform 0.15s;
-}
-
-.fab.open .fab-menu {
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(0);
-}
-
-.fab-item {
+/* ── Settings menu ── */
+.settings-wrap {
   position: relative;
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  border: 1px solid var(--border-color);
-  background: var(--bg-primary, #ffffff);
-  color: var(--text-primary);
-  font-size: 22px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: var(--btn-primary-shadow);
-  transition: transform 0.1s;
 }
 
-.fab-item:hover {
-  background: var(--bg-primary, #ffffff) !important;
-  transform: scale(1.15);
-  opacity: 1 !important;
-}
-
-.fab-label {
+.settings-menu {
   position: absolute;
-  right: 56px;
-  top: 50%;
-  transform: translateY(-50%);
-  white-space: nowrap;
-  background: var(--glass-card-bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  left: 0;
+  right: 0;
+  bottom: calc(100% + 4px);
+  padding: 4px;
+  background: var(--bg-primary);
   border: 1px solid var(--border-color);
-  border-radius: 6px;
-  padding: 4px 10px;
-  font-size: 13px;
-  color: var(--text-primary);
-  font-weight: 500;
-  pointer-events: none;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.12s, visibility 0.12s;
+  border-radius: var(--radius-md);
+  box-shadow: var(--glass-shadow);
+  z-index: 1200;
 }
 
-.fab-item:hover .fab-label {
-  opacity: 1;
-  visibility: visible;
-}
-
-.fab-item.active {
-  color: var(--accent);
-  background: var(--hover-bg);
-  border-color: var(--accent);
-}
-
-.fab-toggle {
-  width: 56px;
-  height: 56px;
-  border-radius: 50%;
-  border: 1px solid var(--border-color);
-  background: var(--bg-primary, #ffffff);
-  color: var(--text-primary);
-  cursor: pointer;
+.settings-item {
   display: flex;
   align-items: center;
-  justify-content: center;
-  box-shadow: var(--btn-primary-shadow);
-  transition: transform 0.2s;
+  gap: var(--space-2);
+  width: 100%;
+  padding: 7px var(--space-2);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
 }
 
-.fab-toggle:hover {
-  background: var(--bg-primary, #ffffff) !important;
-  transform: scale(1.12);
-  opacity: 1 !important;
-}
+.settings-item:hover { background: var(--hover-bg); color: var(--text-primary); }
+.settings-item.active { color: var(--accent); }
+.settings-item .btn-icon { display: flex; }
+.settings-item svg { width: 16px; height: 16px; }
 
-.fab.open .fab-toggle {
-  transform: rotate(45deg);
+.settings-sep {
+  border: 0;
+  border-top: 1px solid var(--border-color);
+  margin: 4px 0;
 }
 
 .privacy-mode .group-meta {

@@ -234,9 +234,8 @@ function togglePrivacy() {
   privacyMode = !privacyMode;
   document.body.classList.toggle('privacy-mode', privacyMode);
   chrome.storage.local.set({ privacyMode });
-  document.getElementById('fab-privacy')?.classList.toggle('active', privacyMode);
-  const iconEl = document.querySelector('#fab-privacy .btn-icon');
-  if (iconEl) iconEl.innerHTML = privacyMode ? icon('eyeOff') : icon('eye');
+  $('settings-privacy').classList.toggle('active', privacyMode);
+  $('settings-privacy').querySelector('.btn-icon').innerHTML = icon(privacyMode ? 'eyeOff' : 'eye');
 }
 
 // ── Drag and drop (merged: card reorder + tab reorder + external drop) ──
@@ -825,26 +824,41 @@ dropZone.addEventListener('drop', e => {
   reader.readAsDataURL(file);
 });
 
-// ── FAB ──
+// ── Settings menu (sidebar) ──
 
-function closeFab() {
-  document.getElementById('fab').classList.remove('open');
+const settingsMenu = $('settings-menu');
+
+function setSettingsOpen(open) {
+  settingsMenu.hidden = !open;
+  $('settings-btn').setAttribute('aria-expanded', String(open));
 }
 
-$('fab-toggle').addEventListener('click', e => {
+$('settings-btn').addEventListener('click', e => {
   e.stopPropagation();
-  document.getElementById('fab').classList.toggle('open');
+  setSettingsOpen(settingsMenu.hidden);
+});
+
+// Toggles (theme, privacy) keep the menu open so they can be clicked repeatedly.
+settingsMenu.addEventListener('click', e => {
+  if (e.target.closest('.settings-item:not([data-keep-open])')) setSettingsOpen(false);
 });
 
 document.addEventListener('click', e => {
-  if (!e.target.closest('#fab')) closeFab();
+  if (!e.target.closest('.settings-wrap')) setSettingsOpen(false);
 });
 
-$('fab-customize').addEventListener('click', () => { closeFab(); showBgModal(); });
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && !settingsMenu.hidden) {
+    setSettingsOpen(false);
+    $('settings-btn').focus();
+  }
+});
+
+$('settings-customize').addEventListener('click', showBgModal);
 
 const THEME_KEY = 'themeMode';
 const THEME_ICONS = { system: icon('monitor'), light: icon('sun'), dark: icon('moon') };
-const THEME_LABELS = { system: 'System', light: 'Light', dark: 'Dark' };
+const THEME_LABELS = { system: 'Hệ thống', light: 'Sáng', dark: 'Tối' };
 const THEME_CYCLE = ['system', 'light', 'dark'];
 
 async function loadTheme() {
@@ -858,16 +872,14 @@ function applyTheme(theme) {
   const root = document.documentElement;
   if (theme === 'system') root.removeAttribute('data-theme');
   else root.setAttribute('data-theme', theme);
-  const btn = document.getElementById('fab-theme');
+  const btn = $('settings-theme');
   if (btn) {
-    btn.querySelector('.fab-label').textContent = 'Theme: ' + THEME_LABELS[theme];
-    btn.title = 'Theme: ' + THEME_LABELS[theme];
+    btn.querySelector('.settings-label').textContent = 'Sáng / Tối: ' + THEME_LABELS[theme];
     btn.querySelector('.btn-icon').innerHTML = THEME_ICONS[theme];
   }
 }
 
-$('fab-theme').addEventListener('click', async () => {
-  closeFab();
+$('settings-theme').addEventListener('click', async () => {
   const result = await chrome.storage.local.get(THEME_KEY);
   const current = result[THEME_KEY] || 'system';
   const idx = THEME_CYCLE.indexOf(current);
@@ -975,7 +987,7 @@ function showHelp() {
   overlay.style.display = 'flex';
 }
 
-$('fab-help').addEventListener('click', () => { closeFab(); showHelp(); });
+$('settings-help').addEventListener('click', showHelp);
 
 $('help-close-btn').addEventListener('click', () => { $('help-overlay').style.display = 'none'; });
 $('help-overlay').addEventListener('click', e => {
@@ -1024,9 +1036,8 @@ chrome.storage.local.get('privacyMode').then(result => {
   privacyMode = !!result.privacyMode;
   if (privacyMode) {
     document.body.classList.add('privacy-mode');
-    document.getElementById('fab-privacy')?.classList.add('active');
-    const iconEl = document.querySelector('#fab-privacy .btn-icon');
-    if (iconEl) iconEl.innerHTML = icon('eyeOff');
+    $('settings-privacy').classList.add('active');
+    $('settings-privacy').querySelector('.btn-icon').innerHTML = icon('eyeOff');
   }
 });
 
@@ -1049,10 +1060,9 @@ chrome.storage.local.get(UI_THEME_KEY).then(result => {
   document.documentElement.setAttribute('data-ui-theme', theme);
 });
 
-$('fab-privacy').addEventListener('click', () => { closeFab(); togglePrivacy(); });
+$('settings-privacy').addEventListener('click', togglePrivacy);
 
-$('fab-export').addEventListener('click', async () => {
-  closeFab();
+$('settings-export').addEventListener('click', async () => {
   const response = await chrome.runtime.sendMessage({ action: 'exportData' });
   if (response && response.error) { showStatus('Export failed: ' + response.error, 'error'); return; }
   const json = response;
@@ -1066,7 +1076,7 @@ $('fab-export').addEventListener('click', async () => {
   showStatus('Exported', 'success');
 });
 
-$('fab-import').addEventListener('click', () => { closeFab(); $('import-input').click(); });
+$('settings-import').addEventListener('click', () => $('import-input').click());
 
 $('import-input').addEventListener('change', async e => {
   const file = e.target.files[0];

@@ -28,6 +28,18 @@
       <nav id="sidebar-list" class="sidebar-list"></nav>
       <button id="new-group-btn" class="sidebar-item sidebar-new"><span class="btn-icon" data-icon="plus"></span><span class="sidebar-item-name">Collection mới</span></button>
       <div class="sidebar-spacer"></div>
+      <div class="settings-wrap">
+        <div id="settings-menu" class="settings-menu" role="menu" hidden>
+          <button id="settings-customize" class="settings-item" role="menuitem"><span class="btn-icon" data-icon="palette"></span><span>Hình nền &amp; Theme</span></button>
+          <button id="settings-theme" class="settings-item" role="menuitem" data-keep-open><span class="btn-icon" data-icon="monitor"></span><span class="settings-label">Sáng / Tối: Hệ thống</span></button>
+          <button id="settings-privacy" class="settings-item" role="menuitem" data-keep-open><span class="btn-icon" data-icon="eye"></span><span>Chế độ riêng tư</span></button>
+          <hr class="settings-sep">
+          <button id="settings-export" class="settings-item" role="menuitem"><span class="btn-icon" data-icon="upload"></span><span>Export</span></button>
+          <button id="settings-import" class="settings-item" role="menuitem"><span class="btn-icon" data-icon="download"></span><span>Import</span></button>
+          <button id="settings-help" class="settings-item" role="menuitem"><span class="btn-icon" data-icon="helpCircle"></span><span>Hướng dẫn</span></button>
+        </div>
+        <button id="settings-btn" class="sidebar-item" aria-haspopup="menu" aria-expanded="false"><span class="btn-icon" data-icon="gear"></span><span class="sidebar-item-name">Cài đặt</span></button>
+      </div>
     </aside>
     <div id="sidebar-backdrop" class="sidebar-backdrop"></div>
 
@@ -115,18 +127,6 @@
       </div>
     </div>
     </main>
-  </div>
-
-  <div id="fab" class="fab" role="navigation" aria-label="Quick actions">
-    <div id="fab-menu" class="fab-menu">
-      <button id="fab-export" class="fab-item" title="Export"><span class="fab-label">Export</span><span class="btn-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></span></button>
-      <button id="fab-import" class="fab-item" title="Import"><span class="fab-label">Import</span><span class="btn-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></span></button>
-      <button id="fab-customize" class="fab-item" title="Customize"><span class="fab-label">Customize</span><span class="btn-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r="0.5" fill="currentColor"/><circle cx="17.5" cy="10.5" r="0.5" fill="currentColor"/><circle cx="8.5" cy="7.5" r="0.5" fill="currentColor"/><circle cx="6.5" cy="12.5" r="0.5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.93 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-1 0-.83.67-1.5 1.5-1.5H16c3.31 0 6-2.69 6-6 0-5.5-4.5-10-10-10z"/></svg></span></button>
-      <button id="fab-theme" class="fab-item" title="Theme: System"><span class="fab-label">Theme: System</span><span class="btn-icon" id="fab-theme-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></span></button>
-      <button id="fab-privacy" class="fab-item" title="Privacy"><span class="fab-label">Privacy</span><span class="btn-icon" id="fab-privacy-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></span></button>
-      <button id="fab-help" class="fab-item" title="Help"><span class="fab-label">Help</span><span class="btn-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span></button>
-    </div>
-    <button id="fab-toggle" class="fab-toggle"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
   </div>
 
   <input type="file" id="import-input" accept=".json" style="display:none">
