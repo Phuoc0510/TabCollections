@@ -911,7 +911,7 @@ function showHelp() {
   content.innerHTML = `
 <section class="help-section">
   <h3>📚 Getting Started</h3>
-  <p>Tab Collection lets you save, organize, and quickly access your browser tabs. All data is stored locally in your browser and never sent anywhere. Switch between <b>Collections</b> (tab management) and <b>Tasks</b> (to-do board) using the tabs at the top.</p>
+  <p>Tab Collection lets you save, organize, and quickly access your browser tabs. All data is stored locally in your browser and never sent anywhere.${TASKS_ENABLED ? ' Switch between <b>Collections</b> (tab management) and <b>Tasks</b> (to-do board) using the tabs at the top.' : ''}</p>
 </section>
 
 <section class="help-section">
@@ -928,7 +928,7 @@ function showHelp() {
 <section class="help-section">
   <h3>📁 Managing Collections</h3>
   <table class="help-table">
-    <tr><td><b>Create</b></td><td>Click <b>New Collection</b> card at the bottom of the grid</td></tr>
+    <tr><td><b>Create</b></td><td>Click <b>Collection mới</b> in the sidebar</td></tr>
     <tr><td><b>Rename</b></td><td>Click the page title <b>"Tab Collections"</b> to edit it</td></tr>
     <tr><td><b>Expand</b></td><td>Click a collection header to show/hide its tabs</td></tr>
     <tr><td><b>Actions</b></td><td>Expand a card → click <b>Actions</b> → choose action (add tab / open all / edit / delete)</td></tr>
@@ -950,20 +950,21 @@ function showHelp() {
   <h3>🔍 Search & View</h3>
   <table class="help-table">
     <tr><td><b>Search</b></td><td>Type in the search bar to filter collections and tabs by name, title, or URL</td></tr>
-    <tr><td><b>Grid / List</b></td><td>Click the <b>Grid/List toggle</b> in the header to switch view</td></tr>
+    <tr><td><b>Tiles / Rows</b></td><td>Use the ▦ / ≡ toggle in the header. Rows also show each tab's URL</td></tr>
+    <tr><td><b>Jump</b></td><td>Click a collection in the sidebar to scroll to it</td></tr>
   </table>
 </section>
 
 <section class="help-section">
   <h3>🖼️ Customization</h3>
   <table class="help-table">
-    <tr><td><b>Background</b></td><td>Open FAB → Customize → pick a preset, paste a URL, or drop an image file</td></tr>
+    <tr><td><b>Background</b></td><td><b>Cài đặt</b> → <b>Hình nền &amp; Theme</b> → pick a preset, paste a URL, or drop an image file</td></tr>
     <tr><td><b>Icons & Colors</b></td><td>When creating/editing a collection, choose from 350+ emoji icons and 10 accent colors</td></tr>
-    <tr><td><b>Theme</b></td><td>Open FAB → <b>Theme</b> toggle to cycle System / Light / Dark</td></tr>
+    <tr><td><b>Theme</b></td><td><b>Cài đặt</b> → <b>Sáng / Tối</b> to cycle System / Light / Dark</td></tr>
   </table>
 </section>
 
-<section class="help-section">
+${TASKS_ENABLED ? `<section class="help-section">
   <h3>📋 Tasks Board</h3>
   <p>Manage your daily tasks synced with <b>tasks.minhtuong.io.vn</b>.</p>
   <table class="help-table">
@@ -976,14 +977,14 @@ function showHelp() {
     <tr><td><b>Board</b></td><td>Click <b>📋 Board</b> to open the full web board in a new tab</td></tr>
     <tr><td><b>Daily reminder</b></td><td>Daily at 17:35, a notification reminds you to review your tasks</td></tr>
   </table>
-</section>
+</section>` : ''}
 
 <section class="help-section">
   <h3>📊 Data Management</h3>
   <table class="help-table">
-    <tr><td><b>Export</b></td><td>Open FAB → <b>Export</b> to download all collections as a JSON file</td></tr>
-    <tr><td><b>Import</b></td><td>Open FAB → <b>Import</b> to restore collections from a JSON file</td></tr>
-    <tr><td><b>Privacy</b></td><td>Open FAB → Privacy toggle to blur tab titles and URLs on screen</td></tr>
+    <tr><td><b>Export</b></td><td><b>Cài đặt</b> → <b>Export</b> to download all collections as a JSON file</td></tr>
+    <tr><td><b>Import</b></td><td><b>Cài đặt</b> → <b>Import</b> to restore collections from a JSON file</td></tr>
+    <tr><td><b>Privacy</b></td><td><b>Cài đặt</b> → <b>Chế độ riêng tư</b> to blur tab titles and URLs on screen</td></tr>
   </table>
 </section>
 
@@ -995,6 +996,7 @@ function showHelp() {
 <section class="help-section">
   <h3>⌨️ Keyboard Shortcuts</h3>
   <table class="help-table">
+    <tr><td><kbd>⌘K</kbd> / <kbd>Ctrl+K</kbd> / <kbd>/</kbd></td><td>Focus search on the new tab page</td></tr>
     <tr><td><kbd>Cmd+Shift+Y</kbd></td><td>Quick Save current tab</td></tr>
     <tr><td><kbd>Cmd+Shift+S</kbd></td><td>Open Side Panel</td></tr>
   </table>

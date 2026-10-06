@@ -48,7 +48,7 @@ function render() {
       <div class="group-tabs">
         ${g.tabs.map(t => `
           <div class="tab-entry" data-url="${esc(t.url)}">
-            ${t.favicon ? `<img src="${t.favicon}" alt="" onerror="this.style.display='none'">` : ''}
+            ${t.favicon ? `<img src="${esc(t.favicon)}" alt="" onerror="this.style.display='none'">` : ''}
             <div class="tab-info">
               <div class="tab-title">${esc(t.title || t.url)}</div>
             </div>

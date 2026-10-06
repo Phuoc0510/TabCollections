@@ -2,7 +2,7 @@
 
 > A Chrome/Brave extension for collecting, organizing, and managing browser tabs — right from your new tab page.
 
-[![Version](https://img.shields.io/badge/version-2.7.0-blue)](https://github.com/Phuoc0510/TabCollections/releases)
+[![Version](https://img.shields.io/badge/version-2.8.0-blue)](https://github.com/Phuoc0510/TabCollections/releases)
 [![Manifest](https://img.shields.io/badge/manifest-v3-green)](https://developer.chrome.com/docs/extensions/reference/manifest)
 
 ---
@@ -18,7 +18,14 @@
 - **Privacy mode** — blur tab titles and URLs with one toggle
 - **Edit tab name & URL** — click **⋯** → **Edit** on any tab to update its title or URL
 
-### Tasks Board
+### Workspace Layout
+- **Collection sidebar** — every collection listed with its color and tab count; click to jump
+- **Tab tiles** — tabs shown as compact tiles with favicons, or as rows with URLs (toggle in the header)
+- **Quick search** — `⌘K` / `Ctrl+K` or `/` focuses search
+- **Settings menu** — background, theme, light/dark, privacy, import/export and help live under **Cài đặt** in the sidebar
+
+### Tasks Board (hidden since v2.8.0)
+- Hidden behind `TASKS_ENABLED` in `constants.js`; the daily reminder is off while hidden
 - **Daily tasks** — view today's tasks and overdue items synced with tasks.minhtuong.io.vn
 - **Full CRUD** — create, edit, delete, and toggle tasks inline
 - **Priority & PIC** — set priority (low/normal/high) and assign a person in charge
@@ -128,14 +135,16 @@ git clone https://github.com/Phuoc0510/TabCollections.git
 
 > A daily notification reminder fires at **17:35** (requires Chrome notification permission on macOS).
 
-The gear button at the bottom-right gives quick access to:
+The **Cài đặt** menu at the bottom of the sidebar gives quick access to:
 
 | Button | Action |
 |--------|--------|
+| Hình nền & Theme | Customize background image & UI theme |
+| Sáng / Tối | Cycle System / Light / Dark |
+| Chế độ riêng tư | Toggle privacy mode |
 | Export | Export collections as JSON |
 | Import | Import collections from JSON |
-| Customize | Customize background image & UI theme |
-| Privacy | Toggle privacy mode |
+| Hướng dẫn | Open this help |
 
 ---
 
