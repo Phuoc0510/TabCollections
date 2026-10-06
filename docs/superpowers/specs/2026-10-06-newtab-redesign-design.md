@@ -56,8 +56,8 @@ Làm mới UI trang new tab theo bố cục "workspace": sidebar collection + c�
 - Header section: chevron thu gọn (logic `expandedGroupIds` hiện có), chấm màu, icon, tên, "N tab". Bên phải hiện trực tiếp: "Thêm tab", "Mở tất cả", nút ⋯ (menu Sửa/Xoá). Không còn ẩn hành động sau `.group-actions-menu` cho Thêm tab/Mở tất cả.
 - Kéo section (header) để sắp xếp group — dùng logic drag group hiện có.
 - Tab (`renderTabEntry`) giữ markup, đổi trình bày bằng CSS theo mode:
-  - **Dạng ô** (`.groups-grid.is-tiles`): lưới `repeat(auto-fill, minmax(170px, 1fr))`, ô gồm favicon + tiêu đề 1 dòng, ẩn `.tab-url`; drag handle và nút ⋯ chỉ hiện khi hover/focus.
-  - **Dạng dòng** (`.groups-grid.is-rows`): mỗi tab một dòng, hiện URL như hiện tại.
+  - **Dạng ô** (mặc định, `viewMode = 'grid'`): lưới `repeat(auto-fill, minmax(170px, 1fr))`, ô gồm favicon + tiêu đề 1 dòng, ẩn `.tab-url`; drag handle và nút ⋯ chỉ hiện khi hover/focus.
+  - **Dạng dòng** (class `view-list` trên `#groups-view`, `viewMode = 'list'`): mỗi tab một dòng, hiện URL như hiện tại.
 - Section rỗng: ô viền nét đứt "Thả URL vào đây hoặc bấm Thêm tab".
 - Không có group nào: `#empty-state` ở vùng chính, hướng dẫn bấm "Collection mới" ở sidebar (cập nhật câu chữ đang nhắc tới FAB).
 
@@ -89,6 +89,7 @@ Làm mới UI trang new tab theo bố cục "workspace": sidebar collection + c�
 
 - Đồng bộ với new tab: font, khoảng cách theo `--space-*`, bo góc `--radius-*`, dòng tab cùng kiểu (favicon 16px + tiêu đề, hover nhẹ), chấm màu collection giống sidebar.
 - Không đổi cấu trúc hay hành vi. Hai màn hình đã dùng SVG icon.
+- Sửa 2 lỗi đồng bộ theme: side panel dùng `--bg` (không tồn tại) nên luôn nền sáng → đổi sang `--bg-primary`/`--font-family`; popup bỏ qua lựa chọn Sáng/Tối → áp `themeMode` như side panel.
 - Side panel chưa load `animations.css`/`reset.css` như popup — chỉ thêm nếu cần cho kiểu dáng thống nhất.
 
 ## File bị ảnh hưởng
