@@ -46,6 +46,11 @@ const TITLE_KEY = 'tabCollectorTitle';
 
 const $ = id => document.getElementById(id);
 
+// Static markup carries data-icon="name"; fill it from icons.js so SVGs live in one place.
+document.querySelectorAll('[data-icon]').forEach(el => { el.innerHTML = icon(el.dataset.icon); });
+
+let activeSidebarId = null;
+
 const UI_THEME_KEY = 'uiTheme';
 const DEFAULT_UI_THEME = 'glass';
 
@@ -99,7 +104,8 @@ async function render() {
     expandedInitialized = true;
   }
 
-  const searchTerm = ($('search-input')?.value || '').trim().toLowerCase();
+  const rawTerm = ($('search-input')?.value || '').trim();
+  const searchTerm = rawTerm.toLowerCase();
   if (searchTerm) {
     groups = groups.map(g => {
       const matchingTabs = (g.tabs || []).filter(t => matchesSearch(t, searchTerm));
@@ -111,52 +117,42 @@ async function render() {
     }).filter(Boolean);
   }
 
+  $('sidebar-list').innerHTML = renderSidebarItems(groups, activeSidebarId);
+
   const grid = $('groups-grid');
   const empty = $('empty-state');
-
   if (groups.length === 0) {
     grid.innerHTML = '';
+    empty.innerHTML = searchTerm
+      ? `<p>Không tìm thấy kết quả cho “${esc(rawTerm)}”.</p>`
+      : '<p>Chưa có collection nào. Bấm <b>Collection mới</b> ở thanh bên để bắt đầu.</p>';
     empty.style.display = 'block';
     return;
   }
   empty.style.display = 'none';
-
-  grid.innerHTML = groups.map(g => {
-    const isExpanded = expandedGroupIds.has(g.id);
-    const tabsHtml = g.tabs && g.tabs.length
-      ? `<div class="group-tabs">${g.tabs.map(renderTabEntry).join('')}</div>`
-      : `<div class="group-tabs group-tabs-empty">No tabs yet. Use the extension popup to add tabs.</div>`;
-
-    return `<article class="group-card glass-card${isExpanded ? ' is-expanded' : ''}" draggable="true" data-id="${g.id}">
-      <div class="group-color-bar" style="--bar-color:${g.color || '#4285f4'}"></div>
-      <div class="group-card-inner">
-        <button class="group-header group-toggle" data-id="${g.id}" aria-expanded="${isExpanded}" aria-controls="group-content-${g.id}">
-          <span class="group-icon">${g.icon || '📁'}</span>
-          <span class="group-name">${esc(g.name)}</span>
-          <span class="group-meta">${g.tabs ? g.tabs.length : 0} tab${(g.tabs ? g.tabs.length : 0) !== 1 ? 's' : ''}</span>
-          <span class="group-actions-toggle" data-id="${g.id}" title="Actions">${icon('moreH')}</span>
-          <span class="group-chevron" aria-hidden="true">${icon('chevronDown')}</span>
-        </button>
-        <div class="group-actions-menu" data-id="${g.id}">
-          <div class="icon-btn-wrap"><button class="group-add-tab-btn icon-btn" data-id="${g.id}" title="Add Tab">${icon('plus')}</button><span class="tooltip">Add Tab</span></div>
-          <div class="icon-btn-wrap"><button class="group-open-all-btn icon-btn" data-id="${g.id}" title="Open All">${icon('externalLink')}</button><span class="tooltip">Open All</span></div>
-          <div class="icon-btn-wrap"><button class="group-edit-btn icon-btn" data-id="${g.id}" title="Edit">${icon('edit')}</button><span class="tooltip">Edit</span></div>
-          <div class="icon-btn-wrap"><button class="group-delete-btn icon-btn" data-id="${g.id}" title="Delete">${icon('trash')}</button><span class="tooltip">Delete</span></div>
-        </div>
-        <div id="group-content-${g.id}" class="group-content"${isExpanded ? '' : ' hidden'}>
-          ${tabsHtml}
-        </div>
-      </div>
-    </article>`;
-  }).join('') + `<article class="group-card add-card glass-card" id="new-group-card">
-    <div class="group-card-inner">
-      <button class="group-header add-card-btn" id="new-group-btn">
-        <span class="group-icon">${icon('plusCircle')}</span>
-        <span class="group-name">New Collection</span>
-      </button>
-    </div>
-  </article>`;
+  grid.innerHTML = groups.map(g => renderGroupSection(g, expandedGroupIds.has(g.id))).join('');
 }
+
+function openNewCollectionModal() {
+  showModal('New Collection', '', '📁', '#4285f4', async (name, icon, color) => {
+    const response = await chrome.runtime.sendMessage({ action: 'createGroup', name, icon, color });
+    if (response && response.error) { showStatus('Create failed: ' + response.error, 'error'); return; }
+    await render();
+    showStatus(`Created "${name}"`, 'success');
+  });
+}
+
+$('new-group-btn').addEventListener('click', openNewCollectionModal);
+
+$('sidebar-list').addEventListener('click', async e => {
+  const item = e.target.closest('.sidebar-item');
+  if (!item) return;
+  activeSidebarId = item.dataset.id;
+  expandedGroupIds.add(activeSidebarId);
+  await render();
+  document.querySelector(`.group-card[data-id="${CSS.escape(activeSidebarId)}"]`)
+    ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
 
 $('groups-grid').addEventListener('click', async e => {
   const groupCard = e.target.closest('.group-card');
@@ -231,15 +227,6 @@ $('groups-grid').addEventListener('click', async e => {
     }
     return;
   }
-
-  if (e.target.closest('#new-group-card') || e.target.closest('#new-group-btn')) {
-    showModal('New Collection', '', '📁', '#4285f4', async (name, icon, color) => {
-      const response = await chrome.runtime.sendMessage({ action: 'createGroup', name, icon, color });
-      if (response && response.error) { showStatus('Create failed: ' + response.error, 'error'); return; }
-      await render();
-      showStatus(`Created "${name}"`, 'success');
-    });
-  }
 });
 
 // Privacy toggle
@@ -306,8 +293,11 @@ $('groups-grid').addEventListener('dragover', e => {
     if (!entry || entry === tabDragSrcEl) return;
     e.dataTransfer.dropEffect = 'move';
     const container = entry.parentNode;
-    const midY = entry.getBoundingClientRect().top + entry.getBoundingClientRect().height / 2;
-    container.insertBefore(tabDragSrcEl, e.clientY < midY ? entry : entry.nextSibling);
+    // Tiles flow left-to-right, rows top-to-bottom — compare along the axis the list runs.
+    const r = entry.getBoundingClientRect();
+    const isRows = $('groups-view').classList.contains('view-list');
+    const before = isRows ? e.clientY < r.top + r.height / 2 : e.clientX < r.left + r.width / 2;
+    container.insertBefore(tabDragSrcEl, before ? entry : entry.nextSibling);
     return;
   }
 

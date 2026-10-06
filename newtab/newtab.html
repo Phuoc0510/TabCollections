@@ -21,16 +21,30 @@
   <link rel="stylesheet" href="../styles/themes/terminal.css">
 </head>
 <body>
-  <div id="app" class="app" role="main">
-    <header class="app-header glass-strong">
+  <div id="app" class="app">
+    <aside id="app-sidebar" class="app-sidebar" aria-label="Collections">
       <h1 id="app-title" class="app-title">Tab Collections</h1>
+      <div class="sidebar-label">COLLECTIONS</div>
+      <nav id="sidebar-list" class="sidebar-list"></nav>
+      <button id="new-group-btn" class="sidebar-item sidebar-new"><span class="btn-icon" data-icon="plus"></span><span class="sidebar-item-name">Collection mới</span></button>
+      <div class="sidebar-spacer"></div>
+    </aside>
+    <div id="sidebar-backdrop" class="sidebar-backdrop"></div>
+
+    <header class="app-header">
+      <button id="sidebar-open-btn" class="sidebar-open-btn" aria-label="Mở danh sách collection"><span class="btn-icon" data-icon="menu"></span></button>
+      <span id="today-label" class="today-label"></span>
       <div class="nav-tabs">
         <button class="nav-tab active" data-view="collections">📂 Collections</button>
         <button class="nav-tab" data-view="tasks">📋 Tasks</button>
       </div>
-      <input type="search" id="search-input" class="search-input" placeholder="Search collections and tabs...">
+      <label class="search-wrap">
+        <span class="btn-icon" data-icon="search"></span>
+        <input type="search" id="search-input" class="search-input" placeholder="Tìm tab, collection…" aria-label="Tìm tab, collection">
+        <kbd id="search-kbd" class="search-kbd"></kbd>
+      </label>
       <div class="header-actions" id="collections-header-actions">
-        <button id="view-toggle-btn" class="btn-ghost" title="Switch to List"><span class="btn-icon" id="view-toggle-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></span><span class="btn-label">Grid view</span></button>
+        <button id="view-toggle-btn" class="btn-ghost" title="Switch to List"><span class="btn-icon" id="view-toggle-icon" data-icon="grid"></span><span class="btn-label">Grid view</span></button>
       </div>
       <div id="tasks-header-actions" class="tasks-header-actions" style="display:none">
         <div class="tasks-search-wrap">
@@ -75,17 +89,14 @@
       </div>
     </header>
 
-    <div id="status-bar" class="status-bar glass-card"></div>
-
-    <div id="collections-view">
-      <div id="groups-view">
-        <div id="groups-grid" class="groups-grid animate-stagger"></div>
-        <div id="empty-state" class="empty-state" style="display:none">
-          <p>No collections yet. Click <b>New Collection</b> card below to start, or open the FAB then <b>Help</b> for guide.</p>
+    <main class="app-main" role="main">
+      <div id="status-bar" class="status-bar glass-card"></div>
+      <div id="collections-view">
+        <div id="groups-view">
+          <div id="groups-grid" class="groups-grid"></div>
+          <div id="empty-state" class="empty-state" style="display:none"></div>
         </div>
       </div>
-    </div>  <!-- end collections-view -->
-
     <div id="tasks-view" style="display:none">
       <div id="tasks-login-gate" style="display:none">
         <div class="tasks-login-card">
@@ -100,6 +111,7 @@
         <div id="tasks-list"></div>
       </div>
     </div>
+    </main>
   </div>
 
   <div id="fab" class="fab" role="navigation" aria-label="Quick actions">
