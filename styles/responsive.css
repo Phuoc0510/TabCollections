@@ -11,11 +11,12 @@
     width: 260px;
     height: auto;
     transform: translateX(-100%);
-    transition: transform var(--transition-normal);
+    visibility: hidden;
+    transition: transform var(--transition-normal), visibility 0s linear var(--transition-normal);
     box-shadow: var(--glass-shadow);
   }
 
-  .app.sidebar-open .app-sidebar { transform: none; }
+  .app.sidebar-open .app-sidebar { transform: none; visibility: visible; transition: transform var(--transition-normal); }
 
   .app.sidebar-open .sidebar-backdrop {
     display: block;

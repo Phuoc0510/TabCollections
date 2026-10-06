@@ -158,12 +158,16 @@ $('sidebar-list').addEventListener('click', async e => {
 // ── Sidebar drawer (narrow windows) ──
 function setSidebarOpen(open) {
   $('app').classList.toggle('sidebar-open', open);
+  $('sidebar-open-btn').setAttribute('aria-expanded', String(open));
 }
 
 $('sidebar-open-btn').addEventListener('click', () => setSidebarOpen(true));
 $('sidebar-backdrop').addEventListener('click', () => setSidebarOpen(false));
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') setSidebarOpen(false);
+  if (e.key === 'Escape' && $('app').classList.contains('sidebar-open')) {
+    setSidebarOpen(false);
+    $('sidebar-open-btn').focus();
+  }
 });
 $('new-group-btn').addEventListener('click', () => setSidebarOpen(false));
 
