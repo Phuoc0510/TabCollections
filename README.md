@@ -108,11 +108,11 @@ git clone https://github.com/Phuoc0510/TabCollections.git
 | Action | How |
 |--------|-----|
 | Create collection | Click **Collection mới** in the sidebar |
-| Edit collection | Expand card → click **Actions** → **Edit** |
-| Delete collection | Expand card → click **Actions** → **Delete** |
+| Edit collection | Click **⋯** in the section header → **Sửa** |
+| Delete collection | Click **⋯** in the section header → **Xoá** |
 | Reorder cards | Drag card by its header |
-| Add tabs | Expand card → click **Actions** → **Add Tab** → choose from open tabs |
-| Open all tabs | Expand card → click **Actions** → **Open All** |
+| Add tabs | Click **Thêm tab** in the section header → choose from open tabs |
+| Open all tabs | Click **Mở tất cả** in the section header |
 | Edit tab name & URL | Hover tab → click **⋯** → **Edit** |
 
 ### Keyboard Shortcuts

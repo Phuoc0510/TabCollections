@@ -751,6 +751,24 @@ body.has-bg .group-card {
   filter: blur(4px);
 }
 
+.privacy-mode #sidebar-list .sidebar-item-name,
+.privacy-mode #sidebar-list .sidebar-item-count {
+  filter: blur(6px);
+}
+
+.tab-entry:focus-within .tab-actions-toggle,
+.tab-entry:focus-within .tab-drag-handle {
+  opacity: 1;
+}
+
+.view-seg-btn:focus-visible,
+.sidebar-item:focus-visible,
+.settings-item:focus-visible,
+.group-action:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
 /* ── Tab Picker ── */
 .tab-picker-list {
   overflow-y: auto;

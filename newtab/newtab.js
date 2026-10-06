@@ -164,10 +164,10 @@ function setSidebarOpen(open) {
 $('sidebar-open-btn').addEventListener('click', () => setSidebarOpen(true));
 $('sidebar-backdrop').addEventListener('click', () => setSidebarOpen(false));
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape' && $('app').classList.contains('sidebar-open')) {
-    setSidebarOpen(false);
-    $('sidebar-open-btn').focus();
-  }
+  if (e.key !== 'Escape' || !$('app').classList.contains('sidebar-open')) return;
+  if (!$('settings-menu').hidden) return; // first Esc closes the settings menu (its own listener)
+  setSidebarOpen(false);
+  $('sidebar-open-btn').focus();
 });
 $('new-group-btn').addEventListener('click', () => setSidebarOpen(false));
 
@@ -931,12 +931,12 @@ function showHelp() {
     <tr><td><b>Create</b></td><td>Click <b>Collection mới</b> in the sidebar</td></tr>
     <tr><td><b>Rename</b></td><td>Click the page title <b>"Tab Collections"</b> to edit it</td></tr>
     <tr><td><b>Expand</b></td><td>Click a collection header to show/hide its tabs</td></tr>
-    <tr><td><b>Actions</b></td><td>Expand a card → click <b>Actions</b> → choose action (add tab / open all / edit / delete)</td></tr>
-    <tr><td><b>Edit</b></td><td>Click <b>Actions</b> → <b>Edit</b> to change name, icon, or color</td></tr>
-    <tr><td><b>Delete</b></td><td>Click <b>Actions</b> → <b>Delete</b> to remove a collection and all its tabs</td></tr>
+    <tr><td><b>Actions</b></td><td>Each section header has <b>Thêm tab</b> and <b>Mở tất cả</b> buttons; <b>⋯</b> opens <b>Sửa</b> / <b>Xoá</b></td></tr>
+    <tr><td><b>Edit</b></td><td>Click <b>⋯</b> → <b>Sửa</b> to change name, icon, or color</td></tr>
+    <tr><td><b>Delete</b></td><td>Click <b>⋯</b> → <b>Xoá</b> to remove a collection and all its tabs</td></tr>
     <tr><td><b>Reorder</b></td><td>Drag any collection card by its header to rearrange</td></tr>
-    <tr><td><b>Add tabs</b></td><td>Click <b>Actions</b> → <b>Add Tab</b> → pick tabs from the current window</td></tr>
-    <tr><td><b>Open all</b></td><td>Click <b>Actions</b> → <b>Open All</b> to open every tab in a collection</td></tr>
+    <tr><td><b>Add tabs</b></td><td>Click <b>Thêm tab</b> in the section header → pick tabs from the current window</td></tr>
+    <tr><td><b>Open all</b></td><td>Click <b>Mở tất cả</b> in the section header to open every tab in a collection</td></tr>
     <tr><td><b>Click a tab</b></td><td>Click any tab entry to navigate the current page to that URL</td></tr>
   </table>
 </section>
@@ -1184,12 +1184,17 @@ $('groups-grid').addEventListener('click', e => {
 });
 
 document.addEventListener('click', e => {
-  if (!e.target.closest('.group-card-inner')) {
+  if (!e.target.closest('.group-actions')) {
     document.querySelectorAll('.group-actions-menu.open').forEach(el => el.classList.remove('open'));
   }
   if (!e.target.closest('.tab-entry')) {
     document.querySelectorAll('.tab-actions-popup.open').forEach(el => el.classList.remove('open'));
   }
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  document.querySelectorAll('.group-actions-menu.open, .tab-actions-popup.open').forEach(el => el.classList.remove('open'));
 });
 
 const VIEW_KEY = 'viewMode';
@@ -1994,10 +1999,11 @@ async function initApp() {
 
   if (!TASKS_ENABLED) {
     // Hidden, not removed: the markup and code stay so flipping the flag brings Tasks back.
-    document.querySelectorAll('.nav-tabs').forEach(el => { el.style.display = 'none'; });
+    // The nav tabs are hidden in the HTML itself so they never flash before this runs.
     return;
   }
 
+  document.querySelectorAll('.nav-tabs').forEach(el => { el.style.display = ''; });
   initTasksEventHandlers();
   // An explicit ?view= wins (the reminder notification uses it); otherwise reopen on
   // whichever tab was last used, so a new tab lands where the person left off.
