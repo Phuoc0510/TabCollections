@@ -7,6 +7,12 @@ chrome.storage.local.get(THEME_KEY).then(result => {
   document.documentElement.setAttribute('data-ui-theme', theme);
 });
 
+chrome.storage.local.get('themeMode').then(({ themeMode }) => {
+  if (themeMode === 'light' || themeMode === 'dark') {
+    document.documentElement.setAttribute('data-theme', themeMode);
+  }
+});
+
 function showStatus(msg, type) {
   let el = document.getElementById('popup-status');
   if (!el) {
