@@ -1,4 +1,7 @@
-/* exported esc, faviconUrl, ICONS, COLORS */
+/* exported esc, faviconUrl, ICONS, COLORS, TASKS_ENABLED */
+
+// Tasks is hidden for now (v2.8.0). Flip to true to bring back the Tasks view and the 17:35 reminder.
+const TASKS_ENABLED = false;
 
 const HTML_ESCAPES = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
 

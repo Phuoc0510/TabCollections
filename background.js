@@ -1,3 +1,4 @@
+importScripts('constants.js');
 importScripts('storage.js');
 importScripts('tasks/tasks-logic.js');
 importScripts('tasks/tasks-api.js');
@@ -50,6 +51,11 @@ chrome.runtime.onStartup.addListener(ensureTasksReminder);
 // The service worker restarts constantly under MV3, so only create the alarm when it is
 // actually missing. Recreating it on every wake-up would keep pushing the next fire time back.
 async function ensureTasksReminder() {
+  if (!TASKS_ENABLED) {
+    // Installs from 2.7.0 and earlier already have a daily alarm scheduled — remove it.
+    await chrome.alarms.clear(TASKS_ALARM);
+    return;
+  }
   const existing = await chrome.alarms.get(TASKS_ALARM);
   if (existing) return;
   const now = Date.now();
@@ -211,7 +217,7 @@ chrome.commands.onCommand.addListener(async (command) => {
 });
 
 chrome.alarms.onAlarm.addListener((alarm) => {
-  if (alarm.name !== TASKS_ALARM) return;
+  if (alarm.name !== TASKS_ALARM || !TASKS_ENABLED) return;
   chrome.notifications.create(TASKS_ALARM, {
     type: 'basic',
     title: '⏰ Nhắc nhở Task',

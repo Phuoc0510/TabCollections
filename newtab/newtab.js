@@ -46,6 +46,11 @@ const TITLE_KEY = 'tabCollectorTitle';
 
 const $ = id => document.getElementById(id);
 
+// Static markup carries data-icon="name"; fill it from icons.js so SVGs live in one place.
+document.querySelectorAll('[data-icon]').forEach(el => { el.innerHTML = icon(el.dataset.icon); });
+
+let activeSidebarId = null;
+
 const UI_THEME_KEY = 'uiTheme';
 const DEFAULT_UI_THEME = 'glass';
 
@@ -57,6 +62,9 @@ const THEMES = [
   { id: 'dark-premium',  name: 'Dark Premium',  icon: '🌙',  desc: 'Tối sang trọng, GitHub-style' },
   { id: 'macos',         name: 'macOS',         icon: '🖥️',  desc: 'Frosted glass tinh tế, Apple-style' },
   { id: 'terminal',      name: 'Terminal',      icon: '💻',  desc: 'Monospace, hacker vibe' },
+  { id: 'nord',          name: 'Nord',          icon: '❄️',  desc: 'Xanh băng dịu mắt, có bản Sáng/Tối' },
+  { id: 'graphite',      name: 'Graphite',      icon: '◼️',  desc: 'Xám trung tính, viền mảnh, có bản Sáng/Tối' },
+  { id: 'paper',         name: 'Paper',         icon: '📜',  desc: 'Giấy ấm, chữ có chân, có bản Sáng/Tối' },
 ];
 
 function showStatus(msg, type) {
@@ -86,27 +94,6 @@ async function loadAll() {
   }
 }
 
-function renderTabEntry(t) {
-  const title = t.title || (() => { try { return new URL(t.url).hostname; } catch { return 'Untitled'; } })();
-  const displayUrl = t.url.length > 60 ? t.url.slice(0, 57) + '...' : t.url;
-  const imgSrc = faviconUrl(t);
-  return `<div class="tab-entry" data-id="${t.id}" data-url="${esc(t.url)}" draggable="true">
-    <span class="tab-drag-handle" draggable="true">${icon('dragHandle')}</span>
-    ${imgSrc ? `<img src="${imgSrc}" alt="" onerror="this.style.display='none'">` : ''}
-    <div class="tab-info">
-      <div class="tab-title">${esc(title)}</div>
-      <div class="tab-url">${esc(displayUrl)}</div>
-    </div>
-    <div class="tab-actions-wrapper">
-      <button class="tab-actions-toggle" data-id="${t.id}" title="Actions">${icon('moreH')}</button>
-      <div class="tab-actions-popup">
-        <button class="tab-edit" data-id="${t.id}">${icon('edit')} Edit</button>
-        <button class="tab-delete" data-id="${t.id}">${icon('trash')} Delete</button>
-      </div>
-    </div>
-  </div>`;
-}
-
 async function render() {
   try {
     await loadAll();
@@ -120,7 +107,8 @@ async function render() {
     expandedInitialized = true;
   }
 
-  const searchTerm = ($('search-input')?.value || '').trim().toLowerCase();
+  const rawTerm = ($('search-input')?.value || '').trim();
+  const searchTerm = rawTerm.toLowerCase();
   if (searchTerm) {
     groups = groups.map(g => {
       const matchingTabs = (g.tabs || []).filter(t => matchesSearch(t, searchTerm));
@@ -132,52 +120,59 @@ async function render() {
     }).filter(Boolean);
   }
 
+  $('sidebar-list').innerHTML = renderSidebarItems(groups, activeSidebarId);
+
   const grid = $('groups-grid');
   const empty = $('empty-state');
-
   if (groups.length === 0) {
     grid.innerHTML = '';
+    empty.innerHTML = searchTerm
+      ? `<p>Không tìm thấy kết quả cho “${esc(rawTerm)}”.</p>`
+      : '<p>Chưa có collection nào. Bấm <b>Collection mới</b> ở thanh bên để bắt đầu.</p>';
     empty.style.display = 'block';
     return;
   }
   empty.style.display = 'none';
-
-  grid.innerHTML = groups.map(g => {
-    const isExpanded = expandedGroupIds.has(g.id);
-    const tabsHtml = g.tabs && g.tabs.length
-      ? `<div class="group-tabs">${g.tabs.map(renderTabEntry).join('')}</div>`
-      : `<div class="group-tabs group-tabs-empty">No tabs yet. Use the extension popup to add tabs.</div>`;
-
-    return `<article class="group-card glass-card${isExpanded ? ' is-expanded' : ''}" draggable="true" data-id="${g.id}">
-      <div class="group-color-bar" style="--bar-color:${g.color || '#4285f4'}"></div>
-      <div class="group-card-inner">
-        <button class="group-header group-toggle" data-id="${g.id}" aria-expanded="${isExpanded}" aria-controls="group-content-${g.id}">
-          <span class="group-icon">${g.icon || '📁'}</span>
-          <span class="group-name">${esc(g.name)}</span>
-          <span class="group-meta">${g.tabs ? g.tabs.length : 0} tab${(g.tabs ? g.tabs.length : 0) !== 1 ? 's' : ''}</span>
-          <span class="group-actions-toggle" data-id="${g.id}" title="Actions">${icon('moreH')}</span>
-          <span class="group-chevron" aria-hidden="true">${icon('chevronDown')}</span>
-        </button>
-        <div class="group-actions-menu" data-id="${g.id}">
-          <div class="icon-btn-wrap"><button class="group-add-tab-btn icon-btn" data-id="${g.id}" title="Add Tab">${icon('plus')}</button><span class="tooltip">Add Tab</span></div>
-          <div class="icon-btn-wrap"><button class="group-open-all-btn icon-btn" data-id="${g.id}" title="Open All">${icon('externalLink')}</button><span class="tooltip">Open All</span></div>
-          <div class="icon-btn-wrap"><button class="group-edit-btn icon-btn" data-id="${g.id}" title="Edit">${icon('edit')}</button><span class="tooltip">Edit</span></div>
-          <div class="icon-btn-wrap"><button class="group-delete-btn icon-btn" data-id="${g.id}" title="Delete">${icon('trash')}</button><span class="tooltip">Delete</span></div>
-        </div>
-        <div id="group-content-${g.id}" class="group-content"${isExpanded ? '' : ' hidden'}>
-          ${tabsHtml}
-        </div>
-      </div>
-    </article>`;
-  }).join('') + `<article class="group-card add-card glass-card" id="new-group-card">
-    <div class="group-card-inner">
-      <button class="group-header add-card-btn" id="new-group-btn">
-        <span class="group-icon">${icon('plusCircle')}</span>
-        <span class="group-name">New Collection</span>
-      </button>
-    </div>
-  </article>`;
+  grid.innerHTML = groups.map(g => renderGroupSection(g, expandedGroupIds.has(g.id))).join('');
 }
+
+function openNewCollectionModal() {
+  showModal('New Collection', '', '📁', '#4285f4', async (name, icon, color) => {
+    const response = await chrome.runtime.sendMessage({ action: 'createGroup', name, icon, color });
+    if (response && response.error) { showStatus('Create failed: ' + response.error, 'error'); return; }
+    await render();
+    showStatus(`Created "${name}"`, 'success');
+  });
+}
+
+$('new-group-btn').addEventListener('click', openNewCollectionModal);
+
+$('sidebar-list').addEventListener('click', async e => {
+  const item = e.target.closest('.sidebar-item');
+  if (!item) return;
+  activeSidebarId = item.dataset.id;
+  setSidebarOpen(false);
+  expandedGroupIds.add(activeSidebarId);
+  await render();
+  document.querySelector(`.group-card[data-id="${CSS.escape(activeSidebarId)}"]`)
+    ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+
+// ── Sidebar drawer (narrow windows) ──
+function setSidebarOpen(open) {
+  $('app').classList.toggle('sidebar-open', open);
+  $('sidebar-open-btn').setAttribute('aria-expanded', String(open));
+}
+
+$('sidebar-open-btn').addEventListener('click', () => setSidebarOpen(true));
+$('sidebar-backdrop').addEventListener('click', () => setSidebarOpen(false));
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape' || !$('app').classList.contains('sidebar-open')) return;
+  if (!$('settings-menu').hidden) return; // first Esc closes the settings menu (its own listener)
+  setSidebarOpen(false);
+  $('sidebar-open-btn').focus();
+});
+$('new-group-btn').addEventListener('click', () => setSidebarOpen(false));
 
 $('groups-grid').addEventListener('click', async e => {
   const groupCard = e.target.closest('.group-card');
@@ -252,15 +247,6 @@ $('groups-grid').addEventListener('click', async e => {
     }
     return;
   }
-
-  if (e.target.closest('#new-group-card') || e.target.closest('#new-group-btn')) {
-    showModal('New Collection', '', '📁', '#4285f4', async (name, icon, color) => {
-      const response = await chrome.runtime.sendMessage({ action: 'createGroup', name, icon, color });
-      if (response && response.error) { showStatus('Create failed: ' + response.error, 'error'); return; }
-      await render();
-      showStatus(`Created "${name}"`, 'success');
-    });
-  }
 });
 
 // Privacy toggle
@@ -268,9 +254,8 @@ function togglePrivacy() {
   privacyMode = !privacyMode;
   document.body.classList.toggle('privacy-mode', privacyMode);
   chrome.storage.local.set({ privacyMode });
-  document.getElementById('fab-privacy')?.classList.toggle('active', privacyMode);
-  const iconEl = document.querySelector('#fab-privacy .btn-icon');
-  if (iconEl) iconEl.innerHTML = privacyMode ? icon('eyeOff') : icon('eye');
+  $('settings-privacy').classList.toggle('active', privacyMode);
+  $('settings-privacy').querySelector('.btn-icon').innerHTML = icon(privacyMode ? 'eyeOff' : 'eye');
 }
 
 // ── Drag and drop (merged: card reorder + tab reorder + external drop) ──
@@ -311,7 +296,7 @@ $('groups-grid').addEventListener('dragstart', e => {
 
 $('groups-grid').addEventListener('dragover', e => {
   e.preventDefault();
-  const targetCard = e.target.closest('.group-card:not(.add-card)');
+  const targetCard = e.target.closest('.group-card');
   if (!targetCard) return;
 
   if (tabDragSrcEl && tabDragSrcEl.isConnected) {
@@ -327,8 +312,11 @@ $('groups-grid').addEventListener('dragover', e => {
     if (!entry || entry === tabDragSrcEl) return;
     e.dataTransfer.dropEffect = 'move';
     const container = entry.parentNode;
-    const midY = entry.getBoundingClientRect().top + entry.getBoundingClientRect().height / 2;
-    container.insertBefore(tabDragSrcEl, e.clientY < midY ? entry : entry.nextSibling);
+    // Tiles flow left-to-right, rows top-to-bottom — compare along the axis the list runs.
+    const r = entry.getBoundingClientRect();
+    const isRows = $('groups-view').classList.contains('view-list');
+    const before = isRows ? e.clientY < r.top + r.height / 2 : e.clientX < r.left + r.width / 2;
+    container.insertBefore(tabDragSrcEl, before ? entry : entry.nextSibling);
     return;
   }
 
@@ -856,26 +844,41 @@ dropZone.addEventListener('drop', e => {
   reader.readAsDataURL(file);
 });
 
-// ── FAB ──
+// ── Settings menu (sidebar) ──
 
-function closeFab() {
-  document.getElementById('fab').classList.remove('open');
+const settingsMenu = $('settings-menu');
+
+function setSettingsOpen(open) {
+  settingsMenu.hidden = !open;
+  $('settings-btn').setAttribute('aria-expanded', String(open));
 }
 
-$('fab-toggle').addEventListener('click', e => {
+$('settings-btn').addEventListener('click', e => {
   e.stopPropagation();
-  document.getElementById('fab').classList.toggle('open');
+  setSettingsOpen(settingsMenu.hidden);
+});
+
+// Toggles (theme, privacy) keep the menu open so they can be clicked repeatedly.
+settingsMenu.addEventListener('click', e => {
+  if (e.target.closest('.settings-item:not([data-keep-open])')) setSettingsOpen(false);
 });
 
 document.addEventListener('click', e => {
-  if (!e.target.closest('#fab')) closeFab();
+  if (!e.target.closest('.settings-wrap')) setSettingsOpen(false);
 });
 
-$('fab-customize').addEventListener('click', () => { closeFab(); showBgModal(); });
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && !settingsMenu.hidden) {
+    setSettingsOpen(false);
+    $('settings-btn').focus();
+  }
+});
+
+$('settings-customize').addEventListener('click', showBgModal);
 
 const THEME_KEY = 'themeMode';
 const THEME_ICONS = { system: icon('monitor'), light: icon('sun'), dark: icon('moon') };
-const THEME_LABELS = { system: 'System', light: 'Light', dark: 'Dark' };
+const THEME_LABELS = { system: 'Hệ thống', light: 'Sáng', dark: 'Tối' };
 const THEME_CYCLE = ['system', 'light', 'dark'];
 
 async function loadTheme() {
@@ -889,16 +892,14 @@ function applyTheme(theme) {
   const root = document.documentElement;
   if (theme === 'system') root.removeAttribute('data-theme');
   else root.setAttribute('data-theme', theme);
-  const btn = document.getElementById('fab-theme');
+  const btn = $('settings-theme');
   if (btn) {
-    btn.querySelector('.fab-label').textContent = 'Theme: ' + THEME_LABELS[theme];
-    btn.title = 'Theme: ' + THEME_LABELS[theme];
+    btn.querySelector('.settings-label').textContent = 'Sáng / Tối: ' + THEME_LABELS[theme];
     btn.querySelector('.btn-icon').innerHTML = THEME_ICONS[theme];
   }
 }
 
-$('fab-theme').addEventListener('click', async () => {
-  closeFab();
+$('settings-theme').addEventListener('click', async () => {
   const result = await chrome.storage.local.get(THEME_KEY);
   const current = result[THEME_KEY] || 'system';
   const idx = THEME_CYCLE.indexOf(current);
@@ -913,7 +914,7 @@ function showHelp() {
   content.innerHTML = `
 <section class="help-section">
   <h3>📚 Getting Started</h3>
-  <p>Tab Collection lets you save, organize, and quickly access your browser tabs. All data is stored locally in your browser and never sent anywhere. Switch between <b>Collections</b> (tab management) and <b>Tasks</b> (to-do board) using the tabs at the top.</p>
+  <p>Tab Collection lets you save, organize, and quickly access your browser tabs. All data is stored locally in your browser and never sent anywhere.${TASKS_ENABLED ? ' Switch between <b>Collections</b> (tab management) and <b>Tasks</b> (to-do board) using the tabs at the top.' : ''}</p>
 </section>
 
 <section class="help-section">
@@ -930,15 +931,15 @@ function showHelp() {
 <section class="help-section">
   <h3>📁 Managing Collections</h3>
   <table class="help-table">
-    <tr><td><b>Create</b></td><td>Click <b>New Collection</b> card at the bottom of the grid</td></tr>
+    <tr><td><b>Create</b></td><td>Click <b>Collection mới</b> in the sidebar</td></tr>
     <tr><td><b>Rename</b></td><td>Click the page title <b>"Tab Collections"</b> to edit it</td></tr>
     <tr><td><b>Expand</b></td><td>Click a collection header to show/hide its tabs</td></tr>
-    <tr><td><b>Actions</b></td><td>Expand a card → click <b>Actions</b> → choose action (add tab / open all / edit / delete)</td></tr>
-    <tr><td><b>Edit</b></td><td>Click <b>Actions</b> → <b>Edit</b> to change name, icon, or color</td></tr>
-    <tr><td><b>Delete</b></td><td>Click <b>Actions</b> → <b>Delete</b> to remove a collection and all its tabs</td></tr>
+    <tr><td><b>Actions</b></td><td>Each section header has <b>Thêm tab</b> and <b>Mở tất cả</b> buttons; <b>⋯</b> opens <b>Sửa</b> / <b>Xoá</b></td></tr>
+    <tr><td><b>Edit</b></td><td>Click <b>⋯</b> → <b>Sửa</b> to change name, icon, or color</td></tr>
+    <tr><td><b>Delete</b></td><td>Click <b>⋯</b> → <b>Xoá</b> to remove a collection and all its tabs</td></tr>
     <tr><td><b>Reorder</b></td><td>Drag any collection card by its header to rearrange</td></tr>
-    <tr><td><b>Add tabs</b></td><td>Click <b>Actions</b> → <b>Add Tab</b> → pick tabs from the current window</td></tr>
-    <tr><td><b>Open all</b></td><td>Click <b>Actions</b> → <b>Open All</b> to open every tab in a collection</td></tr>
+    <tr><td><b>Add tabs</b></td><td>Click <b>Thêm tab</b> in the section header → pick tabs from the current window</td></tr>
+    <tr><td><b>Open all</b></td><td>Click <b>Mở tất cả</b> in the section header to open every tab in a collection</td></tr>
     <tr><td><b>Click a tab</b></td><td>Click any tab entry to navigate the current page to that URL</td></tr>
   </table>
 </section>
@@ -952,20 +953,21 @@ function showHelp() {
   <h3>🔍 Search & View</h3>
   <table class="help-table">
     <tr><td><b>Search</b></td><td>Type in the search bar to filter collections and tabs by name, title, or URL</td></tr>
-    <tr><td><b>Grid / List</b></td><td>Click the <b>Grid/List toggle</b> in the header to switch view</td></tr>
+    <tr><td><b>Tiles / Rows</b></td><td>Use the ▦ / ≡ toggle in the header. Rows also show each tab's URL</td></tr>
+    <tr><td><b>Jump</b></td><td>Click a collection in the sidebar to scroll to it</td></tr>
   </table>
 </section>
 
 <section class="help-section">
   <h3>🖼️ Customization</h3>
   <table class="help-table">
-    <tr><td><b>Background</b></td><td>Open FAB → Customize → pick a preset, paste a URL, or drop an image file</td></tr>
+    <tr><td><b>Background</b></td><td><b>Cài đặt</b> → <b>Hình nền &amp; Theme</b> → pick a preset, paste a URL, or drop an image file</td></tr>
     <tr><td><b>Icons & Colors</b></td><td>When creating/editing a collection, choose from 350+ emoji icons and 10 accent colors</td></tr>
-    <tr><td><b>Theme</b></td><td>Open FAB → <b>Theme</b> toggle to cycle System / Light / Dark</td></tr>
+    <tr><td><b>Theme</b></td><td><b>Cài đặt</b> → <b>Sáng / Tối</b> to cycle System / Light / Dark</td></tr>
   </table>
 </section>
 
-<section class="help-section">
+${TASKS_ENABLED ? `<section class="help-section">
   <h3>📋 Tasks Board</h3>
   <p>Manage your daily tasks synced with <b>tasks.minhtuong.io.vn</b>.</p>
   <table class="help-table">
@@ -978,14 +980,14 @@ function showHelp() {
     <tr><td><b>Board</b></td><td>Click <b>📋 Board</b> to open the full web board in a new tab</td></tr>
     <tr><td><b>Daily reminder</b></td><td>Daily at 17:35, a notification reminds you to review your tasks</td></tr>
   </table>
-</section>
+</section>` : ''}
 
 <section class="help-section">
   <h3>📊 Data Management</h3>
   <table class="help-table">
-    <tr><td><b>Export</b></td><td>Open FAB → <b>Export</b> to download all collections as a JSON file</td></tr>
-    <tr><td><b>Import</b></td><td>Open FAB → <b>Import</b> to restore collections from a JSON file</td></tr>
-    <tr><td><b>Privacy</b></td><td>Open FAB → Privacy toggle to blur tab titles and URLs on screen</td></tr>
+    <tr><td><b>Export</b></td><td><b>Cài đặt</b> → <b>Export</b> to download all collections as a JSON file</td></tr>
+    <tr><td><b>Import</b></td><td><b>Cài đặt</b> → <b>Import</b> to restore collections from a JSON file</td></tr>
+    <tr><td><b>Privacy</b></td><td><b>Cài đặt</b> → <b>Chế độ riêng tư</b> to blur tab titles and URLs on screen</td></tr>
   </table>
 </section>
 
@@ -997,6 +999,7 @@ function showHelp() {
 <section class="help-section">
   <h3>⌨️ Keyboard Shortcuts</h3>
   <table class="help-table">
+    <tr><td><kbd>⌘K</kbd> / <kbd>Ctrl+K</kbd> / <kbd>/</kbd></td><td>Focus search on the new tab page</td></tr>
     <tr><td><kbd>Cmd+Shift+Y</kbd></td><td>Quick Save current tab</td></tr>
     <tr><td><kbd>Cmd+Shift+S</kbd></td><td>Open Side Panel</td></tr>
   </table>
@@ -1006,7 +1009,7 @@ function showHelp() {
   overlay.style.display = 'flex';
 }
 
-$('fab-help').addEventListener('click', () => { closeFab(); showHelp(); });
+$('settings-help').addEventListener('click', showHelp);
 
 $('help-close-btn').addEventListener('click', () => { $('help-overlay').style.display = 'none'; });
 $('help-overlay').addEventListener('click', e => {
@@ -1055,9 +1058,8 @@ chrome.storage.local.get('privacyMode').then(result => {
   privacyMode = !!result.privacyMode;
   if (privacyMode) {
     document.body.classList.add('privacy-mode');
-    document.getElementById('fab-privacy')?.classList.add('active');
-    const iconEl = document.querySelector('#fab-privacy .btn-icon');
-    if (iconEl) iconEl.innerHTML = icon('eyeOff');
+    $('settings-privacy').classList.add('active');
+    $('settings-privacy').querySelector('.btn-icon').innerHTML = icon('eyeOff');
   }
 });
 
@@ -1080,10 +1082,9 @@ chrome.storage.local.get(UI_THEME_KEY).then(result => {
   document.documentElement.setAttribute('data-ui-theme', theme);
 });
 
-$('fab-privacy').addEventListener('click', () => { closeFab(); togglePrivacy(); });
+$('settings-privacy').addEventListener('click', togglePrivacy);
 
-$('fab-export').addEventListener('click', async () => {
-  closeFab();
+$('settings-export').addEventListener('click', async () => {
   const response = await chrome.runtime.sendMessage({ action: 'exportData' });
   if (response && response.error) { showStatus('Export failed: ' + response.error, 'error'); return; }
   const json = response;
@@ -1097,7 +1098,7 @@ $('fab-export').addEventListener('click', async () => {
   showStatus('Exported', 'success');
 });
 
-$('fab-import').addEventListener('click', () => { closeFab(); $('import-input').click(); });
+$('settings-import').addEventListener('click', () => $('import-input').click());
 
 $('import-input').addEventListener('change', async e => {
   const file = e.target.files[0];
@@ -1186,12 +1187,17 @@ $('groups-grid').addEventListener('click', e => {
 });
 
 document.addEventListener('click', e => {
-  if (!e.target.closest('.group-card-inner')) {
+  if (!e.target.closest('.group-actions')) {
     document.querySelectorAll('.group-actions-menu.open').forEach(el => el.classList.remove('open'));
   }
   if (!e.target.closest('.tab-entry')) {
     document.querySelectorAll('.tab-actions-popup.open').forEach(el => el.classList.remove('open'));
   }
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  document.querySelectorAll('.group-actions-menu.open, .tab-actions-popup.open').forEach(el => el.classList.remove('open'));
 });
 
 const VIEW_KEY = 'viewMode';
@@ -1201,28 +1207,33 @@ async function loadViewMode() {
   return result[VIEW_KEY] || 'grid';
 }
 
-async function toggleView() {
-  const current = document.getElementById('groups-view').classList.contains('view-list') ? 'list' : 'grid';
-  const next = current === 'grid' ? 'list' : 'grid';
-  document.getElementById('groups-view').classList.toggle('view-list', next === 'list');
-  const btn = document.getElementById('view-toggle-btn');
-  btn.querySelector('.btn-icon').textContent = next === 'grid' ? '▦' : '☰';
-  btn.title = next === 'grid' ? 'Switch to List' : 'Switch to Grid';
-  btn.querySelector('.btn-label').textContent = next === 'grid' ? 'Grid view' : 'List view';
-  await chrome.storage.local.set({ [VIEW_KEY]: next });
+// 'grid' = tiles, 'list' = rows with URLs. Stored values stay the same as before the redesign.
+function applyViewMode(mode) {
+  $('groups-view').classList.toggle('view-list', mode === 'list');
+  $('view-tiles-btn').setAttribute('aria-pressed', String(mode !== 'list'));
+  $('view-rows-btn').setAttribute('aria-pressed', String(mode === 'list'));
 }
 
-$('view-toggle-btn').addEventListener('click', toggleView);
+async function setViewMode(mode) {
+  applyViewMode(mode);
+  await chrome.storage.local.set({ [VIEW_KEY]: mode });
+}
 
-// Init view mode on load
-loadViewMode().then(mode => {
-  if (mode === 'list') {
-    document.getElementById('groups-view').classList.add('view-list');
-    const btn = document.getElementById('view-toggle-btn');
-    btn.querySelector('.btn-icon').textContent = '☰';
-    btn.title = 'Switch to Grid';
-    btn.querySelector('.btn-label').textContent = 'List view';
-  }
+$('view-tiles-btn').addEventListener('click', () => setViewMode('grid'));
+$('view-rows-btn').addEventListener('click', () => setViewMode('list'));
+loadViewMode().then(applyViewMode);
+
+// ── Header: date + search shortcut ──
+$('today-label').textContent = new Date().toLocaleDateString('vi-VN', { weekday: 'long', day: 'numeric', month: 'long' });
+$('search-kbd').textContent = /Mac|iPhone|iPad/.test(navigator.platform) ? '⌘K' : 'Ctrl K';
+
+document.addEventListener('keydown', e => {
+  if (!isSearchShortcut(e)) return;
+  const modalOpen = [...document.querySelectorAll('.modal-overlay')].some(o => o.style.display && o.style.display !== 'none');
+  if (modalOpen) return;
+  e.preventDefault();
+  $('search-input').focus();
+  $('search-input').select();
 });
 
 // ── Tasks API proxies ──
@@ -1677,11 +1688,14 @@ async function loadActiveView() {
   return r[ACTIVE_VIEW_KEY] === 'tasks' ? 'tasks' : 'collections';
 }
 
+let currentView = 'collections';
+
 function switchView(view) {
+  currentView = view;
   chrome.storage.local.set({ [ACTIVE_VIEW_KEY]: view });
   const collectionsView = $('collections-view');
   const tasksView = $('tasks-view');
-  const collectionsSearch = $('search-input');
+  const collectionsSearch = document.querySelector('.search-wrap');
   const collectionsActions = $('collections-header-actions');
   const tasksActions = $('tasks-header-actions');
 
@@ -1697,7 +1711,7 @@ function switchView(view) {
   } else {
     collectionsView.style.display = 'block';
     tasksView.style.display = 'none';
-    collectionsSearch.style.display = 'block';
+    collectionsSearch.style.display = '';
     if (collectionsActions) collectionsActions.style.display = 'flex';
     if (tasksActions) tasksActions.style.display = 'none';
   }
@@ -1985,14 +1999,19 @@ async function initApp() {
   initTitle();
   await loadTheme();
   await render();
-  initTasksEventHandlers();
 
+  if (!TASKS_ENABLED) {
+    // Hidden, not removed: the markup and code stay so flipping the flag brings Tasks back.
+    // The nav tabs are hidden in the HTML itself so they never flash before this runs.
+    return;
+  }
+
+  document.querySelectorAll('.nav-tabs').forEach(el => { el.style.display = ''; });
+  initTasksEventHandlers();
   // An explicit ?view= wins (the reminder notification uses it); otherwise reopen on
   // whichever tab was last used, so a new tab lands where the person left off.
   const urlView = new URLSearchParams(location.search).get('view');
-  const view = (urlView === 'tasks' || urlView === 'collections')
-    ? urlView
-    : await loadActiveView();
+  const view = resolveInitialView(urlView, await loadActiveView(), TASKS_ENABLED);
   if (view === 'tasks') switchView('tasks');
 }
 
@@ -2002,8 +2021,7 @@ const STORAGE_KEY = 'tabCollector';
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area === 'local' && changes[STORAGE_KEY]) {
     if (isDragging) { pendingRender = true; return; }
-    const activeTab = document.querySelector('.nav-tab.active');
-    if (activeTab && activeTab.dataset.view === 'collections') {
+    if (currentView === 'collections') {
       render().catch(err => console.error('Storage change render failed:', err));
     }
   }

@@ -10,8 +10,8 @@
   <link rel="stylesheet" href="../styles/glass.css">
   <link rel="stylesheet" href="../styles/components.css">
   <link rel="stylesheet" href="../styles/animations.css">
-  <link rel="stylesheet" href="../styles/responsive.css">
   <link rel="stylesheet" href="newtab.css">
+  <link rel="stylesheet" href="../styles/responsive.css">
   <link rel="stylesheet" href="../styles/themes/glass.css">
   <link rel="stylesheet" href="../styles/themes/minimal.css">
   <link rel="stylesheet" href="../styles/themes/material.css">
@@ -19,18 +19,50 @@
   <link rel="stylesheet" href="../styles/themes/dark-premium.css">
   <link rel="stylesheet" href="../styles/themes/macos.css">
   <link rel="stylesheet" href="../styles/themes/terminal.css">
+  <link rel="stylesheet" href="../styles/themes/nord.css">
+  <link rel="stylesheet" href="../styles/themes/graphite.css">
+  <link rel="stylesheet" href="../styles/themes/paper.css">
 </head>
 <body>
-  <div id="app" class="app" role="main">
-    <header class="app-header glass-strong">
+  <div id="app" class="app">
+    <aside id="app-sidebar" class="app-sidebar" aria-label="Collections">
       <h1 id="app-title" class="app-title">Tab Collections</h1>
-      <div class="nav-tabs">
+      <div class="sidebar-label">COLLECTIONS</div>
+      <nav id="sidebar-list" class="sidebar-list"></nav>
+      <button id="new-group-btn" class="sidebar-item sidebar-new"><span class="btn-icon" data-icon="plus"></span><span class="sidebar-item-name">Collection mới</span></button>
+      <div class="sidebar-spacer"></div>
+      <div class="settings-wrap">
+        <div id="settings-menu" class="settings-menu" role="menu" hidden>
+          <button id="settings-customize" class="settings-item" role="menuitem"><span class="btn-icon" data-icon="palette"></span><span>Hình nền &amp; Theme</span></button>
+          <button id="settings-theme" class="settings-item" role="menuitem" data-keep-open><span class="btn-icon" data-icon="monitor"></span><span class="settings-label">Sáng / Tối: Hệ thống</span></button>
+          <button id="settings-privacy" class="settings-item" role="menuitem" data-keep-open><span class="btn-icon" data-icon="eye"></span><span>Chế độ riêng tư</span></button>
+          <hr class="settings-sep">
+          <button id="settings-export" class="settings-item" role="menuitem"><span class="btn-icon" data-icon="upload"></span><span>Export</span></button>
+          <button id="settings-import" class="settings-item" role="menuitem"><span class="btn-icon" data-icon="download"></span><span>Import</span></button>
+          <button id="settings-help" class="settings-item" role="menuitem"><span class="btn-icon" data-icon="helpCircle"></span><span>Hướng dẫn</span></button>
+        </div>
+        <button id="settings-btn" class="sidebar-item" aria-haspopup="menu" aria-expanded="false"><span class="btn-icon" data-icon="gear"></span><span class="sidebar-item-name">Cài đặt</span></button>
+      </div>
+    </aside>
+    <div id="sidebar-backdrop" class="sidebar-backdrop"></div>
+
+    <header class="app-header">
+      <button id="sidebar-open-btn" class="sidebar-open-btn" aria-label="Mở danh sách collection" aria-expanded="false" aria-controls="app-sidebar"><span class="btn-icon" data-icon="menu"></span></button>
+      <span id="today-label" class="today-label"></span>
+      <div class="nav-tabs" style="display:none">
         <button class="nav-tab active" data-view="collections">📂 Collections</button>
         <button class="nav-tab" data-view="tasks">📋 Tasks</button>
       </div>
-      <input type="search" id="search-input" class="search-input" placeholder="Search collections and tabs...">
+      <label class="search-wrap">
+        <span class="btn-icon" data-icon="search"></span>
+        <input type="search" id="search-input" class="search-input" placeholder="Tìm tab, collection…" aria-label="Tìm tab, collection">
+        <kbd id="search-kbd" class="search-kbd"></kbd>
+      </label>
       <div class="header-actions" id="collections-header-actions">
-        <button id="view-toggle-btn" class="btn-ghost" title="Switch to List"><span class="btn-icon" id="view-toggle-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg></span><span class="btn-label">Grid view</span></button>
+        <div class="view-seg" role="group" aria-label="Kiểu hiển thị">
+          <button id="view-tiles-btn" class="view-seg-btn" title="Dạng ô" aria-pressed="true"><span class="btn-icon" data-icon="grid"></span></button>
+          <button id="view-rows-btn" class="view-seg-btn" title="Dạng dòng" aria-pressed="false"><span class="btn-icon" data-icon="list"></span></button>
+        </div>
       </div>
       <div id="tasks-header-actions" class="tasks-header-actions" style="display:none">
         <div class="tasks-search-wrap">
@@ -75,17 +107,14 @@
       </div>
     </header>
 
-    <div id="status-bar" class="status-bar glass-card"></div>
-
-    <div id="collections-view">
-      <div id="groups-view">
-        <div id="groups-grid" class="groups-grid animate-stagger"></div>
-        <div id="empty-state" class="empty-state" style="display:none">
-          <p>No collections yet. Click <b>New Collection</b> card below to start, or open the FAB then <b>Help</b> for guide.</p>
+    <main class="app-main" role="main">
+      <div id="status-bar" class="status-bar glass-card"></div>
+      <div id="collections-view">
+        <div id="groups-view">
+          <div id="groups-grid" class="groups-grid"></div>
+          <div id="empty-state" class="empty-state" style="display:none"></div>
         </div>
       </div>
-    </div>  <!-- end collections-view -->
-
     <div id="tasks-view" style="display:none">
       <div id="tasks-login-gate" style="display:none">
         <div class="tasks-login-card">
@@ -100,18 +129,7 @@
         <div id="tasks-list"></div>
       </div>
     </div>
-  </div>
-
-  <div id="fab" class="fab" role="navigation" aria-label="Quick actions">
-    <div id="fab-menu" class="fab-menu">
-      <button id="fab-export" class="fab-item" title="Export"><span class="fab-label">Export</span><span class="btn-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></span></button>
-      <button id="fab-import" class="fab-item" title="Import"><span class="fab-label">Import</span><span class="btn-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></span></button>
-      <button id="fab-customize" class="fab-item" title="Customize"><span class="fab-label">Customize</span><span class="btn-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r="0.5" fill="currentColor"/><circle cx="17.5" cy="10.5" r="0.5" fill="currentColor"/><circle cx="8.5" cy="7.5" r="0.5" fill="currentColor"/><circle cx="6.5" cy="12.5" r="0.5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.93 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-1 0-.83.67-1.5 1.5-1.5H16c3.31 0 6-2.69 6-6 0-5.5-4.5-10-10-10z"/></svg></span></button>
-      <button id="fab-theme" class="fab-item" title="Theme: System"><span class="fab-label">Theme: System</span><span class="btn-icon" id="fab-theme-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></span></button>
-      <button id="fab-privacy" class="fab-item" title="Privacy"><span class="fab-label">Privacy</span><span class="btn-icon" id="fab-privacy-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></span></button>
-      <button id="fab-help" class="fab-item" title="Help"><span class="fab-label">Help</span><span class="btn-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span></button>
-    </div>
-    <button id="fab-toggle" class="fab-toggle"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+    </main>
   </div>
 
   <input type="file" id="import-input" accept=".json" style="display:none">
@@ -264,6 +282,7 @@
   <script src="../constants.js"></script>
   <script src="../icons.js"></script>
   <script src="../tasks/tasks-logic.js"></script>
+  <script src="newtab-view.js"></script>
   <script src="newtab.js"></script>
 </body>
 </html>

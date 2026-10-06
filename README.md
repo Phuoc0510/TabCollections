@@ -2,7 +2,7 @@
 
 > A Chrome/Brave extension for collecting, organizing, and managing browser tabs — right from your new tab page.
 
-[![Version](https://img.shields.io/badge/version-2.7.0-blue)](https://github.com/Phuoc0510/TabCollections/releases)
+[![Version](https://img.shields.io/badge/version-2.8.0-blue)](https://github.com/Phuoc0510/TabCollections/releases)
 [![Manifest](https://img.shields.io/badge/manifest-v3-green)](https://developer.chrome.com/docs/extensions/reference/manifest)
 
 ---
@@ -18,7 +18,14 @@
 - **Privacy mode** — blur tab titles and URLs with one toggle
 - **Edit tab name & URL** — click **⋯** → **Edit** on any tab to update its title or URL
 
-### Tasks Board
+### Workspace Layout
+- **Collection sidebar** — every collection listed with its color and tab count; click to jump
+- **Tab tiles** — tabs shown as compact tiles with favicons, or as rows with URLs (toggle in the header)
+- **Quick search** — `⌘K` / `Ctrl+K` or `/` focuses search
+- **Settings menu** — background, theme, light/dark, privacy, import/export and help live under **Cài đặt** in the sidebar
+
+### Tasks Board (hidden since v2.8.0)
+- Hidden behind `TASKS_ENABLED` in `constants.js`; the daily reminder is off while hidden
 - **Daily tasks** — view today's tasks and overdue items synced with tasks.minhtuong.io.vn
 - **Full CRUD** — create, edit, delete, and toggle tasks inline
 - **Priority & PIC** — set priority (low/normal/high) and assign a person in charge
@@ -35,7 +42,7 @@
 
 ### Search & View
 - **Realtime search** — filter collections and tabs by name, title, or URL
-- **Grid / List toggle** — switch between compact grid and detailed list view
+- **Tiles / Rows toggle** — switch between compact tab tiles and rows with URLs
 
 ### Tab Picker
 - **Add from open tabs** — click **+** on any card to pick from all open tabs
@@ -48,7 +55,7 @@
 - **Auto-close** — opens links in a new tab and closes the panel
 
 ### Theme
-- **7 UI themes** — Glass, Minimal, Material You, Neubrutalism, Dark Premium, macOS, and Terminal
+- **10 UI themes** — Glass, Minimal, Material You, Neubrutalism, Dark Premium, macOS, Terminal, Nord, Graphite, and Paper (the last three are solid themes with light and dark variants)
 - **Instant switching** — change the whole UI look without reloading
 - **Theme-aware CSS** — every component (header, cards, tasks, modals, dropdowns) adapts via CSS custom properties
 
@@ -100,12 +107,12 @@ git clone https://github.com/Phuoc0510/TabCollections.git
 
 | Action | How |
 |--------|-----|
-| Create collection | Click **New Collection** card at the end of the grid |
-| Edit collection | Expand card → click **Actions** → **Edit** |
-| Delete collection | Expand card → click **Actions** → **Delete** |
+| Create collection | Click **Collection mới** in the sidebar |
+| Edit collection | Click **⋯** in the section header → **Sửa** |
+| Delete collection | Click **⋯** in the section header → **Xoá** |
 | Reorder cards | Drag card by its header |
-| Add tabs | Expand card → click **Actions** → **Add Tab** → choose from open tabs |
-| Open all tabs | Expand card → click **Actions** → **Open All** |
+| Add tabs | Click **Thêm tab** in the section header → choose from open tabs |
+| Open all tabs | Click **Mở tất cả** in the section header |
 | Edit tab name & URL | Hover tab → click **⋯** → **Edit** |
 
 ### Keyboard Shortcuts
@@ -115,7 +122,9 @@ git clone https://github.com/Phuoc0510/TabCollections.git
 | `Cmd+Shift+Y` | Quick Save current tab |
 | `Cmd+Shift+S` | Open Side Panel |
 
-### Tasks Board
+### Tasks Board (hidden since v2.8.0)
+
+Hidden behind `TASKS_ENABLED` in `constants.js`; the daily reminder is off while hidden.
 
 | Action | How |
 |--------|-----|
@@ -128,14 +137,16 @@ git clone https://github.com/Phuoc0510/TabCollections.git
 
 > A daily notification reminder fires at **17:35** (requires Chrome notification permission on macOS).
 
-The gear button at the bottom-right gives quick access to:
+The **Cài đặt** menu at the bottom of the sidebar gives quick access to:
 
 | Button | Action |
 |--------|--------|
+| Hình nền & Theme | Customize background image & UI theme |
+| Sáng / Tối | Cycle System / Light / Dark |
+| Chế độ riêng tư | Toggle privacy mode |
 | Export | Export collections as JSON |
 | Import | Import collections from JSON |
-| Customize | Customize background image & UI theme |
-| Privacy | Toggle privacy mode |
+| Hướng dẫn | Open this help |
 
 ---
 
@@ -214,11 +225,20 @@ npm run format               # Format with Prettier
 └──────────────────┘  └──────────────────┘  └──────────────────────┘
 ```
 
-Data flows through `chrome.storage.local` for collections and through `chrome.runtime.sendMessage` (with background fetch) for tasks. A daily `chrome.alarms` notification fires at 17:35 for task reminders.
+Data flows through `chrome.storage.local` for collections and through `chrome.runtime.sendMessage` (with background fetch) for tasks. A daily `chrome.alarms` notification fires at 17:35 for task reminders (disabled while `TASKS_ENABLED` is false).
 
 ---
 
 ## Changelog
+
+### v2.8.0
+- **Workspace layout** — collection sidebar (color + tab count, click to jump) and compact tab tiles or rows with URLs
+- **Settings menu** — **Cài đặt** in the sidebar replaces the floating action button
+- **Quick search shortcut** — `⌘K` / `Ctrl+K` / `/` focuses search
+- **Narrow windows** — sidebar becomes a slide-out drawer
+- **Tasks view hidden** behind `TASKS_ENABLED`; the 17:35 reminder is off
+- Popup and side panel follow the light/dark setting and match the new tab look
+- **New themes** — Nord, Graphite and Paper: solid (no glass), each with light and dark variants that follow **Sáng / Tối**
 
 ### v2.7.0
 - **7 UI themes** — Glass, Minimal, Material You, Neubrutalism, Dark Premium, macOS, Terminal

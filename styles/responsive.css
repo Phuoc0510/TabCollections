@@ -1,47 +1,48 @@
-@media (max-width: 1024px) {
-  .groups-grid {
-    grid-template-columns: repeat(2, 1fr);
+@media (max-width: 800px) {
+  .app {
+    grid-template-columns: minmax(0, 1fr);
   }
+
+  .app-sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 260px;
+    height: auto;
+    transform: translateX(-100%);
+    visibility: hidden;
+    transition: transform var(--transition-normal), visibility 0s linear var(--transition-normal);
+    box-shadow: var(--glass-shadow);
+  }
+
+  .app.sidebar-open .app-sidebar { transform: none; visibility: visible; transition: transform var(--transition-normal); }
+
+  .app.sidebar-open .sidebar-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: var(--overlay-bg);
+    z-index: 940;
+  }
+
+  .sidebar-open-btn {
+    display: flex;
+    align-items: center;
+    padding: 6px;
+    border: 0;
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+  }
+
+  .today-label { display: none; }
+  .app-header { padding: var(--space-3) var(--space-4); }
+  .app-main { padding: var(--space-4); }
 }
 
-@media (max-width: 640px) {
-  .groups-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .app-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-  }
-
-  .header-actions,
-  .tasks-header-actions {
-    width: 100%;
-    flex-wrap: wrap;
-  }
-
-  .header-actions button,
-  .tasks-header-actions .tasks-icon-btn {
-    flex: 1;
-    min-width: 0;
-    text-align: center;
-  }
-
-  .group-header {
-    flex-wrap: wrap;
-  }
-
-  .group-meta {
-    margin-left: 0;
-  }
-
-  .group-actions {
-    justify-content: flex-start;
-    flex-wrap: wrap;
-  }
-
-  .tab-entry {
-    padding: 8px 12px;
-  }
+@media (max-width: 480px) {
+  .group-action span { display: none; }
+  .search-kbd { display: none; }
+  .group-tabs { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
 }

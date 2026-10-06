@@ -37,17 +37,18 @@ function render() {
   empty.style.display = 'none';
 
   list.innerHTML = groups.map(g => `
-    <div class="group-card" data-id="${g.id}">
+    <div class="group-card" data-id="${esc(g.id)}" style="--group-color:${esc(g.color || '#4285f4')}">
       <div class="group-header">
-        <span class="group-icon">${g.icon || '📁'}</span>
+        <span class="group-dot"></span>
+        <span class="group-icon">${esc(g.icon || '📁')}</span>
         <span class="group-name">${esc(g.name)}</span>
         <span class="group-meta">${g.tabs.length} tab${g.tabs.length !== 1 ? 's' : ''}</span>
-        <button class="add-tab-btn" title="Add current tab">+</button>
+        <button class="add-tab-btn" title="Add current tab">${icon('plus')}</button>
       </div>
       <div class="group-tabs">
         ${g.tabs.map(t => `
           <div class="tab-entry" data-url="${esc(t.url)}">
-            ${t.favicon ? `<img src="${t.favicon}" alt="" onerror="this.style.display='none'">` : ''}
+            ${t.favicon ? `<img src="${esc(t.favicon)}" alt="" onerror="this.style.display='none'">` : ''}
             <div class="tab-info">
               <div class="tab-title">${esc(t.title || t.url)}</div>
             </div>
