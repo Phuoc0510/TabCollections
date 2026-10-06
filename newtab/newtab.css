@@ -316,6 +316,13 @@
 
 .group-actions-menu.open { display: block; }
 
+/* An open menu must paint above the following section (sections are stacking contexts under has-bg). */
+.group-card:has(.group-actions-menu.open),
+.group-card:has(.tab-actions-popup.open) {
+  position: relative;
+  z-index: 5;
+}
+
 .group-actions-menu button {
   display: flex;
   align-items: center;

@@ -277,7 +277,7 @@ $('groups-grid').addEventListener('dragstart', e => {
 
 $('groups-grid').addEventListener('dragover', e => {
   e.preventDefault();
-  const targetCard = e.target.closest('.group-card:not(.add-card)');
+  const targetCard = e.target.closest('.group-card');
   if (!targetCard) return;
 
   if (tabDragSrcEl && tabDragSrcEl.isConnected) {
@@ -1653,7 +1653,7 @@ function switchView(view) {
   chrome.storage.local.set({ [ACTIVE_VIEW_KEY]: view });
   const collectionsView = $('collections-view');
   const tasksView = $('tasks-view');
-  const collectionsSearch = $('search-input');
+  const collectionsSearch = document.querySelector('.search-wrap');
   const collectionsActions = $('collections-header-actions');
   const tasksActions = $('tasks-header-actions');
 
@@ -1669,7 +1669,7 @@ function switchView(view) {
   } else {
     collectionsView.style.display = 'block';
     tasksView.style.display = 'none';
-    collectionsSearch.style.display = 'block';
+    collectionsSearch.style.display = '';
     if (collectionsActions) collectionsActions.style.display = 'flex';
     if (tasksActions) tasksActions.style.display = 'none';
   }
