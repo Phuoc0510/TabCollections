@@ -1,4 +1,47 @@
+@media (max-width: 800px) {
+  .app {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .app-sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 260px;
+    height: auto;
+    transform: translateX(-100%);
+    transition: transform var(--transition-normal);
+    box-shadow: var(--glass-shadow);
+  }
+
+  .app.sidebar-open .app-sidebar { transform: none; }
+
+  .app.sidebar-open .sidebar-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: var(--overlay-bg);
+    z-index: 940;
+  }
+
+  .sidebar-open-btn {
+    display: flex;
+    align-items: center;
+    padding: 6px;
+    border: 0;
+    background: transparent;
+    color: var(--text-secondary);
+    cursor: pointer;
+  }
+
+  .today-label { display: none; }
+  .app-header { padding: var(--space-3) var(--space-4); }
+  .app-main { padding: var(--space-4); }
+}
+
 @media (max-width: 480px) {
   .group-action span { display: none; }
   .search-kbd { display: none; }
+  .group-tabs { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
 }

@@ -148,11 +148,24 @@ $('sidebar-list').addEventListener('click', async e => {
   const item = e.target.closest('.sidebar-item');
   if (!item) return;
   activeSidebarId = item.dataset.id;
+  setSidebarOpen(false);
   expandedGroupIds.add(activeSidebarId);
   await render();
   document.querySelector(`.group-card[data-id="${CSS.escape(activeSidebarId)}"]`)
     ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 });
+
+// ── Sidebar drawer (narrow windows) ──
+function setSidebarOpen(open) {
+  $('app').classList.toggle('sidebar-open', open);
+}
+
+$('sidebar-open-btn').addEventListener('click', () => setSidebarOpen(true));
+$('sidebar-backdrop').addEventListener('click', () => setSidebarOpen(false));
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') setSidebarOpen(false);
+});
+$('new-group-btn').addEventListener('click', () => setSidebarOpen(false));
 
 $('groups-grid').addEventListener('click', async e => {
   const groupCard = e.target.closest('.group-card');
