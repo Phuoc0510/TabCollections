@@ -42,7 +42,7 @@
 
 ### Search & View
 - **Realtime search** — filter collections and tabs by name, title, or URL
-- **Grid / List toggle** — switch between compact grid and detailed list view
+- **Tiles / Rows toggle** — switch between compact tab tiles and rows with URLs
 
 ### Tab Picker
 - **Add from open tabs** — click **+** on any card to pick from all open tabs
@@ -107,7 +107,7 @@ git clone https://github.com/Phuoc0510/TabCollections.git
 
 | Action | How |
 |--------|-----|
-| Create collection | Click **New Collection** card at the end of the grid |
+| Create collection | Click **Collection mới** in the sidebar |
 | Edit collection | Expand card → click **Actions** → **Edit** |
 | Delete collection | Expand card → click **Actions** → **Delete** |
 | Reorder cards | Drag card by its header |
@@ -122,7 +122,9 @@ git clone https://github.com/Phuoc0510/TabCollections.git
 | `Cmd+Shift+Y` | Quick Save current tab |
 | `Cmd+Shift+S` | Open Side Panel |
 
-### Tasks Board
+### Tasks Board (hidden since v2.8.0)
+
+Hidden behind `TASKS_ENABLED` in `constants.js`; the daily reminder is off while hidden.
 
 | Action | How |
 |--------|-----|
@@ -223,11 +225,19 @@ npm run format               # Format with Prettier
 └──────────────────┘  └──────────────────┘  └──────────────────────┘
 ```
 
-Data flows through `chrome.storage.local` for collections and through `chrome.runtime.sendMessage` (with background fetch) for tasks. A daily `chrome.alarms` notification fires at 17:35 for task reminders.
+Data flows through `chrome.storage.local` for collections and through `chrome.runtime.sendMessage` (with background fetch) for tasks. A daily `chrome.alarms` notification fires at 17:35 for task reminders (disabled while `TASKS_ENABLED` is false).
 
 ---
 
 ## Changelog
+
+### v2.8.0
+- **Workspace layout** — collection sidebar (color + tab count, click to jump) and compact tab tiles or rows with URLs
+- **Settings menu** — **Cài đặt** in the sidebar replaces the floating action button
+- **Quick search shortcut** — `⌘K` / `Ctrl+K` / `/` focuses search
+- **Narrow windows** — sidebar becomes a slide-out drawer
+- **Tasks view hidden** behind `TASKS_ENABLED`; the 17:35 reminder is off
+- Popup and side panel follow the light/dark setting and match the new tab look
 
 ### v2.7.0
 - **7 UI themes** — Glass, Minimal, Material You, Neubrutalism, Dark Premium, macOS, Terminal
